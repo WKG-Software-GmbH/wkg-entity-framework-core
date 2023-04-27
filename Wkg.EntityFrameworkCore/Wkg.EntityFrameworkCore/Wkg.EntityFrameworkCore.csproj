@@ -14,14 +14,14 @@
     <!--Nuget packaging-->
     <PropertyGroup>
         <IsPackable>true</IsPackable>
-        <RepositoryUrl>https://git.wkg.lan/WKG/components/wkg-base.git</RepositoryUrl>
-        <PackageProjectUrl>https://git.wkg.lan/WKG/components/wkg-base.git</PackageProjectUrl>
+        <RepositoryUrl>https://git.wkg.lan/WKG/components/wkg-entity-framework-core</RepositoryUrl>
+        <PackageProjectUrl>https://git.wkg.lan/WKG/components/wkg-entity-framework-core</PackageProjectUrl>
+        <Title>WKG Library RECAP Core</Title>
         <Description>Internal WKG library containing the EntityFrameworkCore Reflective Entity Configuration And Procedure mapping extension (RECAP).</Description>
         <Company>WKG Software GmbH</Company>
         <Authors>WKG Software GmbH</Authors>
         <Copyright>Copyright (c) WKG Software GmbH 2023</Copyright>
         <PackageIcon>logo.png</PackageIcon>
-        <Title>WKG Library RECAP Core</Title>
         <PackageType>Dependency</PackageType>
         <PackageTags>
             EntityFrameworkCore;ORM
