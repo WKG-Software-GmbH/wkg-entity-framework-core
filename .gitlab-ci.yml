@@ -4,9 +4,9 @@ stages:
     - deploy-baget
 
 variables:
-    PROJECT_FILE_PATH: "{Path}"
-    MAJOR_VERSION: "1"
-    MINOR_VERSION: "0"
+    PROJECT_FILE_PATH: "Wkg.EntityFrameworkCore/Wkg.EntityFrameworkCore/Wkg.EntityFrameworkCore.csproj"
+    MAJOR_VERSION: "7"
+    MINOR_VERSION: "1"
 
 include:
     - project: 'wkg/gitlab-templates'
