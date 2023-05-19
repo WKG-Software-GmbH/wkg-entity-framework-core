@@ -2,6 +2,10 @@
 
 ![](https://git.wkg.lan/WKG/components/wkg-entity-framework-core/badges/main/pipeline.svg)
 
+---
+
+## Abstract
+
 *Object-relational mapping (ORM) is a widely used technique in software development to manage the interaction between relational databases and object-oriented programming languages. It allows developers to work with the database using familiar object-oriented concepts rather than having to write raw SQL queries. However, given the risk of increased maintenance costs and decreased developer productivity posed by inefficient ORM configurations for large-scale software systems with complex and interconnected business logic, it is vital to ensure that these configurations are as clear and concise as possible.*<br>
 *The Reflective Entity Configuration And Procedure mapping framework (RECAP) has been designed and developed as a solution to simplify, standardize, and automate the configuration of relational database access layers in .NET. By building upon the existing functionality of Microsoft's Entity Framework Core, RECAP streamlines the configuration process for entity mappings and stored database procedures in .NET, resulting in improved maintainability and reduced code redundancy. This is achieved through the use of a uniform configuration syntax and the ability to map procedures to entity-like command objects.*
 
