@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.Data;
+﻿using System.Data;
 using System.Data.Common;
 using System.Diagnostics.CodeAnalysis;
 using Wkg.EntityFrameworkCore.ProcedureMapping.Builder.ResultBinding;
@@ -8,27 +7,58 @@ using Wkg.EntityFrameworkCore.ProcedureMapping.Compiler;
 using Wkg.EntityFrameworkCore.ProcedureMapping.Compiler.Output;
 using Wkg.Extensions.Common;
 using Wkg.Extensions.Reflection;
-using Wkg.Reflection;
 
 namespace Wkg.EntityFrameworkCore.ProcedureMapping.Builder;
 
+/// <summary>
+/// Provides a simple API for configuring a stored database procedure.
+/// </summary>
 public interface IProcedureBuilder
 {
+    /// <summary>
+    /// The name of the procedure being mapped.
+    /// </summary>
     string? ProcedureName { get; }
+
+    /// <summary>
+    /// Indicates whether the procedure is a database function.
+    /// </summary>
     bool IsFunction { get; }
 }
 
+/// <summary>
+/// Provides a simple API for configuring a stored database procedure.
+/// </summary>
+/// <typeparam name="TCompiledParameter">The concrete type of the compiled parameter.</typeparam>
+/// <typeparam name="TDataReader">The concrete type of the <see cref="DbDataReader"/> to be used.</typeparam>
 public interface IProcedureBuilder<TCompiledParameter, TDataReader> : IProcedureBuilder 
     where TCompiledParameter : struct, ICompiledParameter
     where TDataReader : DbDataReader
 {
+    /// <summary>
+    /// Builds this stored procedure builder into an <see cref="IProcedureCompiler{TCompiledParameter}"/> instance that can be used to emit the runtime representation of the stored procedure.
+    /// </summary>
     internal IProcedureCompiler<TCompiledParameter> Build();
-    
+
+    /// <summary>
+    /// The <see cref="IParameterBuilder{TCompiledParameter}"/> instances used to configure the parameters of this stored procedure.
+    /// </summary>
     internal IReadOnlyCollection<IParameterBuilder<TCompiledParameter>> ParameterBuilders { get; }
 
+    /// <summary>
+    /// The <see cref="IResultBuilder{TDataReader}"/> instance used to configure the set of result entities returned by this stored procedure.
+    /// </summary>
     internal IResultBuilder<TDataReader>? ResultBuilder { get; }
 }
 
+/// <summary>
+/// Provides a simple API for configuring a stored database procedure.
+/// </summary>
+/// <typeparam name="TProcedure">The concrete type of the stored procedure command object that represents the stored database procedure.</typeparam>
+/// <typeparam name="TIOContainer">The type of the Input/Output container object used to pass arguments to and from the stored procedure.</typeparam>
+/// <typeparam name="TCompiledParameter">The concrete type of the compiled parameter.</typeparam>
+/// <typeparam name="TDataReader">The concrete type of the <see cref="DbDataReader"/> to be used.</typeparam>
+/// <typeparam name="TProcedureBuilderImpl">The concrete type of the procedure builder implementation.</typeparam>
 public abstract class ProcedureBuilder<TProcedure, TIOContainer, TCompiledParameter, TDataReader, TProcedureBuilderImpl> : IProcedureBuilder<TCompiledParameter, TDataReader>
     where TProcedure : class, IStoredProcedure
     where TIOContainer : class
@@ -36,6 +66,10 @@ public abstract class ProcedureBuilder<TProcedure, TIOContainer, TCompiledParame
     where TDataReader : DbDataReader
     where TProcedureBuilderImpl : ProcedureBuilder<TProcedure, TIOContainer, TCompiledParameter, TDataReader, TProcedureBuilderImpl>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ProcedureBuilder{TProcedure, TIOContainer, TCompiledParameter, TDataReader, TProcedureBuilderImpl}"/> class.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown when the generic type argument <typeparamref name="TProcedureBuilderImpl"/> does not match the concrete type of the derived class.</exception>
     protected ProcedureBuilder()
     {
         if (this is not TProcedureBuilderImpl)
@@ -44,24 +78,36 @@ public abstract class ProcedureBuilder<TProcedure, TIOContainer, TCompiledParame
         }
     }
 
+    /// <summary>
+    /// The <see cref="IThrowHelper"/> instance used to throw exceptions within the context of this procedure builder.
+    /// </summary>
     protected IProcedureThrowHelper ThrowHelper { get; } = new ProcedureBuilderThrowHelper<TProcedure>();
 
+    /// <inheritdoc cref="IProcedureBuilder.ProcedureName"/>
     protected string? ProcedureName { get; private set; }
 
     string? IProcedureBuilder.ProcedureName => ProcedureName;
 
+    /// <inheritdoc cref="IProcedureBuilder.IsFunction"/>
     protected bool IsFunctionValue { get; private set; } = false;
 
     bool IProcedureBuilder.IsFunction => IsFunctionValue;
 
+    /// <inheritdoc cref="IProcedureBuilder{TCompiledParameter, TDataReader}.ParameterBuilders"/>
     protected List<IParameterBuilder<TCompiledParameter>> ParameterBuilders { get; } = new();
 
     IReadOnlyCollection<IParameterBuilder<TCompiledParameter>> IProcedureBuilder<TCompiledParameter, TDataReader>.ParameterBuilders => ParameterBuilders;
 
+    /// <inheritdoc cref="IProcedureBuilder{TCompiledParameter, TDataReader}.ResultBuilder"/>
     protected IResultBuilder<TDataReader>? ResultBuilder { get; set; }
 
     IResultBuilder<TDataReader>? IProcedureBuilder<TCompiledParameter, TDataReader>.ResultBuilder => ResultBuilder;
 
+    /// <summary>
+    /// Configures the stored procedure that the <typeparamref name="TProcedure"/> command object maps to.
+    /// </summary>
+    /// <param name="name">The name of the stored procedure.</param>
+    /// <returns>The current builder instance.</returns>
     public TProcedureBuilderImpl ToDatabaseProcedure(string name)
     {
         if (ProcedureName is not null)
@@ -72,6 +118,11 @@ public abstract class ProcedureBuilder<TProcedure, TIOContainer, TCompiledParame
         return this.To<TProcedureBuilderImpl>();
     }
 
+    /// <summary>
+    /// Configures the database function that the <typeparamref name="TProcedure"/> command object maps to.
+    /// </summary>
+    /// <param name="name">The name of the database function.</param>
+    /// <returns>The current builder instance.</returns>
     public TProcedureBuilderImpl ToDatabaseFunction(string name)
     {
         if (ProcedureName is not null)
@@ -83,12 +134,23 @@ public abstract class ProcedureBuilder<TProcedure, TIOContainer, TCompiledParame
         return this.To<TProcedureBuilderImpl>();
     }
 
+    /// <summary>
+    /// Configures the stored procedure to be invoked as a database function.
+    /// </summary>
+    /// <param name="isFunction"><see langword="true"/> if the stored procedure is a database function; otherwise, <see langword="false"/>.</param>
+    /// <returns>The current builder instance.</returns>
     public TProcedureBuilderImpl IsFunction(bool isFunction = true)
     {
         IsFunctionValue = isFunction;
         return this.To<TProcedureBuilderImpl>();
     }
 
+    /// <summary>
+    /// Asserts that the current builder instance is valid and that all required information has been provided.
+    /// </summary>
+    /// <exception cref="ArgumentNullException">Thrown when no procedure name has been provided.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when the procedure has more than one <see cref="ParameterDirection.ReturnValue"/> parameter.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when contradictory information has been provided.</exception>
     [MemberNotNull(nameof(ProcedureName))]
     protected virtual void AssertIsValid()
     {
@@ -125,6 +187,7 @@ public abstract class ProcedureBuilder<TProcedure, TIOContainer, TCompiledParame
         }
     }
 
+    /// <inheritdoc cref="IProcedureBuilder{TCompiledParameter, TDataReader}.Build"/>
     protected abstract IProcedureCompiler<TCompiledParameter> Build();
 
     IProcedureCompiler<TCompiledParameter> IProcedureBuilder<TCompiledParameter, TDataReader>.Build()

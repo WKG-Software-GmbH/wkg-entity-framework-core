@@ -5,8 +5,17 @@ using Wkg.EntityFrameworkCore.ProcedureMapping.Runtime;
 
 namespace Wkg.EntityFrameworkCore.ProcedureMapping;
 
+/// <summary>
+/// Provides the base class for all procedure build pipelines.
+/// </summary>
 public abstract class ProcedureBuildPipeline
 {
+    /// <summary>
+    /// Executes the procedure build pipeline.
+    /// </summary>
+    /// <typeparam name="TCompiledParameter">The concrete type of the compiled parameters.</typeparam>
+    /// <typeparam name="TDataReader">The concrete type of the <see cref="DbDataReader"/> to be used to read the result set.</typeparam>
+    /// <param name="procedureBuilder">The procedure builder to build.</param>
     protected static void Execute<TCompiledParameter, TDataReader>(IProcedureBuilder<TCompiledParameter, TDataReader> procedureBuilder) 
         where TCompiledParameter : struct, ICompiledParameter
         where TDataReader : DbDataReader

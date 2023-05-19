@@ -7,5 +7,9 @@ namespace Wkg.EntityFrameworkCore.Configuration.Reflection.Policies;
 /// </summary>
 public interface IPolicy
 {
-    internal void Audit(IMutableEntityType entityType);
+    /// <summary>
+    /// Audits the specified <see cref="IMutableEntityType"/> for compliance with the policy and takes corresponding actions if necessary.
+    /// </summary>
+    /// <param name="entityType">The <see cref="IMutableEntityType"/> to audit.</param>
+    void Audit(IMutableEntityType entityType);
 }
