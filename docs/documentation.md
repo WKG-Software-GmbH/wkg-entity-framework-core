@@ -10,9 +10,11 @@
 
 ## Getting Started
 
+*WKG Entity Framework Core* ... TODO
+
 ### Installation
 
-The *WKG Entity Framework Core* library is available as a NuGet package from out internal nuget feed. To install it, add the following package source to your NuGet configuration:
+The *WKG Entity Framework Core* library is available as a NuGet package from our internal nuget feed. To install it, add the following package source to your NuGet configuration:
 
 ```xml
 <PropertyGroup>
