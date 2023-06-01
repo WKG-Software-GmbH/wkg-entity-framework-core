@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Wkg.Extensions.Reflection;
+using Wkg.Logging;
 
 namespace Wkg.EntityFrameworkCore.Configuration.Reflection;
 
@@ -48,7 +49,8 @@ public abstract class ReflectiveLoaderBase
     /// <exception cref="InvalidOperationException">Thrown if the procedure type does not implement the reflective interface or if the procedure type does not inherit from the generic base class.</exception>
     protected static void LoadAllProceduresInternal(Type storedProcedureInterface, Type storedProcedure, Type reflectiveInterface, Type modelBuilderExtensionsType, string loadProcedureMethodName, ModelBuilder builder)
     {
-        IEnumerable<ReflectiveProcedure> entities = AssembliesWithEntryPoint()
+        Log.WriteInfo($"Loading all procedures implementing {storedProcedureInterface.Name}.");
+        ReflectiveProcedure[] entities = AssembliesWithEntryPoint()
             // get all types in these assemblies
             .SelectMany(asm => asm.GetTypes()
                 .Where(type =>
@@ -76,11 +78,13 @@ public abstract class ReflectiveLoaderBase
                 && procedure.ProcedureType.ImplementsDirectGenericInterfaceWithTypeParameters(reflectiveInterface, procedure.ProcedureType, procedure.ContextType))
             .ToArray();
 
+        Log.WriteInfo($"Loading {entities.Length} stored procedures.");
+
         // re-use parameter array for all procedures
         object?[] parameters = new object[1];
         foreach (ReflectiveProcedure entity in entities)
         {
-            Console.WriteLine($"ReflectiveProcedureConfigurationLoader loading: {entity.ProcedureType.Name}.");
+            Log.WriteDiagnostic($"Loading: {entity.ProcedureType.Name}.");
             // use the load procedure extension method to configure and compile the procedure
             MethodInfo? loadProcedure = modelBuilderExtensionsType.GetMethod
             (
@@ -97,7 +101,8 @@ public abstract class ReflectiveLoaderBase
             parameters[0] = builder;
             // invoke the method
             genericLoadProcedure.Invoke(null, parameters);
-            Console.WriteLine($"ReflectiveProcedureConfigurationLoader loaded: {entity.ProcedureType.Name}.");
+            Log.WriteDiagnostic($"Loaded: {entity.ProcedureType.Name}.");
         }
+        Log.WriteInfo($"Loaded {entities.Length} stored procedures.");
     }
 }

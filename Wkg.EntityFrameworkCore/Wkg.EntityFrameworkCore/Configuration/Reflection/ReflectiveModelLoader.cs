@@ -4,6 +4,7 @@ using System.Reflection;
 using Wkg.Extensions.Reflection;
 using Wkg.EntityFrameworkCore.Configuration.Reflection.Policies.NamingPolicies;
 using Wkg.EntityFrameworkCore.Configuration.Reflection.Policies.MappingPolicies;
+using Wkg.Logging;
 
 namespace Wkg.EntityFrameworkCore.Configuration.Reflection;
 
@@ -37,13 +38,13 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
                     throw new InvalidOperationException($"The database engine {databaseEngineAttributeType.Name} has already been loaded.");
                 }
                 _loadedDatabaseEngines.Add(databaseEngineAttributeType);
-                Console.WriteLine($"Loading only models with {databaseEngineAttributeType.Name}.");
+                Log.WriteInfo($"Loading only models with {databaseEngineAttributeType.Name}.");
             }
         }
-        Console.WriteLine($"{nameof(ReflectiveModelLoader)} is initializing.");
+        Log.WriteInfo($"{nameof(ReflectiveModelLoader)} is initializing.");
         Dictionary<Type, EntityTypeBuilder> typeBuilderCache = new();
 
-        IEnumerable<ReflectiveEntity> entities = AssembliesWithEntryPoint()
+        ReflectiveEntity[] entities = AssembliesWithEntryPoint()
             // get all types in these assemblies
             .SelectMany(asm => asm.GetTypes()
                 .Where(type =>
@@ -68,11 +69,13 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
             .Where(entity => entity.Configure is not null)
             .ToArray();
 
+        Log.WriteInfo($"{nameof(ReflectiveModelLoader)} is loading {entities.Length} models.");
+
         // re-use the same array for all calls to Configure
         object[] parameters = new object[1];
         foreach (ReflectiveEntity entity in entities)
         {
-            Console.WriteLine($"{nameof(ReflectiveModelLoader)} loading: {entity.Type.Name}.");
+            Log.WriteDiagnostic($"{nameof(ReflectiveModelLoader)} loading: {entity.Type.Name}.");
             // get the generic Entity method
             MethodInfo? entityTypeBuilderFactory = typeof(ModelBuilder).GetMethod(nameof(ModelBuilder.Entity), 1, Array.Empty<Type>());
             // make it generic
@@ -89,7 +92,7 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
                 // recurse up the inheritance tree and look for any base class that implements IReflectiveBaseModelConfiguration<T> where T is the base class
                 if (baseType.ImplementsDirectGenericInterfaceWithTypeParameter(typeof(IReflectiveBaseModelConfiguration<>), baseType))
                 {
-                    Console.WriteLine($"{nameof(ReflectiveModelLoader)} found base model: {baseType.Name}.");
+                    Log.WriteDiagnostic($"{nameof(ReflectiveModelLoader)} found base model: {baseType.Name}.");
                     // load the base model using the explicit interface implementation
                     // we have to do some trickery to get the correct method as it's name is compiler generated.
                     // it would be better to do this using the method table / InterfaceMapping but that just dies with some IL format error.
@@ -102,7 +105,7 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
                         MethodInfo genericBaseConfigure = baseConfigure.MakeGenericMethod(entity.Type);
                         // invoke it with the EntityTypeBuilder<T> instance where T is the child class.
                         genericBaseConfigure.Invoke(null, parameters);
-                        Console.WriteLine($"{nameof(ReflectiveModelLoader)} applied base model definition {baseType.Name} to {entity.Type.Name}.");
+                        Log.WriteDiagnostic($"{nameof(ReflectiveModelLoader)} applied base model definition {baseType.Name} to {entity.Type.Name}.");
                     }
                 }
                 baseType = baseType.BaseType;
@@ -112,9 +115,10 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
             mappingPolicy.Audit(entityTypeBuilder.Metadata);
             namingPolicy.Audit(entityTypeBuilder.Metadata);
             typeBuilderCache.Add(entity.Type, entityTypeBuilder);
-            Console.WriteLine($"{nameof(ReflectiveModelLoader)} loaded: {entity.Type.Name}.");
+            Log.WriteDiagnostic($"{nameof(ReflectiveModelLoader)} loaded: {entity.Type.Name}.");
         }
-        Console.WriteLine($"{nameof(ReflectiveModelLoader)} is exiting.");
+        Log.WriteInfo($"{nameof(ReflectiveModelLoader)} loaded {entities.Length} models.");
+        Log.WriteInfo($"{nameof(ReflectiveModelLoader)} is exiting.");
         return typeBuilderCache;
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using Wkg.Extensions.Reflection;
+using Wkg.Logging;
 
 namespace Wkg.EntityFrameworkCore.Configuration.Reflection;
 
@@ -34,13 +35,13 @@ internal class ReflectiveConnectionLoader : ReflectiveLoaderBase
                     throw new InvalidOperationException($"The database engine {databaseEngineAttributeType.Name} has already been loaded.");
                 }
                 _loadedDatabaseEngines.Add(databaseEngineAttributeType);
-                Console.WriteLine($"Loading only model connections with {databaseEngineAttributeType.Name}.");
+                Log.WriteInfo($"Loading only model connections with {databaseEngineAttributeType.Name}.");
             }
         }
-        
-        Console.WriteLine($"{nameof(ReflectiveConnectionLoader)} is initializing.");
 
-        IEnumerable<ReflectiveConnection> connections = AssembliesWithEntryPoint()
+        Log.WriteInfo($"{nameof(ReflectiveConnectionLoader)} is initializing.");
+
+        ReflectiveConnection[] connections = AssembliesWithEntryPoint()
             // get all types in these assemblies
             .SelectMany(asm => asm.GetTypes()
                 .Where(type =>
@@ -81,11 +82,13 @@ internal class ReflectiveConnectionLoader : ReflectiveLoaderBase
             .Where(connection => connection.Connect is not null)
             .ToArray();
 
+        Log.WriteInfo($"{nameof(ReflectiveConnectionLoader)} is loading {connections.Length} model connections.");
+
         // re-use the same array for all calls to Configure
         object[] parameters = new object[2];
         foreach (ReflectiveConnection connection in connections)
         {
-            Console.WriteLine($"{nameof(ReflectiveConnectionLoader)} loading: {connection.Type.Name}.");
+            Log.WriteDiagnostic($"{nameof(ReflectiveConnectionLoader)} loading: {connection.Type.Name}.");
             // ensure that the entity types are configured
             if (entityBuilders.TryGetValue(connection.TFrom, out EntityTypeBuilder? fromBuilder) is false)
             {
@@ -105,9 +108,10 @@ internal class ReflectiveConnectionLoader : ReflectiveLoaderBase
 
             // invoke the Connect method with the two EntityTypeBuilder<T> instances
             connection.Connect!.Invoke(null, parameters);
-            Console.WriteLine($"{nameof(ReflectiveConnectionLoader)} loaded: {connection.Type.Name}.");
+            Log.WriteDiagnostic($"{nameof(ReflectiveConnectionLoader)} loaded: {connection.Type.Name}.");
         }
-        Console.WriteLine($"{nameof(ReflectiveConnectionLoader)} is exiting.");
+        Log.WriteInfo($"{nameof(ReflectiveConnectionLoader)} loaded {connections.Length} model connections.");
+        Log.WriteInfo($"{nameof(ReflectiveConnectionLoader)} is exiting.");
     }
 }
 

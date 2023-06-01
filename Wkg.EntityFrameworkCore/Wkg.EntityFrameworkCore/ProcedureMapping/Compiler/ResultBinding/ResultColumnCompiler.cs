@@ -5,19 +5,38 @@ using Wkg.EntityFrameworkCore.ProcedureMapping.Compiler.Output;
 
 namespace Wkg.EntityFrameworkCore.ProcedureMapping.Compiler.ResultBinding;
 
+/// <summary>
+/// Represents a compiler capable of transforming the configured result column binding into an expression tree.
+/// </summary>
 public interface IResultColumnCompiler
 {
+    /// <summary>
+    /// Precompiles the configured result column bindings into an expression tree to read the column value from the <see cref="DbDataReader"/>, perform null checks and convert the value to the desired type using the configured conversion expressions.
+    /// </summary>
     CompiledResultColumn Compile();
 }
 
+/// <summary>
+/// Represents the base class for all compilers capable of transforming the configured result column binding into an expression tree.
+/// </summary>
+/// <typeparam name="TBuilder">The type of the result column builder.</typeparam>
+/// <typeparam name="TDbDataReader">The type of the <see cref="DbDataReader"/> to be used.</typeparam>
 public abstract class ResultColumnCompiler<TBuilder, TDbDataReader> 
     where TBuilder : IResultColumnBuilder
     where TDbDataReader : DbDataReader
 {
+    /// <summary>
+    /// The result column builder.
+    /// </summary>
     protected TBuilder Builder { get; }
 
+    /// <summary>
+    /// Creates a new <see cref="ResultColumnCompiler{TBuilder, TDbDataReader}"/> instance.
+    /// </summary>
+    /// <param name="builder">The result column builder.</param>
     protected ResultColumnCompiler(TBuilder builder) => Builder = builder;
 
+    /// <inheritdoc cref="IResultColumnCompiler.Compile"/>
     public virtual CompiledResultColumn Compile()
     {
         ParameterExpression readerExpression = Expression.Parameter(typeof(TDbDataReader), "reader");
@@ -74,10 +93,21 @@ public abstract class ResultColumnCompiler<TBuilder, TDbDataReader>
         return new CompiledResultColumn(Builder.ColumnName!, Builder.Context.ResultProperty.Name, Builder.Context.ResultProperty.PropertyType, factory);
     }
 
+    /// <summary>
+    /// Automatically determines the best conversion expression for the column or returns <see langword="null"/> if no conversion is necessary or possible.
+    /// </summary>
     protected abstract Expression? GetColumnConverterOrDefault();
 
+    /// <summary>
+    /// Gets the type of the column value and the expression to read the value from the <see cref="DbDataReader"/>.
+    /// </summary>
     protected abstract (Type, Expression) GetColumnFactory();
 
+    /// <summary>
+    /// A helper method to create a tuple of the column type and the expression to read the value from the <see cref="DbDataReader"/>.
+    /// </summary>
+    /// <typeparam name="TResult">The type of the column value.</typeparam>
+    /// <param name="expression">The expression to read the value from the <see cref="DbDataReader"/>.</param>
     protected static (Type, Expression<Func<TDbDataReader, string, TResult>>) ReadColumn<TResult>(Expression<Func<TDbDataReader, string, TResult>> expression) =>
         (typeof(TResult), expression);
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata;
 using Wkg.EntityFrameworkCore.Extensions;
+using Wkg.Logging;
 
 namespace Wkg.EntityFrameworkCore.Configuration.Reflection.Policies.NamingPolicies;
 
@@ -13,10 +14,10 @@ internal readonly struct PreferExplicitNamingPolicy : INamingPolicy
             .ToArray();
         if (implicitProperties.Length > 0)
         {
-            Console.WriteLine($"{nameof(PreferExplicitNamingPolicy)}: entity {entityType.ClrType.Name} contains implicitly named properties.");
+            Log.WriteWarning($"{nameof(PreferExplicitNamingPolicy)}: entity {entityType.ClrType.Name} contains implicitly named properties.");
             foreach (IMutableProperty implicitProperty in implicitProperties)
             {
-                Console.WriteLine($"Property {implicitProperty.Name} has no explicit column name configured. Using the property name as column name. Consider using HasColumnName() to specify a column name.");
+                Log.WriteWarning($"Property {implicitProperty.Name} has no explicit column name configured. Using the property name as column name. Consider using HasColumnName() to specify a column name.");
             }
         }
     }

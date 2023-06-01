@@ -1,20 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Wkg.Reflection;
 
 namespace Wkg.EntityFrameworkCore.ProcedureMapping.Compiler.ResultConverters;
 
+/// <summary>
+/// Represents a converter that can be used to convert a JSON string to a CLR object.
+/// </summary>
 public static class JsonResultConverter
 {
     private static readonly MethodInfo Deserialize = typeof(JsonSerializer)
         .GetMethod(nameof(JsonSerializer.Deserialize), TypeArray.Of<string, Type, JsonSerializerOptions>())!;
 
+    /// <summary>
+    /// Returns a <see cref="LambdaExpression"/> that can be used to convert a JSON string to a CLR object of the specified type.
+    /// </summary>
+    /// <param name="targetType">The type of the object to convert to.</param>
     public static LambdaExpression For(Type targetType)
     {
         ParameterExpression jsonExpression = Expression.Parameter(typeof(string), "json");
@@ -34,5 +36,9 @@ public static class JsonResultConverter
         return Expression.Lambda(result, jsonExpression);
     }
 
+    /// <summary>
+    /// Returns a <see cref="LambdaExpression"/> that can be used to convert a JSON string to a CLR object of the specified type.
+    /// </summary>
+    /// <typeparam name="TResult">The type of the object to convert to.</typeparam>
     public static LambdaExpression For<TResult>() => For(typeof(TResult));
 }

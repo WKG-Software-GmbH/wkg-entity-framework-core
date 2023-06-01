@@ -71,7 +71,7 @@ internal readonly struct ILAccessorBuilder : IAccessorBuilder, IAccessorBuilderF
             _ownerType,
             true);
 
-        MethodInfo unsafeAs1 = UnsafeReflection.As(_ownerType);
+        MethodInfo unsafeAsOwnerType = UnsafeReflection.As(_ownerType);
 
         // get the IL generator for the dynamic method
         ILGenerator generator = dynamicMethod.GetILGenerator();
@@ -80,7 +80,7 @@ internal readonly struct ILAccessorBuilder : IAccessorBuilder, IAccessorBuilderF
         generator.Emit(OpCodes.Ldarg_0);
 
         // cast the owner to the owner type
-        generator.Emit(OpCodes.Call, unsafeAs1);
+        generator.Emit(OpCodes.Call, unsafeAsOwnerType);
 
         // call the getter method of the property, which will leave the value of the property on the stack
         generator.Emit(OpCodes.Callvirt, _pInfo.GetMethod!);
@@ -120,7 +120,7 @@ internal readonly struct ILAccessorBuilder : IAccessorBuilder, IAccessorBuilderF
             true);
 
         // we use Unsafe.As<OwnerType>(owner) instead of (OwnerType)owner because Castclass is slooooow
-        MethodInfo unsafeAs1 = UnsafeReflection.As(_ownerType);
+        MethodInfo unsafeAsOwnerType = UnsafeReflection.As(_ownerType);
 
         // get the IL generator for the dynamic method
         ILGenerator generator = dynamicMethod.GetILGenerator();
@@ -129,7 +129,7 @@ internal readonly struct ILAccessorBuilder : IAccessorBuilder, IAccessorBuilderF
         generator.Emit(OpCodes.Ldarg_0);
 
         // cast the owner to the owner type
-        generator.Emit(OpCodes.Call, unsafeAs1);
+        generator.Emit(OpCodes.Call, unsafeAsOwnerType);
 
         // we can optimize manually here.
         // this is why in the benchmarks we are faster than Roslyn :)
@@ -180,13 +180,13 @@ internal readonly struct ILAccessorBuilder : IAccessorBuilder, IAccessorBuilderF
             // benchmarking shows that this is even faster than just jamming the pointer in there
             // probably because this legal IL is easier to jit than the illegal IL we'd get otherwise :)
             // We use Unsafe.As<object, TargetType>(ref value) here
-            MethodInfo unsafeAs2 = UnsafeReflection.As(typeof(object), _pInfo.PropertyType);
+            MethodInfo unsafeAsPropertyType = UnsafeReflection.As(typeof(object), _pInfo.PropertyType);
 
             // push argument address (ByRef) of the value onto the stack (second argument, index 1, managed ByRef)
             generator.Emit(OpCodes.Ldarga_S, 1);
             
             // invoke Unsafe.As<object, TargetType>(ref value)
-            generator.Emit(OpCodes.Call, unsafeAs2);
+            generator.Emit(OpCodes.Call, unsafeAsPropertyType);
 
             // resolve the ByRef pointer to a normal reference (ByRef<object> is just void**)
             generator.Emit(OpCodes.Ldind_Ref);

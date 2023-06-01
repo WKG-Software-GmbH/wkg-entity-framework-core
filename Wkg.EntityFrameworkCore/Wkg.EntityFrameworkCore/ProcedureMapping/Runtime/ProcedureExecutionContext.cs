@@ -9,17 +9,34 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Wkg.EntityFrameworkCore.ProcedureMapping.Runtime;
 
+/// <summary>
+/// Represents the stateful runtime execution context of a stored procedure. 
+/// </summary>
+/// <remarks>
+/// This class is responsible for handling, populating, and caching the ADO.NET <see cref="DbParameter"/>s, creating and executing the ADO.NET <see cref="DbCommand"/> and storing potential results into a <see cref="IResultContainer{TResult}"/> object.
+/// </remarks>
 public interface IProcedureExecutionContext
 {
-    void Execute(DatabaseFacade dbContext, object context);
+    /// <summary>
+    /// Executes the stored procedure against the provided <see cref="DatabaseFacade"/> using the provided I/O <paramref name="container"/> object to load input parameters and store output parameters.
+    /// </summary>
+    /// <param name="dbContext">The <see cref="DatabaseFacade"/> to be used for the ADO.NET call.</param>
+    /// <param name="container">The I/O container object.</param>
+    void Execute(DatabaseFacade dbContext, object container);
 
-    IResultContainer<TResult> Execute<TResult>(DatabaseFacade dbContext, object context) where TResult : class;
+    /// <summary>
+    /// Executes the stored procedure against the provided <see cref="DatabaseFacade"/> using the provided I/O <paramref name="container"/> object to load input parameters and store output parameters. Results are returned in a <see cref="IResultContainer{TResult}"/> object.
+    /// </summary>
+    /// <typeparam name="TResult">The type of the result entities constructed from the result rows.</typeparam>
+    /// <param name="dbContext">The <see cref="DatabaseFacade"/> to be used for the ADO.NET call.</param>
+    /// <param name="container">The I/O container object.</param>
+    IResultContainer<TResult> Execute<TResult>(DatabaseFacade dbContext, object container) where TResult : class;
 }
 
 internal sealed class ProcedureExecutionContext<TCompiledParameter> : IProcedureExecutionContext where TCompiledParameter : struct, ICompiledParameter
 {
-    protected CompiledProcedure<TCompiledParameter> CompiledProcedure { get; }
-    protected DbParameter?[] DbParameters { get; }
+    private CompiledProcedure<TCompiledParameter> CompiledProcedure { get; }
+    private DbParameter?[] DbParameters { get; }
 
     public ProcedureExecutionContext(CompiledProcedure<TCompiledParameter> compiledProcedure)
     {
@@ -100,6 +117,11 @@ internal sealed class ProcedureExecutionContext<TCompiledParameter> : IProcedure
         }
     }
 
+    /// <summary>
+    /// Executes the stored procedure against the provided <see cref="DatabaseFacade"/> using the pre-populated ADO.NET <see cref="DbParameter"/> array.
+    /// </summary>
+    /// <param name="databaseFacade">The <see cref="DatabaseFacade"/> to be used for the ADO.NET call.</param>
+    /// <returns>The single value returned by this procedure or function.</returns>
     private object? ExecuteProcedureScalar(DatabaseFacade databaseFacade)
     {
         DbConnection connection = databaseFacade.GetDbConnection();
@@ -121,6 +143,12 @@ internal sealed class ProcedureExecutionContext<TCompiledParameter> : IProcedure
         return cmd.ExecuteScalar();
     }
 
+    /// <summary>
+    /// Executes the stored procedure against the provided <see cref="DatabaseFacade"/> using the pre-populated ADO.NET <see cref="DbParameter"/> array.
+    /// </summary>
+    /// <typeparam name="TResult">The type of the entity to be returned.</typeparam>
+    /// <param name="databaseFacade">The <see cref="DatabaseFacade"/> to be used for the ADO.NET call.</param>
+    /// <returns>The first row returned by this procedure, stored in a <typeparamref name="TResult"/> entity.</returns>
     private IResultContainer<TResult> ExecuteProcedureReaderSingle<TResult>(DatabaseFacade databaseFacade)
         where TResult : class
     {
@@ -147,6 +175,12 @@ internal sealed class ProcedureExecutionContext<TCompiledParameter> : IProcedure
         return new ResultElement<TResult>(result);
     }
 
+    /// <summary>
+    /// Executes the stored procedure against the provided <see cref="DatabaseFacade"/> using the pre-populated ADO.NET <see cref="DbParameter"/> array.
+    /// </summary>
+    /// <typeparam name="TResult">The type of the result returned by the stored procedure.</typeparam>
+    /// <param name="databaseFacade">The <see cref="DatabaseFacade"/> to be used for the ADO.NET call.</param>
+    /// <returns>A collection of <typeparamref name="TResult"/> entities representing all rows returned by this procedure.</returns>
     private IResultContainer<TResult> ExecuteProcedureReader<TResult>(DatabaseFacade databaseFacade)
         where TResult : class
     {
@@ -174,6 +208,7 @@ internal sealed class ProcedureExecutionContext<TCompiledParameter> : IProcedure
         return new ResultCollection<TResult>(results);
     }
 
+    /// <inheritdoc/>
     public void Execute(DatabaseFacade dbContext, object context)
     {
         ReadOnlySpan<TCompiledParameter> parameters = CompiledProcedure.CompiledParameters;
@@ -182,6 +217,7 @@ internal sealed class ProcedureExecutionContext<TCompiledParameter> : IProcedure
         AfterExecution(context, returnValue, ref parameters);
     }
 
+    /// <inheritdoc/>
     public IResultContainer<TResult> Execute<TResult>(DatabaseFacade dbContext, object context) where TResult : class
     {
         ReadOnlySpan<TCompiledParameter> parameters = CompiledProcedure.CompiledParameters;
