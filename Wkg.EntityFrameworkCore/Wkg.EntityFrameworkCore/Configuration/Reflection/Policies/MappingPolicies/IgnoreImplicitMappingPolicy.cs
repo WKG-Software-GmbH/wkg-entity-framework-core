@@ -20,7 +20,9 @@ internal readonly struct IgnoreImplicitMappingPolicy : IMappingPolicy
                 if (implicitProperty.IsIndex())
                 {
                     Log.WriteWarning($"Property {implicitProperty.Name} is an indexed property and will be removed from the containing index(es).");
-                    foreach (IMutableIndex index in implicitProperty.GetContainingIndexes())
+                    // take a copy of the indexes to avoid modifying the collection while iterating
+                    IMutableIndex[] indexes = implicitProperty.GetContainingIndexes().ToArray();
+                    foreach (IMutableIndex index in indexes)
                     {
                         entityType.RemoveIndex(index);
                     }
@@ -28,7 +30,9 @@ internal readonly struct IgnoreImplicitMappingPolicy : IMappingPolicy
                 if (implicitProperty.IsForeignKey())
                 {
                     Log.WriteWarning($"Property {implicitProperty.Name} is a foreign key property and will be removed from the containing foreign key(s).");
-                    foreach (IMutableForeignKey fkey in implicitProperty.GetContainingForeignKeys())
+                    // take a copy of the foreign keys to avoid modifying the collection while iterating
+                    IMutableForeignKey[] fkeys = implicitProperty.GetContainingForeignKeys().ToArray();
+                    foreach (IMutableForeignKey fkey in fkeys)
                     {
                         entityType.RemoveForeignKey(fkey);
                     }
