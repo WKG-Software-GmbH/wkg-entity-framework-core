@@ -73,6 +73,7 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
 
         // re-use the same array for all calls to Configure
         object[] parameters = new object[1];
+        int baseModelsLoaded = 0;
         foreach (ReflectiveEntity entity in entities)
         {
             Log.WriteDiagnostic($"{nameof(ReflectiveModelLoader)} loading: {entity.Type.Name}.");
@@ -105,6 +106,7 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
                         MethodInfo genericBaseConfigure = baseConfigure.MakeGenericMethod(entity.Type);
                         // invoke it with the EntityTypeBuilder<T> instance where T is the child class.
                         genericBaseConfigure.Invoke(null, parameters);
+                        baseModelsLoaded++;
                         Log.WriteDiagnostic($"{nameof(ReflectiveModelLoader)} applied base model definition {baseType.Name} to {entity.Type.Name}.");
                     }
                 }
@@ -117,7 +119,7 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
             typeBuilderCache.Add(entity.Type, entityTypeBuilder);
             Log.WriteDiagnostic($"{nameof(ReflectiveModelLoader)} loaded: {entity.Type.Name}.");
         }
-        Log.WriteInfo($"{nameof(ReflectiveModelLoader)} loaded {entities.Length} models.");
+        Log.WriteInfo($"{nameof(ReflectiveModelLoader)} loaded {entities.Length} models and {baseModelsLoaded} base model definitions.");
         Log.WriteInfo($"{nameof(ReflectiveModelLoader)} is exiting.");
         return typeBuilderCache;
     }
