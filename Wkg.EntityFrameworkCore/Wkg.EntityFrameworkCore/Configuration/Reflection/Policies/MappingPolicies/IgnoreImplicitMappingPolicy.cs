@@ -17,16 +17,6 @@ internal readonly struct IgnoreImplicitMappingPolicy : IMappingPolicy
             foreach (IMutableProperty implicitProperty in unmappedProperties)
             {
                 Log.WriteDebug($"Property {implicitProperty.Name} was not explicitly mapped and was not marked as unmapped! {nameof(IgnoreImplicitMappingPolicy)} is active and will prevent convention-based mapping of this property.");
-                entityType.RemoveProperty(implicitProperty);
-                entityType.AddIgnored(implicitProperty.Name);
-                if (implicitProperty.IsForeignKey())
-                {
-                    Log.WriteWarning($"Property {implicitProperty.Name} is a foreign key property and will be removed from the containing foreign key(s).");
-                    foreach (IMutableForeignKey fkey in implicitProperty.GetContainingForeignKeys())
-                    {
-                        entityType.RemoveForeignKey(fkey);
-                    }
-                }
                 if (implicitProperty.IsIndex())
                 {
                     Log.WriteWarning($"Property {implicitProperty.Name} is an indexed property and will be removed from the containing index(es).");
@@ -35,6 +25,16 @@ internal readonly struct IgnoreImplicitMappingPolicy : IMappingPolicy
                         entityType.RemoveIndex(index);
                     }
                 }
+                if (implicitProperty.IsForeignKey())
+                {
+                    Log.WriteWarning($"Property {implicitProperty.Name} is a foreign key property and will be removed from the containing foreign key(s).");
+                    foreach (IMutableForeignKey fkey in implicitProperty.GetContainingForeignKeys())
+                    {
+                        entityType.RemoveForeignKey(fkey);
+                    }
+                }
+                entityType.RemoveProperty(implicitProperty);
+                entityType.AddIgnored(implicitProperty.Name);
             }
         }
     }
