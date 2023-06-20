@@ -32,7 +32,7 @@ public static class ModelBuilderExtensions
     /// Loads and configures all models that implement <see cref="IReflectiveModelConfiguration{T}"/>.
     /// </summary>
     /// <param name="builder">The model builder.</param>
-    /// <param name="namingPolicy">The <see cref="INamingPolicy"/> to be used to determine what action should be taken when no explicit colomn name is provided.</param>
+    /// <param name="namingPolicy">The <see cref="INamingPolicy"/> to be used to determine what action should be taken when no explicit column name is provided.</param>
     /// <param name="mappingPolicy">The <see cref="IMappingPolicy"/> to be used to determine what action should be taken when a property is neither ignored nor explicitly mapped, i.e., how to handle convention-based mapping scenarios.</param>
     /// <returns>The model builder.</returns>
     /// <remarks>
@@ -49,7 +49,7 @@ public static class ModelBuilderExtensions
     /// </summary>
     /// <typeparam name="TDatabaseEngineModelAttribute">The type data base engine to load the models for.</typeparam>
     /// <param name="builder">The model builder.</param>
-    /// <param name="namingPolicy">The <see cref="INamingPolicy"/> to be used to determine what action should be taken when no explicit colomn name is provided.</param>
+    /// <param name="namingPolicy">The <see cref="INamingPolicy"/> to be used to determine what action should be taken when no explicit column name is provided.</param>
     /// <param name="mappingPolicy">The <see cref="IMappingPolicy"/> to be used to determine what action should be taken when a property is neither ignored nor explicitly mapped, i.e., how to handle convention-based mapping scenarios.</param>
     /// <returns>The model builder.</returns>
     /// <remarks>

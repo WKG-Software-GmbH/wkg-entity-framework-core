@@ -2,10 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using Wkg.Extensions.Reflection;
-using Wkg.EntityFrameworkCore.Configuration.Reflection.Policies.NamingPolicies;
-using Wkg.EntityFrameworkCore.Configuration.Reflection.Policies.MappingPolicies;
 using Wkg.Logging;
-using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Wkg.EntityFrameworkCore.Configuration.Reflection;
 
@@ -22,8 +19,7 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
     /// </summary>
     /// <param name="builder">The <see cref="ModelBuilder"/> to configure.</param>
     /// <param name="databaseEngineAttributeType">The type of the attribute that marks a model as being for a specific database engine. If <see langword="null"/>, all models will be loaded.</param>
-    /// <param name="namingPolicy">The policy to enforce specifying how parameter names are mapped to column names.</param>
-    /// <param name="mappingPolicy">The policy to enforce specifying how to handle properties that are not explicitly mapped.</param>
+    /// <returns>A dictionary of the used <see cref="EntityTypeBuilder"/> instances keyed by the type of the entity.</returns>
     public static IReadOnlyDictionary<Type, EntityTypeBuilder> LoadAll(ModelBuilder builder, Type? databaseEngineAttributeType)
     {
         if (databaseEngineAttributeType is null)
@@ -55,7 +51,7 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
                     && type.ImplementsDirectGenericInterfaceWithTypeParameter(typeof(IReflectiveModelConfiguration<>), type)
                     // only keep classes that have the specified database engine attribute if enabled
                     && (databaseEngineAttributeType is null || type.GetCustomAttribute(databaseEngineAttributeType) is not null)))
-            // just to be sure ...
+            // just to be sure...
             .Distinct()
             .Select(type => new ReflectiveEntity
             (
