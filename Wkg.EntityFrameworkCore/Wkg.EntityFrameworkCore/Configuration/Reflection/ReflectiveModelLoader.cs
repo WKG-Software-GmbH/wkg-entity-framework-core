@@ -66,7 +66,7 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
             .Where(entity => entity.Configure is not null)
             .ToArray();
 
-        Log.WriteInfo($"{nameof(ReflectiveModelLoader)} is loading {entities.Length} models.");
+        Log.WriteInfo($"{nameof(ReflectiveModelLoader)} discovered {entities.Length} models.");
 
         // re-use the same array for all calls to Configure
         object[] parameters = new object[1];
