@@ -82,7 +82,7 @@ internal class ReflectiveConnectionLoader : ReflectiveLoaderBase
             .Where(connection => connection.Connect is not null)
             .ToArray();
 
-        Log.WriteInfo($"{nameof(ReflectiveConnectionLoader)} is loading {connections.Length} model connections.");
+        Log.WriteInfo($"{nameof(ReflectiveConnectionLoader)} discovered {connections.Length} model connections.");
 
         // re-use the same array for all calls to Configure
         object[] parameters = new object[2];

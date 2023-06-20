@@ -2,8 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using Wkg.Extensions.Reflection;
-using Wkg.EntityFrameworkCore.Configuration.Reflection.Policies.NamingPolicies;
-using Wkg.EntityFrameworkCore.Configuration.Reflection.Policies.MappingPolicies;
 using Wkg.Logging;
 
 namespace Wkg.EntityFrameworkCore.Configuration.Reflection;
@@ -21,9 +19,8 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
     /// </summary>
     /// <param name="builder">The <see cref="ModelBuilder"/> to configure.</param>
     /// <param name="databaseEngineAttributeType">The type of the attribute that marks a model as being for a specific database engine. If <see langword="null"/>, all models will be loaded.</param>
-    /// <param name="namingPolicy">The policy to enforce specifying how parameter names are mapped to column names.</param>
-    /// <param name="mappingPolicy">The policy to enforce specifying how to handle properties that are not explicitly mapped.</param>
-    public static IReadOnlyDictionary<Type, EntityTypeBuilder> LoadAll(ModelBuilder builder, Type? databaseEngineAttributeType, INamingPolicy namingPolicy, IMappingPolicy mappingPolicy)
+    /// <returns>A dictionary of the used <see cref="EntityTypeBuilder"/> instances keyed by the type of the entity.</returns>
+    public static IReadOnlyDictionary<Type, EntityTypeBuilder> LoadAll(ModelBuilder builder, Type? databaseEngineAttributeType)
     {
         if (databaseEngineAttributeType is null)
         {
@@ -54,7 +51,7 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
                     && type.ImplementsDirectGenericInterfaceWithTypeParameter(typeof(IReflectiveModelConfiguration<>), type)
                     // only keep classes that have the specified database engine attribute if enabled
                     && (databaseEngineAttributeType is null || type.GetCustomAttribute(databaseEngineAttributeType) is not null)))
-            // just to be sure ...
+            // just to be sure...
             .Distinct()
             .Select(type => new ReflectiveEntity
             (
@@ -69,10 +66,11 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
             .Where(entity => entity.Configure is not null)
             .ToArray();
 
-        Log.WriteInfo($"{nameof(ReflectiveModelLoader)} is loading {entities.Length} models.");
+        Log.WriteInfo($"{nameof(ReflectiveModelLoader)} discovered {entities.Length} models.");
 
         // re-use the same array for all calls to Configure
         object[] parameters = new object[1];
+        int baseModelsLoaded = 0;
         foreach (ReflectiveEntity entity in entities)
         {
             Log.WriteDiagnostic($"{nameof(ReflectiveModelLoader)} loading: {entity.Type.Name}.");
@@ -105,6 +103,7 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
                         MethodInfo genericBaseConfigure = baseConfigure.MakeGenericMethod(entity.Type);
                         // invoke it with the EntityTypeBuilder<T> instance where T is the child class.
                         genericBaseConfigure.Invoke(null, parameters);
+                        baseModelsLoaded++;
                         Log.WriteDiagnostic($"{nameof(ReflectiveModelLoader)} applied base model definition {baseType.Name} to {entity.Type.Name}.");
                     }
                 }
@@ -112,12 +111,10 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
             }
             // enforce policies
             EntityTypeBuilder entityTypeBuilder = (EntityTypeBuilder)entityTypeBuilderObj;
-            mappingPolicy.Audit(entityTypeBuilder.Metadata);
-            namingPolicy.Audit(entityTypeBuilder.Metadata);
             typeBuilderCache.Add(entity.Type, entityTypeBuilder);
             Log.WriteDiagnostic($"{nameof(ReflectiveModelLoader)} loaded: {entity.Type.Name}.");
         }
-        Log.WriteInfo($"{nameof(ReflectiveModelLoader)} loaded {entities.Length} models.");
+        Log.WriteInfo($"{nameof(ReflectiveModelLoader)} loaded {entities.Length} models and {baseModelsLoaded} base model definitions.");
         Log.WriteInfo($"{nameof(ReflectiveModelLoader)} is exiting.");
         return typeBuilderCache;
     }

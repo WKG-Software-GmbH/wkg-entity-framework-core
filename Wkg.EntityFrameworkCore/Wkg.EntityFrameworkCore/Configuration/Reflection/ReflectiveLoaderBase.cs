@@ -78,7 +78,7 @@ public abstract class ReflectiveLoaderBase
                 && procedure.ProcedureType.ImplementsDirectGenericInterfaceWithTypeParameters(reflectiveInterface, procedure.ProcedureType, procedure.ContextType))
             .ToArray();
 
-        Log.WriteInfo($"Loading {entities.Length} stored procedures.");
+        Log.WriteInfo($"Discovered {entities.Length} stored procedures.");
 
         // re-use parameter array for all procedures
         object?[] parameters = new object[1];
