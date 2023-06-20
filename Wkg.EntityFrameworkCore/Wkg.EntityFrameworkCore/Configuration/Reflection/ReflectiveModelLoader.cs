@@ -5,6 +5,7 @@ using Wkg.Extensions.Reflection;
 using Wkg.EntityFrameworkCore.Configuration.Reflection.Policies.NamingPolicies;
 using Wkg.EntityFrameworkCore.Configuration.Reflection.Policies.MappingPolicies;
 using Wkg.Logging;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Wkg.EntityFrameworkCore.Configuration.Reflection;
 
@@ -23,7 +24,7 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
     /// <param name="databaseEngineAttributeType">The type of the attribute that marks a model as being for a specific database engine. If <see langword="null"/>, all models will be loaded.</param>
     /// <param name="namingPolicy">The policy to enforce specifying how parameter names are mapped to column names.</param>
     /// <param name="mappingPolicy">The policy to enforce specifying how to handle properties that are not explicitly mapped.</param>
-    public static IReadOnlyDictionary<Type, EntityTypeBuilder> LoadAll(ModelBuilder builder, Type? databaseEngineAttributeType, INamingPolicy namingPolicy, IMappingPolicy mappingPolicy)
+    public static IReadOnlyDictionary<Type, EntityTypeBuilder> LoadAll(ModelBuilder builder, Type? databaseEngineAttributeType)
     {
         if (databaseEngineAttributeType is null)
         {
@@ -114,8 +115,6 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
             }
             // enforce policies
             EntityTypeBuilder entityTypeBuilder = (EntityTypeBuilder)entityTypeBuilderObj;
-            mappingPolicy.Audit(entityTypeBuilder.Metadata);
-            namingPolicy.Audit(entityTypeBuilder.Metadata);
             typeBuilderCache.Add(entity.Type, entityTypeBuilder);
             Log.WriteDiagnostic($"{nameof(ReflectiveModelLoader)} loaded: {entity.Type.Name}.");
         }
