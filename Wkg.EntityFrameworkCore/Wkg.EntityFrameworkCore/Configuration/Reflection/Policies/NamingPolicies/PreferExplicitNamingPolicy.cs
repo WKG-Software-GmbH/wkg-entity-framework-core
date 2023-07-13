@@ -1,17 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata;
-using Wkg.EntityFrameworkCore.Extensions;
 using Wkg.Logging;
 
 namespace Wkg.EntityFrameworkCore.Configuration.Reflection.Policies.NamingPolicies;
 
-internal readonly struct PreferExplicitNamingPolicy : INamingPolicy
+internal class PreferExplicitNamingPolicy : ExplicitNamingPolicy
 {
-    public void Audit(IMutableEntityType entityType)
+    public override void Audit(IMutableEntityType entityType)
     {
-        IMutableProperty[] implicitProperties = entityType
-            .GetDeclaredProperties()
-            .Where(p => !p.HasAnnotation(annotation => annotation is RelationalAnnotationNames.ColumnName))
-            .ToArray();
+        if (!HasExplicitTableName(entityType))
+        {
+            Log.WriteWarning($"{nameof(PreferExplicitNamingPolicy)}: entity {entityType.ClrType.Name} was not explicitly mapped to a table or view.");
+        }
+        IMutableProperty[] implicitProperties = GetImplicitProperties(entityType);
         if (implicitProperties.Length > 0)
         {
             Log.WriteWarning($"{nameof(PreferExplicitNamingPolicy)}: entity {entityType.ClrType.Name} contains implicitly named properties.");

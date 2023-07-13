@@ -3,18 +3,15 @@ using Wkg.EntityFrameworkCore.Extensions;
 
 namespace Wkg.EntityFrameworkCore.Configuration.Reflection.Policies.NamingPolicies;
 
-internal readonly struct RequireExplicitNamingPolicy : INamingPolicy
+internal class RequireExplicitNamingPolicy : ExplicitNamingPolicy
 {
-    public void Audit(IMutableEntityType entityType)
+    public override void Audit(IMutableEntityType entityType)
     {
-        if (!entityType.HasAnnotation(annotation => annotation is RelationalAnnotationNames.TableName or RelationalAnnotationNames.ViewName))
+        if (!HasExplicitTableName(entityType))
         {
             throw new ArgumentException($"{nameof(RequireExplicitNamingPolicy)}: entity {entityType.ClrType.Name} was not explicitly mapped to a table or view.");
         }
-        IMutableProperty[] implicitProperties = entityType
-            .GetDeclaredProperties()
-            .Where(p => !p.HasAnnotation(annotation => annotation is RelationalAnnotationNames.ColumnName))
-            .ToArray();
+        IMutableProperty[] implicitProperties = GetImplicitProperties(entityType);
         if (implicitProperties.Length > 0)
         {
             List<Exception> invalidPropertyExceptions = new();
