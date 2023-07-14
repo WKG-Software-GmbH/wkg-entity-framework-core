@@ -181,7 +181,7 @@ public class MyDbContext : DbContext
 }
 ```
 
-> :warning:
+> :warning: **Warning**
 > In order to reduce the risk of missing entities, it is recommended to use [Reflective Entity Discovery](#reflective-entity-discovery), rather than manual registration.
 
 #### Configuring Inheritance Hierarchies
