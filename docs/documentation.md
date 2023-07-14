@@ -796,7 +796,7 @@ readonly struct UseSnakeCaseByConvention : INamingPolicy
 }
 ```
 
-> :bangbang: **Caution**
+> :x: **Caution**
 > Policies are designed to be stateless and immutable. If you absolutely need to store state, beware that policy objects are treated as singletons by RECAP, so the same instance will be used for all mappings.
 
 ##### Mapping Policies
@@ -1047,7 +1047,7 @@ Then the `Returns<T>()` method is used to configure the result set. The `AsColle
 
 The `Column()` method of the `ResultBuilder` is used to configure the columns of the result set. The `id` and `name` columns are mapped using RECAP's support for inferred database types. The `uuid` column is mapped using a custom conversion function, because the `uuid` column is stored as a `BINARY(16)` column in the database, which represents a complex GUID type in .NET. The `GetAsBytes()` method tells RECAP to read the column as a byte array, while the `RequiresConversion()` method provides a conversion function that converts the byte array to a `Guid` which matches the type of the `Uuid` property. Without this conversion function, RECAP would throw an exception because it cannot convert the byte array to a `Guid` automatically.
 
-> :bangbang: **Caution**
+> :x: **Caution**
 > When instantiating Result classes, RECAP requires that the class has a public constructor with parameters matching the columns of the result set. Parameter names are compared case-insensitively, CLR types must match exactly with the mapped Property types. If no matching constructor is found, RECAP will throw an exception. It is recommended to use primary constructor syntax for result classes to avoid this problem.
 
 #### PCO Discovery
