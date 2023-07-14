@@ -200,7 +200,11 @@ Table Per Hierarchy (TPH) is the default inheritance strategy used by EF Core. I
 In RECAP, TPH inheritance is achieved by configuring the discriminator column in the base entity mapping, and by mapping any additional properties in the derived entity mappings. The following example shows how to configure TPH inheritance for the `Person`, `Child`, and `Adult` entities:
 
 <details>
-<summary style="font-style: italic">Show/hide <code>Person</code> TPH configuration</summary>
+<summary>
+
+*Show/hide <code>Person</code> TPH configuration*
+
+</summary>
 
 `Person.cs` file:
 
@@ -248,7 +252,11 @@ public abstract partial class Person : IReflectiveModelConfiguration<Person>
 
 </details>
 <details>
-<summary style="font-style: italic">Show/hide <code>Adult</code> TPH configuration</summary>
+<summary>
+
+*Show/hide <code>Adult</code> TPH configuration*
+
+</summary>
 
 `Adult.cs` file:
 
@@ -288,7 +296,11 @@ public partial class Adult : Person, IReflectiveModelConfiguration<Adult>
 
 </details>
 <details>
-<summary style="font-style: italic">Show/hide <code>Child</code> TPH configuration</summary>
+<summary>
+
+*Show/hide <code>Child</code> TPH configuration*
+
+</summary>
 
 `Child.cs` file:
 
@@ -314,7 +326,11 @@ For easy linking, the primary key of the child entity is also the foreign key to
 The following example shows how to configure TPT inheritance for the `Person`, `Child`, and `Adult` entities:
 
 <details>
-<summary style="font-style: italic">Show/hide <code>Person</code> TPT configuration</summary>
+<summary>
+
+*Show/hide <code>Person</code> TPT configuration*
+
+</summary>
 
 `Person.cs` file:
 
@@ -352,7 +368,11 @@ public abstract partial class Person : IReflectiveModelConfiguration<Person>
 
 </details>
 <details>
-<summary style="font-style: italic">Show/hide <code>Adult</code> TPT configuration</summary>
+<summary>
+
+*Show/hide <code>Adult</code> TPT configuration*
+
+</summary>
 
 `Adult.cs` file:
 
@@ -394,7 +414,11 @@ public partial class Adult : Person, IReflectiveModelConfiguration<Adult>
 
 </details>
 <details>
-<summary style="font-style: italic">Show/hide <code>Child</code> TPT configuration</summary>
+<summary>
+
+*Show/hide <code>Child</code> TPT configuration*
+
+</summary>
 
 `Child.cs` file:
 
@@ -439,7 +463,11 @@ The following example shows how to configure TPC inheritance for the `Person`, `
 entities:
 
 <details>
-<summary style="font-style: italic">Show/hide <code>Person</code> TPC configuration</summary>
+<summary>
+
+*Show/hide <code>Person</code> TPC configuration*
+
+</summary>
 
 `Person.cs` file:
 
@@ -479,7 +507,11 @@ public abstract partial class Person : IReflectiveBaseModelConfiguration<Person>
 
 </details>
 <details>
-<summary style="font-style: italic">Show/hide <code>Adult</code> TPC configuration</summary>
+<summary>
+
+*Show/hide <code>Adult</code> TPC configuration*
+
+</summary>
 
 `Adult.cs` file:
 
@@ -521,7 +553,11 @@ public partial class Adult : Person, IReflectiveModelConfiguration<Adult>
 
 </details>
 <details>
-<summary style="font-style: italic">Show/hide <code>Child</code> TPC configuration</summary>
+<summary>
+
+*Show/hide <code>Child</code> TPC configuration*
+
+</summary>
 
 `Child.cs` file:
 
@@ -557,7 +593,11 @@ RECAP allows you to easily configure connection entities for many-to-many relati
 First, configure the `Person` and `Group` entities as usual:
 
 <details>
-<summary style="font-style: italic">Show/hide <code>Person</code> entity configuration</summary>
+<summary>
+
+*Show/hide <code>Person</code> entity configuration*
+
+</summary>
 
 `Person.cs` file:
 
@@ -600,7 +640,11 @@ public partial class Person : IReflectiveModelConfiguration<Person>
 
 </details>
 <details>
-<summary style="font-style: italic">Show/hide <code>Group</code> entity configuration</summary>
+<summary>
+
+*Show/hide <code>Group</code> entity configuration*
+
+</summary>
 
 `Group.cs` file:
 
@@ -648,7 +692,11 @@ public partial class Group : IReflectiveModelConfiguration<Group>
 Next, create the connection entity by implementing either `IModelConnection<TConnection, TLeft, TRight>` or `IReflectiveModelConnection<TConnection, TLeft, TRight>`. The following example shows how to create a connection entity named `PersonToGroup`:
 
 <details>
-<summary style="font-style: italic">Show/hide <code>PersonToGroup</code> connection entity configuration</summary>
+<summary>
+
+*Show/hide <code>PersonToGroup</code> connection entity configuration*
+
+</summary>
 
 `PersonToGroup.cs` file:
 
@@ -883,7 +931,11 @@ The following example shows how to map a database function that takes two intege
 Assuming the following database function is defined in the database:
 
 <details>
-<summary style="font-style: italic">Show/hide <code>perform_addition</code> database function definition</summary>
+<summary>
+
+*Show/hide <code>perform_addition</code> database function definition*
+
+</summary>
 
 ```sql
 CREATE FUNCTION perform_addition (IN a INT, IN b INT) RETURNS INT
@@ -899,7 +951,11 @@ The first step is to define a PCO class that represents the function. The PCO cl
 Depending on whether you use Reflective or Manual Procedure Discovery, the PCO class must additionally implement either `IProcedureConfiguration<TProcedure, TContainer>` or `IReflectiveProcedureConfiguration<TProcedure, TContainer>`, where `TProcedure` is the type of the PCO class itself and `TContainer` is the type of the I/O Container class. In this example we are using Reflective Procedure Discovery, so we implement `IReflectiveProcedureConfiguration<TProcedure, TContainer>`. Either way, a `Configure()` method must be implemented to configure the PCO class. The following example shows how to configure the PCO class for the `perform_addition` function:
 
 <details>
-<summary style="font-style: italic">Show/hide <code>Addition</code> PCO class definition</summary>
+<summary>
+
+*Show/hide <code>Addition</code> PCO class definition*
+
+</summary>
 
 ```csharp
 // define a PCO class that represents the function
@@ -960,7 +1016,11 @@ The following example shows how to map a stored procedure with input and output 
 Assuming the following stored procedure is defined in the database:
 
 <details>
-<summary style="font-style: italic">Show/hide <code>get_persons_by_name</code> stored procedure definition</summary>
+<summary>
+
+*Show/hide <code>get_persons_by_name</code> stored procedure definition*
+
+</summary>
 
 ```sql
 CREATE PROCEDURE get_persons_by_name (IN name_in VARCHAR(255), OUT invalid_count INT)
@@ -977,7 +1037,11 @@ The procedure takes a single input parameter `name_in` and an output parameter `
 Mapping a stored procedure in RECAP is very similar to mapping a function. The only differences are that the `ToDatabaseFunction()` method is replaced with the `ToDatabaseProcedure()` method, and that parameter and result set mappings are a bit more complex. The following example shows how the `get_persons_by_name` procedure can be mapped:
 
 <details>
-<summary style="font-style: italic">Show/hide <code>GetPersonsByName</code> PCO class definition</summary>
+<summary>
+
+*Show/hide <code>GetPersonsByName</code> PCO class definition*
+
+</summary>
 
 ```csharp
 // define a PCO class that represents the procedure
