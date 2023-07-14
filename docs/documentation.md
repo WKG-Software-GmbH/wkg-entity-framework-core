@@ -29,6 +29,11 @@
         - [Mapping Policies](#mapping-policies)
         - [Applying Policies](#applying-policies)
     - [Stored Procedure Mapping](#stored-procedure-mapping)
+      - [Getting Started with PCO Mapping](#getting-started-with-pco-mapping)
+        - [Mapping a Database Function](#mapping-a-database-function)
+        - [Mapping a Stored Procedure](#mapping-a-stored-procedure)
+      - [PCO Discovery](#pco-discovery)
+    - [Executing PCOs](#executing-pcos)
 
 ## Getting Started
 
@@ -791,7 +796,7 @@ readonly struct UseSnakeCaseByConvention : INamingPolicy
 }
 ```
 
-> :x: **Caution**
+> :bangbang: **Caution**
 > Policies are designed to be stateless and immutable. If you absolutely need to store state, beware that policy objects are treated as singletons by RECAP, so the same instance will be used for all mappings.
 
 ##### Mapping Policies
@@ -853,4 +858,278 @@ class MyDbContext : DbContext
 
 ### Stored Procedure Mapping
 
-TODO
+RECAP allows you to map stored procedures and database functions to CLR command objects (so-called *Procedure Command Objects (PCOs)*). PCOs are similar to entities in EF Core in that they are mapped to database objects and require configuration via fluent API. However, unlike entities, PCOs are generally stateless and specific to the database provider.
+
+Every mapped procedure or function consist of three components in RECAP:
+
+- A ***Procedure Command Object (PCO)*** class that represents the procedure or function itself. The PCO class is used by client code to invoke the procedure or function.
+- An ***Input/Output Container (I/O Container)*** class that represents the input and output parameters, and scalar return values of the procedure or function. The I/O Container class is used by the PCO class to pass parameters to the procedure or function and to retrieve the results.
+- An optional ***Result*** class that represents the result set of a procedure invocation. The Result class is similar to an entity class and is used to map a set of columns returned by a procedure to a CLR type. A procedure may return a single result or a set of multiple results.
+
+> :information_source: **Note**
+RECAP internally uses ADO.NET to invoke stored procedures and functions. Therefore, binding libraries for the target database provider must be installed in the project. For more information, see [Supported Database Providers](#requirements).
+
+#### Getting Started with PCO Mapping
+
+The following examples show how to map stored procedures and functions in RECAP. The examples provided here are targeting MySQL, but the same principles apply to other database providers.
+
+> :bulb: **Tip**
+> For full documentation on the options available for your target database provider, see the documentation for the [binding library of your database provider](#requirements).
+
+##### Mapping a Database Function
+
+The following example shows how to map a database function that takes two integer parameters and returns the sum of the two parameters.
+
+Assuming the following database function is defined in the database:
+
+<details>
+<summary style="font-style: italic">Show/hide <code>perform_addition</code> database function definition</summary>
+
+```sql
+CREATE FUNCTION perform_addition (IN a INT, IN b INT) RETURNS INT
+BEGIN
+    RETURN a + b;
+END
+```
+
+</details>
+
+The first step is to define a PCO class that represents the function. The PCO class must inherit from the provider-specific `StoredProcedure<TContainer>` implementation, where `TContainer` is the type of the I/O Container class that represents the input and output parameters of the function. In this example we are using MySQL, so we inherit from the `MySqlStoredProcedure<TContainer>` class. 
+
+Depending on whether you use Reflective or Manual Procedure Discovery, the PCO class must additionally implement either `IProcedureConfiguration<TProcedure, TContainer>` or `IReflectiveProcedureConfiguration<TProcedure, TContainer>`, where `TProcedure` is the type of the PCO class itself and `TContainer` is the type of the I/O Container class. In this example we are using Reflective Procedure Discovery, so we implement `IReflectiveProcedureConfiguration<TProcedure, TContainer>`. Either way, a `Configure()` method must be implemented to configure the PCO class. The following example shows how to configure the PCO class for the `perform_addition` function:
+
+<details>
+<summary style="font-style: italic">Show/hide <code>Addition</code> PCO class definition</summary>
+
+```csharp
+// define a PCO class that represents the function
+public class Addition : MySqlStoredProcedure<AdditionContainer>,
+    IReflectiveProcedureConfiguration<Addition, AdditionContainer>
+{
+    // depending on your use case, you can define any number of Invoke() methods
+    // with different signatures or method names. the method name does not matter.
+    public int Invoke(int a, int b)
+    {
+        // create an I/O Container instance
+        AdditionContainer io = new(a, b, default);
+        // invoke the function by calling the base class implementation
+        Execute(io);
+        // retrieve the result from the I/O Container and return it
+        return io.Result;
+    }
+    // map parameters and return values of the function to properties of the I/O Container
+    public static void Configure(MySqlProcedureBuilder<Addition, AdditionContainer> self)
+    {
+        // map the function name
+        _ = self.ToDatabaseFunction("perform_addition") 
+            .ReturnsScalar(io => io.Result) // configure the result
+            .HasDbType(MySqlDbType.Int32);  // configure the DB return type
+        // configure the first parameter
+        _ = self.Parameter(io => io.A)
+            .HasName("a")                   // map the parameter name
+            .HasDbType(MySqlDbType.Int32);  // configure the DB type
+        // configure the second parameter
+        _ = self.Parameter(io => io.B)
+            .HasName("b")                   // map the parameter name
+            .HasDbType(MySqlDbType.Int32);  // configure the DB type
+    }
+}
+// define an I/O Container class that represents the input and output parameters
+// of the function.
+public record AdditionContainer(int A, int B, int Result);
+```
+
+</details>
+
+As shown in the example above, the `Configure()` method is used to map the function to the PCO class. The `ToDatabaseFunction()` method is used to map the function name. The `ReturnsScalar()` method is used to map the scalar return value of the function. The `Parameter()` method is used to map the input parameters of the function, where `HasName()` is used to map the parameter name, and `HasDbType()` specifies the database type of the parameter.
+
+> :bulb: **Tip**
+> RECAP provides a `ReturnsScalar(...)` extension method to map scalar return values of stored procedures. This extension method is functionally equivalent to the `Parameter(...).HasDirection(ParameterDirection.ReturnValue)` method chain.
+
+The example above uses a record type for the I/O Container class to take advantage of the built-in deconstruction and primary constructor features of records. However, you can use any reference type as an I/O Container class. The only restriction is that only properties can be mapped to parameters and return values. Fields are not supported.
+
+> :bulb: **Tip**
+> Even output properties of the I/O Container class don't have to be writable. RECAP uses dynamic IL emission to access I/O Container properties, so records with init-only properties are fully supported.
+
+RECAP does not require any specific signatures for invoking the PCO class. You can freely define any number of instance methods with different signatures or names to invoke the function. By convention, the name *"Invoke"* should be used for the method that is used by client code to invoke the function (duh). However, this is not a requirement.
+
+##### Mapping a Stored Procedure
+
+The following example shows how to map a stored procedure with input and output parameters that returns a result set.
+
+Assuming the following stored procedure is defined in the database:
+
+<details>
+<summary style="font-style: italic">Show/hide <code>get_persons_by_name</code> stored procedure definition</summary>
+
+```sql
+CREATE PROCEDURE get_persons_by_name (IN name_in VARCHAR(255), OUT invalid_count INT)
+BEGIN
+    SET invalid_count = (SELECT COUNT(*) FROM person WHERE `name` IS NULL);
+    SELECT `id`, `name`, `uuid` FROM `person` WHERE `name` = name_in;
+END
+```
+
+</details>
+
+The procedure takes a single input parameter `name_in` and an output parameter `invalid_count`, which is used to return the number of rows in the `person` table where the `name` column is `NULL`. The procedure returns a result set with three columns: `id`, `name`, and `uuid`.
+
+Mapping a stored procedure in RECAP is very similar to mapping a function. The only differences are that the `ToDatabaseFunction()` method is replaced with the `ToDatabaseProcedure()` method, and that parameter and result set mappings are a bit more complex. The following example shows how the `get_persons_by_name` procedure can be mapped:
+
+<details>
+<summary style="font-style: italic">Show/hide <code>GetPersonsByName</code> PCO class definition</summary>
+
+```csharp
+// define a PCO class that represents the procedure
+public class GetPersonsByName : MySqlStoredProcedure<GetPersonsByNameContainer, GetPersonsByNameResult>,
+    IReflectiveProcedureConfiguration<GetPersonsByName, GetPersonsByNameContainer>
+{
+    public IReadOnlyList<GetPersonsByNameResult> Invoke(string name, out int invalidCount)
+    {
+        // create an I/O Container instance
+        GetPersonsByNameContainer io = new(name, default);
+        // invoke the procedure by calling the base class implementation
+        IResultContainer<GetPersonsByNameResult> result = Execute(io);
+        // set the output parameter
+        invalidCount = io.InvalidCount;
+        // retrieve the result as a collection and return it
+        return result.AsCollection();
+    }
+
+    public static void Configure(MySqlProcedureBuilder<GetPersonsByName, GetPersonsByNameContainer> self)
+    {
+        _ = self.ToDatabaseProcedure("get_persons_by_name");
+        // unless specified otherwise, RECAP assumes that all parameters are input parameters.
+        _ = self.Parameter(io => io.Name)
+            .HasName("name_in")
+            .HasDbType(MySqlDbType.String)
+            .HasSize(255);
+        // configure the output parameter
+        _ = self.Parameter(io => io.InvalidCount)
+            .HasName("invalid_count")
+            .HasDirection(ParameterDirection.Output);
+        // configure the result set and tell RECAP to read *all* returned rows.
+        MySqlResultBuilder<GetPersonsByNameResult> result = self
+            .Returns<GetPersonsByNameResult>()
+            .AsCollection();
+        // configure the columns of the result set
+        // RECAP will attempt to automatically determine the DB type based on the
+        // CLR type of the property. If this is not possible, you can use the
+        // HasDbType() method to specify the DB type manually.
+        _ = result.Column(io => io.Id)
+            .HasName("id");
+        _ = result.Column(io => io.Name)
+            .HasName("name");
+        // in this example, the UUID column is stored as a BINARY(16) column in the database.
+        // => tell RECAP to read the column as a byte array and provide a conversion function
+        //    that converts the byte array to a Guid.
+        _ = result.Column(io => io.Uuid)
+            .HasName("uuid")
+            .GetAsBytes()
+            .RequiresConversion(bytes => new Guid(bytes));
+    }
+}
+// define an I/O Container class that represents the input and output parameters
+// of the function.
+public record GetPersonsByNameContainer(string Name, int InvalidCount);
+
+// define a result class that represents a single row of the result set returned by this procedure
+public record GetPersonsByNameResult(int Id, string Name, Guid Uuid);
+```
+
+</details>
+
+As shown above, PCOs expecting a result set must inherit from the `StoredProcedure<TContainer, TResult>` base class, where `TContainer` is the I/O Container class, and `TResult` is the result class. 
+
+The `Configure()` method is used to map the procedure to the PCO class. The `ToDatabaseProcedure()` method tells RECAP to invoke `get_persons_by_name` as a procedure (instead of a function). The `Parameter()` method is used to configure the input and output parameters of the procedure. 
+
+Then the `Returns<T>()` method is used to configure the result set. The `AsCollection()` method tells RECAP to eagerly read all returned rows into a collection. Alternatively `AsSingle()` can be used if you only expect a single row to be returned, or if are only interested in the first row.
+
+The `Column()` method of the `ResultBuilder` is used to configure the columns of the result set. The `id` and `name` columns are mapped using RECAP's support for inferred database types. The `uuid` column is mapped using a custom conversion function, because the `uuid` column is stored as a `BINARY(16)` column in the database, which represents a complex GUID type in .NET. The `GetAsBytes()` method tells RECAP to read the column as a byte array, while the `RequiresConversion()` method provides a conversion function that converts the byte array to a `Guid` which matches the type of the `Uuid` property. Without this conversion function, RECAP would throw an exception because it cannot convert the byte array to a `Guid` automatically.
+
+> :bangbang: **Caution**
+> When instantiating Result classes, RECAP requires that the class has a public constructor with parameters matching the columns of the result set. Parameter names are compared case-insensitively, CLR types must match exactly with the mapped Property types. If no matching constructor is found, RECAP will throw an exception. It is recommended to use primary constructor syntax for result classes to avoid this problem.
+
+#### PCO Discovery
+
+Similar to entities, RECAP supports automatic reflective discovery of PCO classes. The following example shows how to discover and load all PCO classes in the current assembly:
+
+```csharp
+class MyDbContext : DbContext
+{
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        builder
+            // load entities as usual
+            .LoadReflectiveModels(EntityNamingPolicy.RequireExplicit, PropertyMappingPolicy.IgnoreImplicit)
+            // discover and load PCO definitions
+            .LoadReflectiveProcedures();
+    }
+}
+```
+
+As always, you can also opt to load PCO classes manually (without reflection):
+
+```csharp
+class MyDbContext : DbContext
+{
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        builder
+            // load entities as usual
+            .LoadModel<Person>()
+            .LoadModel<Child>()
+            // load PCO classes with corresponding I/O Containers manually 
+            .LoadProcedure<Addition, AdditionContainer>()
+            .LoadProcedure<GetPersonsByName, GetPersonsByNameContainer>();
+    }
+}
+```
+
+### Executing PCOs
+
+Once a PCO class has been defined and mapped, it can be used in a similar way as an entity. Instead of calling `Set<T>()` on the `DbContext`, you can call `Procedure<T>()` to get an invocable instance of the PCO.
+
+The following example shows how to invoke the `Addition` PCO:
+
+```csharp
+using (MyDbContext dbContext = new())
+{
+    int result = dbContext.Procedure<Addition>().Invoke(1, 2);
+    Console.WriteLine(result); // prints 3
+}
+```
+
+PCOs are transaction-aware, which means that they will automatically enlist in the current transaction if one exists. If no transaction exists, RECAP will not create a new transaction. This means that PCOs can be used in the same way as entities, and you can perform database operations using EF Core and PCOs in the same transaction:
+
+```csharp
+using MyDbContext dbContext = new();
+using IDbContextTransaction transaction = dbContext.Database.BeginTransaction();
+
+dbContext.Add(new Person { Name = "John" });
+dbContext.SaveChanges();
+
+IReadOnlyList<GetPersonsByNameResult> results = dbContext.Procedure<GetPersonsByName>()
+    .Invoke("John", out int _);
+Console.WriteLine(results.Count > 0); // prints True
+
+transaction.Commit(); // or transaction.Rollback();
+```
+
+You can also re-use the same PCO instance to invoke the procedure multiple times:
+
+```csharp
+using MyDbContext dbContext = new();
+IResultContainer<int> addition = dbContext.Procedure<Addition>();
+int result1 = addition.Invoke(1, 2);
+int result2 = addition.Invoke(3, 4);
+Console.WriteLine(result1); // prints 3
+Console.WriteLine(result2); // prints 7
+```
+
+> :warning: **Warning**
+> When re-using a PCO instance, you are re-using the internal Execution Context (state) of the PCO. This means that PCOs are not thread-safe. If you need to invoke a PCO from multiple threads, you must create a separate PCO instance using a separate `DbContext` instance for each thread. Similarly, do not re-use PCO instances across multiple transactions.

@@ -7,6 +7,11 @@
 public interface IResultContainer<TResult> where TResult : class
 {
     /// <summary>
+    /// The number of results in this container.
+    /// </summary>
+    int Count { get; }
+
+    /// <summary>
     /// Returns all result entities returned by the stored procedure.
     /// </summary>
     IReadOnlyList<TResult> AsCollection();
@@ -33,6 +38,9 @@ public readonly struct ResultCollection<TResult> : IResultContainer<TResult> whe
     {
         _results = results;
     }
+
+    /// <inheritdoc/>
+    public int Count => _results.Count;
 
     /// <inheritdoc/>
     public IReadOnlyList<TResult> AsCollection() => _results;
@@ -64,6 +72,9 @@ public readonly struct ResultElement<TResult> : IResultContainer<TResult> where 
     {
         _result = result;
     }
+
+    /// <inheritdoc/>
+    public int Count => _result is null ? 0 : 1;
 
     /// <inheritdoc/>
     public IReadOnlyList<TResult> AsCollection()
