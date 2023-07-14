@@ -1,10 +1,9 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
-using Wkg.EntityFrameworkCore.ProcedureMapping.Builder.ThrowHelpers;
 using Wkg.EntityFrameworkCore.ProcedureMapping.Compiler.Output;
 using Wkg.Reflection;
 
-namespace Wkg.EntityFrameworkCore.ProcedureMapping.Compiler.AccessorGeneration;
+namespace Wkg.EntityFrameworkCore.ProcedureMapping.Compiler.AccessorFactory;
 
 /// <summary>
 /// An <see cref="IAccessorBuilder"/> that uses expression trees to create parameter accessors.
@@ -43,7 +42,7 @@ internal readonly struct ExpressionTreeAccessorBuilder : IAccessorBuilder, IAcce
         _throwHelper = throwHelper;
         _ownerType = _pInfo.DeclaringType!;
     }
-    
+
     [Obsolete("Use factory method instead!", true)]
     public ExpressionTreeAccessorBuilder()
     {

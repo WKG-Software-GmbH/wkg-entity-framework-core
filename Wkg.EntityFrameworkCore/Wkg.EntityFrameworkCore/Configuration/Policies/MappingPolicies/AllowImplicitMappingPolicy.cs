@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace Wkg.EntityFrameworkCore.Configuration.Reflection.Policies.MappingPolicies;
+namespace Wkg.EntityFrameworkCore.Configuration.Policies.MappingPolicies;
 
 internal readonly struct AllowImplicitMappingPolicy : IMappingPolicy
 {

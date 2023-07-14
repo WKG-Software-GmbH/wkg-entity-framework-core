@@ -1,11 +1,12 @@
-﻿using Wkg.EntityFrameworkCore.Configuration.Reflection.Policies.NamingPolicies;
+﻿using Wkg.EntityFrameworkCore.Configuration.Policies.NamingPolicies;
+using Wkg.EntityFrameworkCore.Configuration.Reflection.Policies.NamingPolicies;
 
-namespace Wkg.EntityFrameworkCore.Configuration.Reflection.Policies;
+namespace Wkg.EntityFrameworkCore.Configuration.Policies;
 
 /// <summary>
 /// Provides a set of predefined <see cref="INamingPolicy"/> implementations.
 /// </summary>
-public static class EntityNamingPolicy
+public static class NamingPolicy
 {
     /// <summary>
     /// Allows implicit naming of database columns determined automatically from the corresponding property name via EF Core conventions.

@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata;
 using Wkg.EntityFrameworkCore.Extensions;
 
-namespace Wkg.EntityFrameworkCore.Configuration.Reflection.Policies.NamingPolicies;
+namespace Wkg.EntityFrameworkCore.Configuration.Policies.NamingPolicies;
 
 internal class RequireExplicitNamingPolicy : ExplicitNamingPolicy
 {

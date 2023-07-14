@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using Wkg.Extensions.Reflection;
 using Wkg.Logging;
+using Wkg.EntityFrameworkCore.Configuration.Policies.Discovery;
 
 namespace Wkg.EntityFrameworkCore.Configuration.Reflection;
 
@@ -18,9 +19,9 @@ internal class ReflectiveConnectionLoader : ReflectiveLoaderBase
     /// Loads and configures all <see cref="IReflectiveModelConnection{TConnection, TSource, TTarget}"/> implementations.
     /// </summary>
     /// <param name="builder">The <see cref="ModelBuilder"/> to configure.</param>
-    /// <param name="entityBuilders">The <see cref="EntityTypeBuilder"/>s for all mapped entities in the model.</param>
+    /// <param name="discoveryContext">The <see cref="IDiscoveryContext"/> that has been used for model discovery.</param>
     /// <param name="databaseEngineAttributeType">The type of the attribute that marks a model connection as being for a specific database engine. If <see langword="null"/>, all models will be loaded.</param>
-    public static void LoadAll(ModelBuilder builder, IReadOnlyDictionary<Type, EntityTypeBuilder> entityBuilders, Type? databaseEngineAttributeType)
+    public static void LoadAll(ModelBuilder builder, IDiscoveryContext discoveryContext, Type? databaseEngineAttributeType)
     {
         if (databaseEngineAttributeType is null)
         {
@@ -90,11 +91,11 @@ internal class ReflectiveConnectionLoader : ReflectiveLoaderBase
         {
             Log.WriteDiagnostic($"{nameof(ReflectiveConnectionLoader)} loading: {connection.Type.Name}.");
             // ensure that the entity types are configured
-            if (entityBuilders.TryGetValue(connection.TFrom, out EntityTypeBuilder? fromBuilder) is false)
+            if (discoveryContext.EntityBuilderCache.TryGetValue(connection.TFrom, out EntityTypeBuilder? fromBuilder) is false)
             {
                 throw new InvalidOperationException($"The entity type {connection.TFrom.Name} is not configured.");
             }
-            if (entityBuilders.TryGetValue(connection.TTo, out EntityTypeBuilder? toBuilder) is false)
+            if (discoveryContext.EntityBuilderCache.TryGetValue(connection.TTo, out EntityTypeBuilder? toBuilder) is false)
             {
                 throw new InvalidOperationException($"The entity type {connection.TTo.Name} is not configured.");
             }
@@ -109,6 +110,10 @@ internal class ReflectiveConnectionLoader : ReflectiveLoaderBase
             // invoke the Connect method with the two EntityTypeBuilder<T> instances
             connection.Connect!.Invoke(null, parameters);
             Log.WriteDiagnostic($"{nameof(ReflectiveConnectionLoader)} loaded: {connection.Type.Name}.");
+
+            // create an entity type builder for the connection entity and add it to the cache for policy validation
+            EntityTypeBuilder connectionBuilder = builder.Entity(connection.Type);
+            discoveryContext.EntityBuilderCache.Add(connection.Type, connectionBuilder);
         }
         Log.WriteInfo($"{nameof(ReflectiveConnectionLoader)} loaded {connections.Length} model connections.");
         Log.WriteInfo($"{nameof(ReflectiveConnectionLoader)} is exiting.");
