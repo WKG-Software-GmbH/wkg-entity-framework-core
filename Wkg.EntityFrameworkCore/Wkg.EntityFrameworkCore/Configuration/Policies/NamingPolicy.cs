@@ -1,5 +1,4 @@
 ﻿using Wkg.EntityFrameworkCore.Configuration.Policies.NamingPolicies;
-using Wkg.EntityFrameworkCore.Configuration.Reflection.Policies.NamingPolicies;
 
 namespace Wkg.EntityFrameworkCore.Configuration.Policies;
 

@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata;
-using Wkg.EntityFrameworkCore.Extensions;
 
 namespace Wkg.EntityFrameworkCore.Configuration.Policies.NamingPolicies;
 

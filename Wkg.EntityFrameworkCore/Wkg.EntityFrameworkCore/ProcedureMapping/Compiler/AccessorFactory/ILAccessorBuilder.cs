@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using System.Reflection.Emit;
-using System.Runtime.CompilerServices;
 using Wkg.EntityFrameworkCore.ProcedureMapping.Compiler.Output;
 using Wkg.Reflection;
 using Wkg.Reflection.Exceptions;
