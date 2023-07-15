@@ -37,7 +37,7 @@ Then, install the package by adding the following package reference to your proj
 ```
 
 > :warning: **Warning**
-> Replace `X.X.X` with the latest stable version available on the [nuget feed](https://baget.wkg.lan/packages/wkg/latest), where **the major version must match the major version of your targeted .NET runtime**.
+> Replace `X.X.X` with the latest stable version available on the [nuget feed](https://baget.wkg.lan/packages/wkg.entityframeworkcore/latest), where **the major version must match the major version of your targeted .NET runtime**.
 
 ## Conceptual Design and Usage
 

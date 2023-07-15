@@ -172,6 +172,9 @@ public class MyDbContext : DbContext
 }
 ```
 
+> :bulb: **Tip**
+> If you are targeting multiple databases (i.e., have multiple `DbContext` classes), you can use the `LoadReflectiveModels<TDatabaseEngineModelAttribute>()` extension method to only load entities that are decorated with the specified database engine attribute.
+
 ##### Manual Entity Registration
 
 Alternatively, entities can be configured manually by calling the `LoadModel<TEntity>()` extension method on the `ModelBuilder` instance in the `OnModelCreating` method of the `DbContext` class for each entity that needs to be configured. The following example shows how to configure the `Person` entity manually:
