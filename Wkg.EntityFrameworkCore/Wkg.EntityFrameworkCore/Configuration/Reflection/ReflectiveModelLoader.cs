@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using Wkg.Extensions.Reflection;
 using Wkg.Logging;
+using Wkg.EntityFrameworkCore.Configuration.Policies.Discovery;
 
 namespace Wkg.EntityFrameworkCore.Configuration.Reflection;
 
@@ -18,9 +19,10 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
     /// Loads and configures all <see cref="IReflectiveModelConfiguration{T}"/> implementations.
     /// </summary>
     /// <param name="builder">The <see cref="ModelBuilder"/> to configure.</param>
+    /// <param name="discoveryContext">The <see cref="IDiscoveryContext"/> to use for discovery.</param>
     /// <param name="databaseEngineAttributeType">The type of the attribute that marks a model as being for a specific database engine. If <see langword="null"/>, all models will be loaded.</param>
     /// <returns>A dictionary of the used <see cref="EntityTypeBuilder"/> instances keyed by the type of the entity.</returns>
-    public static IReadOnlyDictionary<Type, EntityTypeBuilder> LoadAll(ModelBuilder builder, Type? databaseEngineAttributeType)
+    public static void LoadAll(ModelBuilder builder, IDiscoveryContext discoveryContext, Type? databaseEngineAttributeType)
     {
         if (databaseEngineAttributeType is null)
         {
@@ -39,7 +41,6 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
             }
         }
         Log.WriteInfo($"{nameof(ReflectiveModelLoader)} is initializing.");
-        Dictionary<Type, EntityTypeBuilder> typeBuilderCache = new();
 
         ReflectiveEntity[] entities = AssembliesWithEntryPoint()
             // get all types in these assemblies
@@ -111,12 +112,11 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
             }
             // enforce policies
             EntityTypeBuilder entityTypeBuilder = (EntityTypeBuilder)entityTypeBuilderObj;
-            typeBuilderCache.Add(entity.Type, entityTypeBuilder);
+            discoveryContext.EntityBuilderCache.Add(entity.Type, entityTypeBuilder);
             Log.WriteDiagnostic($"{nameof(ReflectiveModelLoader)} loaded: {entity.Type.Name}.");
         }
         Log.WriteInfo($"{nameof(ReflectiveModelLoader)} loaded {entities.Length} models and {baseModelsLoaded} base model definitions.");
         Log.WriteInfo($"{nameof(ReflectiveModelLoader)} is exiting.");
-        return typeBuilderCache;
     }
 }
 

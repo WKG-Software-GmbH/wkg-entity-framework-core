@@ -7,7 +7,7 @@ stages:
 variables:
     PROJECT_FILE_PATH: "Wkg.EntityFrameworkCore/Wkg.EntityFrameworkCore/Wkg.EntityFrameworkCore.csproj"
     MAJOR_VERSION: "7"
-    MINOR_VERSION: "3"
+    MINOR_VERSION: "4"
 
 include:
     - project: 'wkg/gitlab-templates'

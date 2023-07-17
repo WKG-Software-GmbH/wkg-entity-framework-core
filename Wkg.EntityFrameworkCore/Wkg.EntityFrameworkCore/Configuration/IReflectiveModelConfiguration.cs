@@ -1,7 +1,7 @@
 ﻿using Wkg.EntityFrameworkCore.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Wkg.EntityFrameworkCore.Configuration.Reflection.Policies.NamingPolicies;
-using Wkg.EntityFrameworkCore.Configuration.Reflection.Policies.MappingPolicies;
+using Wkg.EntityFrameworkCore.Configuration.Policies.MappingPolicies;
+using Wkg.EntityFrameworkCore.Configuration.Policies.NamingPolicies;
 
 namespace Wkg.EntityFrameworkCore.Configuration;
 

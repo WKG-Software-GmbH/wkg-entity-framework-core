@@ -20,7 +20,7 @@ public abstract class ReflectiveLoaderBase
     protected static void AssertLoadOnce(ModelBuilder? builder, ref object? sentinel)
     {
         _ = builder ?? throw new ArgumentNullException(nameof(builder));
-        _ = sentinel ?? throw new InvalidOperationException("Reflective procedures have already been loaded.");
+        _ = sentinel ?? throw new InvalidOperationException("ORM model has already been loaded.");
         sentinel = null;
     }
 

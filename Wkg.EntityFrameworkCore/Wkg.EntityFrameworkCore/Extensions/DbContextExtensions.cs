@@ -16,6 +16,6 @@ public static class DbContextExtensions
     /// <param name="context">The database context to be used.</param>
     /// <returns>The stored procedure instance.</returns>
     public static T Procedure<T>(this DbContext context) where T : IStoredProcedure, new() => 
-        ProcedureCache.GetProcedure<T>(context.Database);
+        ProcedureRegistry.GetProcedure<T>(context.Database);
 }
 

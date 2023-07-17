@@ -1,5 +1,5 @@
 ﻿using Wkg.EntityFrameworkCore.ProcedureMapping.Builder;
-using Wkg.EntityFrameworkCore.ProcedureMapping.Compiler.AccessorGeneration;
+using Wkg.EntityFrameworkCore.ProcedureMapping.Compiler.AccessorFactory;
 using Wkg.EntityFrameworkCore.ProcedureMapping.Compiler.Output;
 
 namespace Wkg.EntityFrameworkCore.ProcedureMapping.Compiler;

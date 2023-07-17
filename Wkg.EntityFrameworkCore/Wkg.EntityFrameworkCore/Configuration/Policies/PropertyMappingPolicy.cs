@@ -1,6 +1,6 @@
-﻿using Wkg.EntityFrameworkCore.Configuration.Reflection.Policies.MappingPolicies;
+﻿using Wkg.EntityFrameworkCore.Configuration.Policies.MappingPolicies;
 
-namespace Wkg.EntityFrameworkCore.Configuration.Reflection.Policies;
+namespace Wkg.EntityFrameworkCore.Configuration.Policies;
 
 /// <summary>
 /// Provides a set of default <see cref="IMappingPolicy"/> implementations.

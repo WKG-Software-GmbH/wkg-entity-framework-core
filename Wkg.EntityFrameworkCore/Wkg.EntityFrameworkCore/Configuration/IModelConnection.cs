@@ -23,6 +23,9 @@ public interface IModelConnection<TConnection, TLeft, TRight>
     /// <summary>
     /// Configures the connection entity.
     /// </summary>
+    /// <remarks>
+    /// This method should be passed to <see cref="CollectionCollectionBuilder{TLeftEntity, TRightEntity}.UsingEntity{TJoinEntity}(Func{EntityTypeBuilder{TJoinEntity}, ReferenceCollectionBuilder{TLeftEntity, TJoinEntity}}, Func{EntityTypeBuilder{TJoinEntity}, ReferenceCollectionBuilder{TRightEntity, TJoinEntity}}, Action{EntityTypeBuilder{TJoinEntity}})"/> to configure the connection entity in the <see cref="Connect(EntityTypeBuilder{TLeft}, EntityTypeBuilder{TRight})"/> method.
+    /// </remarks>
     /// <param name="self">The connection entity.</param>
     static abstract void ConfigureConnection(EntityTypeBuilder<TConnection> self);
 }

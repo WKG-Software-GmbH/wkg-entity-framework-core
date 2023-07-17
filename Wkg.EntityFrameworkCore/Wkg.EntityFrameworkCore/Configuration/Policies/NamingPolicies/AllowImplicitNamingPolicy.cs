@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace Wkg.EntityFrameworkCore.Configuration.Reflection.Policies.NamingPolicies;
+namespace Wkg.EntityFrameworkCore.Configuration.Policies.NamingPolicies;
 
 internal readonly struct AllowImplicitNamingPolicy : INamingPolicy
 {

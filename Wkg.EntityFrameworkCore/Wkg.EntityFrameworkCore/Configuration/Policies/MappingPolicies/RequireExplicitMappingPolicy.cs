@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Wkg.EntityFrameworkCore.Configuration.Reflection.Policies.MappingPolicies;
+namespace Wkg.EntityFrameworkCore.Configuration.Policies.MappingPolicies;
 
 internal readonly struct RequireExplicitMappingPolicy : IMappingPolicy
 {

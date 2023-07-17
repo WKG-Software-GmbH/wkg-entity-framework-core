@@ -3,13 +3,13 @@ using Wkg.EntityFrameworkCore.ProcedureMapping.Compiler.Output;
 
 namespace Wkg.EntityFrameworkCore.ProcedureMapping.Runtime;
 
-internal static class ProcedureCache
+internal static class ProcedureRegistry
 {
-    public static Dictionary<Type, ICompiledProcedure> RegisteredProcedures { get; } = new();
+    public static Dictionary<Type, ICompiledProcedure> Procedures { get; } = new();
 
     public static T GetProcedure<T>(DatabaseFacade database) where T : IStoredProcedure, new()
     {
-        if (RegisteredProcedures.TryGetValue(typeof(T), out ICompiledProcedure? compiledProcedure))
+        if (Procedures.TryGetValue(typeof(T), out ICompiledProcedure? compiledProcedure))
         {
             T instance = new()
             {

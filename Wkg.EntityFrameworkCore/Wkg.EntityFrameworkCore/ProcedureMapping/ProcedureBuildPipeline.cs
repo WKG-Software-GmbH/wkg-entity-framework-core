@@ -36,6 +36,6 @@ public abstract class ProcedureBuildPipeline
                             .Compile())
                         .ToArray()));
 
-        ProcedureCache.RegisteredProcedures.TryAdd(compiledProcedure.ProcedureType, compiledProcedure);
+        ProcedureRegistry.Procedures.TryAdd(compiledProcedure.ProcedureType, compiledProcedure);
     }
 }

@@ -1,8 +1,7 @@
 ﻿using System.Reflection;
-using Wkg.EntityFrameworkCore.ProcedureMapping.Builder.ThrowHelpers;
 using Wkg.EntityFrameworkCore.ProcedureMapping.Compiler.Output;
 
-namespace Wkg.EntityFrameworkCore.ProcedureMapping.Compiler.AccessorGeneration;
+namespace Wkg.EntityFrameworkCore.ProcedureMapping.Compiler.AccessorFactory;
 
 /// <summary>
 /// Represents a builder to generate <see cref="PropertyGetter"/> and <see cref="PropertySetter"/> delegates for a given property.

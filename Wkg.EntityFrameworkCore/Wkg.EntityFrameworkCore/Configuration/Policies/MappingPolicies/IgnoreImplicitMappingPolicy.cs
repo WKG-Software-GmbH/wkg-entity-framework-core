@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata;
 using Wkg.Logging;
 
-namespace Wkg.EntityFrameworkCore.Configuration.Reflection.Policies.MappingPolicies;
+namespace Wkg.EntityFrameworkCore.Configuration.Policies.MappingPolicies;
 
 internal readonly struct IgnoreImplicitMappingPolicy : IMappingPolicy
 {

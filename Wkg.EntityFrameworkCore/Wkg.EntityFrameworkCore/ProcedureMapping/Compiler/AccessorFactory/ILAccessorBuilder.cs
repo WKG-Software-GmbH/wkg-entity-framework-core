@@ -1,12 +1,10 @@
 ﻿using System.Reflection;
 using System.Reflection.Emit;
-using System.Runtime.CompilerServices;
-using Wkg.EntityFrameworkCore.ProcedureMapping.Builder.ThrowHelpers;
 using Wkg.EntityFrameworkCore.ProcedureMapping.Compiler.Output;
 using Wkg.Reflection;
 using Wkg.Reflection.Exceptions;
 
-namespace Wkg.EntityFrameworkCore.ProcedureMapping.Compiler.AccessorGeneration;
+namespace Wkg.EntityFrameworkCore.ProcedureMapping.Compiler.AccessorFactory;
 
 /// <summary>
 /// An <see cref="IAccessorBuilder"/> that uses IL code generation to create parameter accessors.
@@ -184,7 +182,7 @@ internal readonly struct ILAccessorBuilder : IAccessorBuilder, IAccessorBuilderF
 
             // push argument address (ByRef) of the value onto the stack (second argument, index 1, managed ByRef)
             generator.Emit(OpCodes.Ldarga_S, 1);
-            
+
             // invoke Unsafe.As<object, TargetType>(ref value)
             generator.Emit(OpCodes.Call, unsafeAsPropertyType);
 

@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics;
 
-namespace Wkg.EntityFrameworkCore.ProcedureMapping.Builder.ThrowHelpers;
+namespace Wkg.EntityFrameworkCore;
 
 /// <summary>
 /// An interface that can be used to throw exceptions.
