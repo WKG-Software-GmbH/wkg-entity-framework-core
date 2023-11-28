@@ -11,7 +11,7 @@ variables:
 
 include:
     - project: 'wkg/gitlab-templates'
-      ref: 'v1.1.8'
+      ref: 'v1.1.11'
       file:
           - '/jobs/build_dotnet_8.yml'
           - '/jobs/test_dotnet_8.yml'
