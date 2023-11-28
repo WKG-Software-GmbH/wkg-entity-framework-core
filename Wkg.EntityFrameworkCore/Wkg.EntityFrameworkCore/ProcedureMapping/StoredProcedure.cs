@@ -2,7 +2,7 @@
 using System.Data.Common;
 using Wkg.EntityFrameworkCore.ProcedureMapping.ResultCollections;
 using Wkg.EntityFrameworkCore.ProcedureMapping.Runtime;
-using Wkg.Extensions.Common;
+using Wkg.Common.Extensions;
 
 namespace Wkg.EntityFrameworkCore.ProcedureMapping;
 
