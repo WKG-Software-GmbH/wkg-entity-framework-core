@@ -1,30 +1,24 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Wkg.Common.Extensions;
 using Wkg.EntityFrameworkCore.Configuration.Policies.MappingPolicies;
 using Wkg.EntityFrameworkCore.Configuration.Policies.NamingPolicies;
-using Wkg.Extensions.Common;
 using Wkg.Logging;
 
 namespace Wkg.EntityFrameworkCore.Configuration.Policies.Discovery;
 
 /// <inheritdoc cref="IDiscoveryContext"/>
-internal class EntityDiscoveryContext : IDiscoveryContext
+/// <summary>
+/// Initializes a new instance of the <see cref="EntityDiscoveryContext"/> class using the specified <paramref name="namingPolicy"/> and <paramref name="mappingPolicy"/>.
+/// </summary>
+/// <param name="namingPolicy">The <see cref="INamingPolicy"/> to use. If <see langword="null"/>, <see cref="NamingPolicy.RequireExplicit"/> will be used.</param>
+/// <param name="mappingPolicy">The <see cref="IMappingPolicy"/> to use. If <see langword="null"/>, <see cref="PropertyMappingPolicy.IgnoreImplicit"/> will be used.</param>
+internal class EntityDiscoveryContext(INamingPolicy? namingPolicy, IMappingPolicy? mappingPolicy) : IDiscoveryContext
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="EntityDiscoveryContext"/> class using the specified <paramref name="namingPolicy"/> and <paramref name="mappingPolicy"/>.
-    /// </summary>
-    /// <param name="namingPolicy">The <see cref="INamingPolicy"/> to use. If <see langword="null"/>, <see cref="NamingPolicy.RequireExplicit"/> will be used.</param>
-    /// <param name="mappingPolicy">The <see cref="IMappingPolicy"/> to use. If <see langword="null"/>, <see cref="PropertyMappingPolicy.IgnoreImplicit"/> will be used.</param>
-    public EntityDiscoveryContext(INamingPolicy? namingPolicy, IMappingPolicy? mappingPolicy)
-    {
-        NamingPolicy = namingPolicy ?? Policies.NamingPolicy.RequireExplicit;
-        MappingPolicy = mappingPolicy ?? PropertyMappingPolicy.IgnoreImplicit;
-    }
+    /// <inheritdoc/>
+    public INamingPolicy NamingPolicy { get; } = namingPolicy ?? Policies.NamingPolicy.RequireExplicit;
 
     /// <inheritdoc/>
-    public INamingPolicy NamingPolicy { get; }
-
-    /// <inheritdoc/>
-    public IMappingPolicy MappingPolicy { get; }
+    public IMappingPolicy MappingPolicy { get; } = mappingPolicy ?? PropertyMappingPolicy.IgnoreImplicit;
 
     IDictionary<Type, EntityTypeBuilder> IDiscoveryContext.EntityBuilderCache { get; } = new Dictionary<Type, EntityTypeBuilder>();
 

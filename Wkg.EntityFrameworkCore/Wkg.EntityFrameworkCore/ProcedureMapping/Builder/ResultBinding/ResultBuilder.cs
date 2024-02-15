@@ -1,7 +1,7 @@
 ﻿using System.Data.Common;
 using Wkg.EntityFrameworkCore.ProcedureMapping.Builder.ThrowHelpers;
 using Wkg.EntityFrameworkCore.ProcedureMapping.Compiler.ResultBinding;
-using Wkg.Extensions.Common;
+using Wkg.Common.Extensions;
 
 namespace Wkg.EntityFrameworkCore.ProcedureMapping.Builder.ResultBinding;
 
@@ -62,7 +62,7 @@ public abstract class ResultBuilder<TResult, TDataReader, TResultBuilderImpl> : 
     /// <summary>
     /// The <see cref="IResultColumnBuilder"/> collection to be used when building the result from the <typeparamref name="TDataReader"/>.
     /// </summary>
-    protected List<IResultColumnBuilder> ColumnBuilders { get; } = new();
+    protected List<IResultColumnBuilder> ColumnBuilders { get; } = [];
 
     IReadOnlyCollection<IResultColumnBuilder> IResultBuilder<TDataReader>.ColumnBuilders => ColumnBuilders;
 

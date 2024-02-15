@@ -13,7 +13,7 @@ internal class RequireExplicitNamingPolicy : ExplicitNamingPolicy
         IMutableProperty[] implicitProperties = GetImplicitProperties(entityType);
         if (implicitProperties.Length > 0)
         {
-            List<Exception> invalidPropertyExceptions = new();
+            List<Exception> invalidPropertyExceptions = [];
             foreach (IMutableProperty implicitProperty in implicitProperties)
             {
                 invalidPropertyExceptions.Add(new ArgumentException($"Property {implicitProperty.Name} has no explicit column name configured. Use HasColumnName() to specify a column name."));

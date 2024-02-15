@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Wkg.EntityFrameworkCore.ProcedureMapping.Builder.ThrowHelpers;
 using Wkg.EntityFrameworkCore.ProcedureMapping.Compiler.ResultBinding;
-using Wkg.Extensions.Common;
+using Wkg.Common.Extensions;
 
 namespace Wkg.EntityFrameworkCore.ProcedureMapping.Builder.ResultBinding;
 

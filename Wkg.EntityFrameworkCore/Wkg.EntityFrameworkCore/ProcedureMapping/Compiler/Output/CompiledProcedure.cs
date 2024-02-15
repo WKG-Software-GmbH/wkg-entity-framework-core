@@ -22,19 +22,28 @@ public interface ICompiledProcedure
 /// Represents a stateless compiled stored procedure that can be used to create a stateful <see cref="IProcedureExecutionContext"/>.
 /// </summary>
 /// <typeparam name="TCompiledParameter">The concrete type of the compiled parameters.</typeparam>
-public sealed class CompiledProcedure<TCompiledParameter> : ICompiledProcedure where TCompiledParameter : struct, ICompiledParameter
+/// <remarks>
+/// Creates a new <see cref="CompiledProcedure{TCompiledParameter}"/> instance.
+/// </remarks>
+/// <param name="procedureName">The name of the stored procedure.</param>
+/// <param name="isFunction">Indicates whether the stored procedure is a database function.</param>
+/// <param name="parameters">The compiled parameters of this stored procedure.</param>
+/// <param name="procedureType">The CLR type of the command object managing this procedure.</param>
+/// <param name="compiledResult">The compiled result returned by this stored procedure.</param>
+public sealed class CompiledProcedure<TCompiledParameter>(string procedureName, bool isFunction, TCompiledParameter[] parameters, Type procedureType, CompiledResult? compiledResult) 
+    : ICompiledProcedure where TCompiledParameter : struct, ICompiledParameter
 {
-    private readonly TCompiledParameter[] _compiledParameters;
+    private readonly TCompiledParameter[] _compiledParameters = parameters;
 
     /// <summary>
     /// The name of the stored procedure.
     /// </summary>
-    internal string ProcedureName { get; }
+    internal string ProcedureName { get; } = procedureName;
 
     /// <summary>
     /// Indicates whether the stored procedure is a database function.
     /// </summary>
-    internal bool IsFunction { get; }
+    internal bool IsFunction { get; } = isFunction;
 
     /// <summary>
     /// The compiled parameters of this stored procedure.
@@ -49,28 +58,11 @@ public sealed class CompiledProcedure<TCompiledParameter> : ICompiledProcedure w
     /// <summary>
     /// The compiled result returned by this stored procedure.
     /// </summary>
-    internal CompiledResult? CompiledResult { get; } 
+    internal CompiledResult? CompiledResult { get; } = compiledResult;
 
     Type ICompiledProcedure.ProcedureType => _procedureType;
 
-    private readonly Type _procedureType;
-
-    /// <summary>
-    /// Creates a new <see cref="CompiledProcedure{TCompiledParameter}"/> instance.
-    /// </summary>
-    /// <param name="procedureName">The name of the stored procedure.</param>
-    /// <param name="isFunction">Indicates whether the stored procedure is a database function.</param>
-    /// <param name="parameters">The compiled parameters of this stored procedure.</param>
-    /// <param name="procedureType">The CLR type of the command object managing this procedure.</param>
-    /// <param name="compiledResult">The compiled result returned by this stored procedure.</param>
-    public CompiledProcedure(string procedureName, bool isFunction, TCompiledParameter[] parameters, Type procedureType, CompiledResult? compiledResult)
-    {
-        _compiledParameters = parameters;
-        ProcedureName = procedureName;
-        IsFunction = isFunction;
-        _procedureType = procedureType;
-        CompiledResult = compiledResult;
-    }
+    private readonly Type _procedureType = procedureType;
 
     /// <summary>
     /// Creates a new <see cref="IProcedureExecutionContext"/> for this procedure.

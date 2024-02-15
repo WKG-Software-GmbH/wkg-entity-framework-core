@@ -5,7 +5,7 @@ using Wkg.EntityFrameworkCore.ProcedureMapping.Builder.ResultBinding;
 using Wkg.EntityFrameworkCore.ProcedureMapping.Builder.ThrowHelpers;
 using Wkg.EntityFrameworkCore.ProcedureMapping.Compiler;
 using Wkg.EntityFrameworkCore.ProcedureMapping.Compiler.Output;
-using Wkg.Extensions.Common;
+using Wkg.Common.Extensions;
 using Wkg.Extensions.Reflection;
 
 namespace Wkg.EntityFrameworkCore.ProcedureMapping.Builder;
@@ -94,7 +94,7 @@ public abstract class ProcedureBuilder<TProcedure, TIOContainer, TCompiledParame
     bool IProcedureBuilder.IsFunction => IsFunctionValue;
 
     /// <inheritdoc cref="IProcedureBuilder{TCompiledParameter, TDataReader}.ParameterBuilders"/>
-    protected List<IParameterBuilder<TCompiledParameter>> ParameterBuilders { get; } = new();
+    protected List<IParameterBuilder<TCompiledParameter>> ParameterBuilders { get; } = [];
 
     IReadOnlyCollection<IParameterBuilder<TCompiledParameter>> IProcedureBuilder<TCompiledParameter, TDataReader>.ParameterBuilders => ParameterBuilders;
 

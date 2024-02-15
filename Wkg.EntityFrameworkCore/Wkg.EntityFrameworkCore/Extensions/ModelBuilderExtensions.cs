@@ -99,7 +99,7 @@ public static class ModelBuilderExtensions
     private static ModelBuilder LoadReflectiveModelsInternal(this ModelBuilder builder, INamingPolicy? namingPolicy, IMappingPolicy? mappingPolicy, Type? dbEngineModelAttributeType)
     {
         _ = builder ?? throw new ArgumentNullException(nameof(builder));
-        IDiscoveryContext discoveryContext = new EntityDiscoveryContext(namingPolicy, mappingPolicy);
+        EntityDiscoveryContext discoveryContext = new(namingPolicy, mappingPolicy);
         ReflectiveModelLoader.LoadAll(builder, discoveryContext, dbEngineModelAttributeType);
         ReflectiveConnectionLoader.LoadAll(builder, discoveryContext, dbEngineModelAttributeType);
         discoveryContext.AuditPolicies();

@@ -1,1 +1,1 @@
-﻿global using static Wkg.SyntacticSugar;
+﻿global using static Wkg.Common.SyntacticSugar;
