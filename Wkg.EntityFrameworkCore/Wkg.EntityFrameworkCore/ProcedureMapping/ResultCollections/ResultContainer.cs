@@ -26,18 +26,13 @@ public interface IResultContainer<TResult> where TResult : class
 /// Represents a collection of result entites returned by a stored procedure.
 /// </summary>
 /// <typeparam name="TResult">The CLR type of the result entity representing a single row of the result set.</typeparam>
-public readonly struct ResultCollection<TResult> : IResultContainer<TResult> where TResult : class
+/// <remarks>
+/// Creates a new <see cref="ResultCollection{TResult}"/> instance.
+/// </remarks>
+/// <param name="results">The result entities returned by the stored procedure.</param>
+public readonly struct ResultCollection<TResult>(IReadOnlyList<TResult> results) : IResultContainer<TResult> where TResult : class
 {
-    private readonly IReadOnlyList<TResult> _results;
-
-    /// <summary>
-    /// Creates a new <see cref="ResultCollection{TResult}"/> instance.
-    /// </summary>
-    /// <param name="results">The result entities returned by the stored procedure.</param>
-    public ResultCollection(IReadOnlyList<TResult> results)
-    {
-        _results = results;
-    }
+    private readonly IReadOnlyList<TResult> _results = results;
 
     /// <inheritdoc/>
     public int Count => _results.Count;
@@ -60,18 +55,13 @@ public readonly struct ResultCollection<TResult> : IResultContainer<TResult> whe
 /// Represents a single result entity returned by a stored procedure.
 /// </summary>
 /// <typeparam name="TResult">The CLR type of the result entity representing a single row of the result set.</typeparam>
-public readonly struct ResultElement<TResult> : IResultContainer<TResult> where TResult : class
+/// <remarks>
+/// Creates a new <see cref="ResultElement{TResult}"/> instance.
+/// </remarks>
+/// <param name="result">The result entity returned by the stored procedure.</param>
+public readonly struct ResultElement<TResult>(TResult? result) : IResultContainer<TResult> where TResult : class
 {
-    private readonly TResult? _result;
-
-    /// <summary>
-    /// Creates a new <see cref="ResultElement{TResult}"/> instance.
-    /// </summary>
-    /// <param name="result">The result entity returned by the stored procedure.</param>
-    public ResultElement(TResult? result)
-    {
-        _result = result;
-    }
+    private readonly TResult? _result = result;
 
     /// <inheritdoc/>
     public int Count => _result is null ? 0 : 1;

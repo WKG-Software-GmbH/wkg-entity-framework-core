@@ -5,7 +5,8 @@ namespace Wkg.EntityFrameworkCore.ProcedureMapping.Runtime;
 
 internal static class ProcedureRegistry
 {
-    public static Dictionary<Type, ICompiledProcedure> Procedures { get; } = new();
+    // TODO: use frozen dictionary
+    public static Dictionary<Type, ICompiledProcedure> Procedures { get; } = [];
 
     public static T GetProcedure<T>(DatabaseFacade database) where T : IStoredProcedure, new()
     {

@@ -92,7 +92,7 @@ public abstract class ReflectiveLoaderBase
                 2,                                                                      // number of generic type arguments
                 BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly,  // binding flags
                 null,                                                                   // binder (null = default)
-                new Type[] { typeof(ModelBuilder) },                                    // parameter types
+                [typeof(ModelBuilder)],                                                 // parameter types
                 null                                                                    // modifiers (null = default)
             );
             // make the method generic

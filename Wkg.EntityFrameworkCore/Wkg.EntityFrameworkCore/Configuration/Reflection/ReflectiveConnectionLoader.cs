@@ -13,7 +13,7 @@ namespace Wkg.EntityFrameworkCore.Configuration.Reflection;
 internal class ReflectiveConnectionLoader : ReflectiveLoaderBase
 {
     private static object? _reflectiveConnectionLoaderSentinel = new();
-    private static readonly HashSet<Type> _loadedDatabaseEngines = new();
+    private static readonly HashSet<Type> _loadedDatabaseEngines = [];
 
     /// <summary>
     /// Loads and configures all <see cref="IReflectiveModelConnection{TConnection, TSource, TTarget}"/> implementations.
@@ -74,11 +74,10 @@ internal class ReflectiveConnectionLoader : ReflectiveLoaderBase
                 (
                     nameof(ModelConnectionInfoForReflection_DontChange.Connect),
                     BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly,
-                    new Type[] 
-                    { 
+                    [ 
                         typeof(EntityTypeBuilder<>).MakeGenericType(type.TypeArgs[1]), 
                         typeof(EntityTypeBuilder<>).MakeGenericType(type.TypeArgs[2]) 
-                    })
+                    ])
                 ))
             .Where(connection => connection.Connect is not null)
             .ToArray();

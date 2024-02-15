@@ -45,7 +45,7 @@ internal sealed class ProcedureExecutionContext<TCompiledParameter> : IProcedure
         // allocate local array for DbParameters for ADO.NET call
         DbParameters = CompiledProcedure.ParameterCount > 0
             ? new DbParameter?[CompiledProcedure.ParameterCount]
-            : Array.Empty<DbParameter>();
+            : [];
     }
 
     /// <summary>
@@ -198,7 +198,7 @@ internal sealed class ProcedureExecutionContext<TCompiledParameter> : IProcedure
             cmd.Parameters.Add(parameter!);
         }
         using DbDataReader reader = cmd.ExecuteReader();
-        List<TResult> results = new();
+        List<TResult> results = [];
         while (reader.Read())
         {
             object rawResult = CompiledProcedure.CompiledResult!.ReadFrom(reader);

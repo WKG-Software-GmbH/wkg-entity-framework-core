@@ -13,7 +13,7 @@ namespace Wkg.EntityFrameworkCore.Configuration.Reflection;
 internal class ReflectiveModelLoader : ReflectiveLoaderBase
 {
     private static object? _reflectiveModelLoaderSentinel = new();
-    private static readonly HashSet<Type> _loadedDatabaseEngines = new();
+    private static readonly HashSet<Type> _loadedDatabaseEngines = [];
 
     /// <summary>
     /// Loads and configures all <see cref="IReflectiveModelConfiguration{T}"/> implementations.

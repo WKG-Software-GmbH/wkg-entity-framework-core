@@ -71,7 +71,7 @@ public abstract class ResultColumnCompiler<TBuilder, TDbDataReader>
                     .MakeGenericType(compilerSettings.ReaderResultType));
                 notNullExpression = Expression.New(typeof(Nullable<>)
                     .MakeGenericType(compilerSettings.ReaderResultType)
-                        .GetConstructor(new[] { compilerSettings.ReaderResultType })!, valueExpression);
+                        .GetConstructor([compilerSettings.ReaderResultType])!, valueExpression);
             }
             else
             {

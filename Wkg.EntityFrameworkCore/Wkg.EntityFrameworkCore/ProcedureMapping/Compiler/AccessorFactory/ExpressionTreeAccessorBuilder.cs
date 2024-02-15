@@ -14,7 +14,7 @@ internal readonly struct ExpressionTreeAccessorBuilder : IAccessorBuilder, IAcce
     /// <summary>
     /// The argument types for the field setter delegate <see cref="FieldInfo.SetValue(object?, object?)"/>, cached for performance (read-only, so thread safe)
     /// </summary>
-    private static readonly Type[] _fieldSetValueParameterTypes = new Type[] { typeof(object), typeof(object) };
+    private static readonly Type[] _fieldSetValueParameterTypes = [typeof(object), typeof(object)];
 
     /// <summary>
     /// The property info of the property this accessor builder is for
