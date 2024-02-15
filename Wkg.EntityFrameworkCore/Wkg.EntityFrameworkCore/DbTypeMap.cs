@@ -1,4 +1,6 @@
-﻿namespace Wkg.EntityFrameworkCore;
+﻿using System.Collections.Frozen;
+
+namespace Wkg.EntityFrameworkCore;
 
 /// <summary>
 /// A base class for mapping CLR types to database types.
@@ -9,7 +11,7 @@ public abstract class DbTypeMap<TDbType> where TDbType : Enum
     /// <summary>
     /// A dictionary mapping CLR types to database types.
     /// </summary>
-    protected abstract Dictionary<Type, TDbType> TypeMap { get; }
+    protected abstract FrozenDictionary<Type, TDbType> TypeMap { get; }
 
     /// <summary>
     /// Gets the database type for the given CLR type or <see langword="null"/> if no known mapping exists.
