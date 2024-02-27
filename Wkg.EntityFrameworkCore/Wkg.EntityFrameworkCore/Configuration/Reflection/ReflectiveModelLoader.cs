@@ -42,9 +42,9 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
         }
         Log.WriteInfo($"{nameof(ReflectiveModelLoader)} is initializing.");
 
-        ReflectiveEntity[] entities = AssembliesWithEntryPoint()
+        ReflectiveEntity[] entities = GetClientAssemblies()
             // get all types in these assemblies
-            .SelectMany(asm => asm.GetTypes()
+            .SelectMany(asm => asm.GetExportedTypes()
                 .Where(type =>
                     // only keep classes
                     type.IsClass
@@ -62,7 +62,7 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
                 (
                     nameof(ModelConfigInfoForReflection_DontChange.Configure),
                     BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly,
-                    new Type[] { typeof(EntityTypeBuilder<>).MakeGenericType(type) })
+                    [typeof(EntityTypeBuilder<>).MakeGenericType(type)])
                 ))
             .Where(entity => entity.Configure is not null)
             .ToArray();
