@@ -110,7 +110,7 @@ public static class ModelBuilderExtensions
     /// Models implementing <see cref="IReflectiveModelConfiguration{T}"/> should not be loaded explicitly using <see cref="LoadModel{TModel}(ModelBuilder, IDiscoveryContext)"/>.
     /// </para>
     /// </remarks>
-    public static ModelBuilder LoadReflectiveModels(this ModelBuilder builder, INamingPolicy? namingPolicy = null, IMappingPolicy? mappingPolicy = null, string[]? targetAssemblies) =>
+    public static ModelBuilder LoadReflectiveModels(this ModelBuilder builder, string[]? targetAssemblies, INamingPolicy? namingPolicy = null, IMappingPolicy? mappingPolicy = null) =>
         LoadReflectiveModelsInternal(builder, namingPolicy, mappingPolicy, null, targetAssemblies);
 
     private static ModelBuilder LoadReflectiveModelsInternal(this ModelBuilder builder, INamingPolicy? namingPolicy, IMappingPolicy? mappingPolicy, Type? dbEngineModelAttributeType, string[]? targetAssemblies)
