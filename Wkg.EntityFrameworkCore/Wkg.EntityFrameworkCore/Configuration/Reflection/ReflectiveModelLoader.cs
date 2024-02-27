@@ -42,7 +42,7 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
         }
         Log.WriteInfo($"{nameof(ReflectiveModelLoader)} is initializing.");
 
-        ReflectiveEntity[] entities = GetClientAssemblies()
+        ReflectiveEntity[] entities = AssembliesWithEntryPoint()
             // get all types in these assemblies
             .SelectMany(asm => asm.GetExportedTypes()
                 .Where(type =>
@@ -76,7 +76,7 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
         {
             Log.WriteDiagnostic($"{nameof(ReflectiveModelLoader)} loading: {entity.Type.Name}.");
             // get the generic Entity method
-            MethodInfo? entityTypeBuilderFactory = typeof(ModelBuilder).GetMethod(nameof(ModelBuilder.Entity), 1, Array.Empty<Type>());
+            MethodInfo? entityTypeBuilderFactory = typeof(ModelBuilder).GetMethod(nameof(ModelBuilder.Entity), 1, []);
             // make it generic
             MethodInfo genericEntityTypeBuilderFactory = entityTypeBuilderFactory!.MakeGenericMethod(entity.Type);
             // invoke it to create an EntityTypeBuilder<T> where T matches the entity

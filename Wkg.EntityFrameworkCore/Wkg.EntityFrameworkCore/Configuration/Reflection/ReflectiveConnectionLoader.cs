@@ -42,7 +42,7 @@ internal class ReflectiveConnectionLoader : ReflectiveLoaderBase
 
         Log.WriteInfo($"{nameof(ReflectiveConnectionLoader)} is initializing.");
 
-        ReflectiveConnection[] connections = GetClientAssemblies()
+        ReflectiveConnection[] connections = AssembliesWithEntryPoint()
             // get all types in these assemblies
             .SelectMany(asm => asm.GetTypes()
                 .Where(type =>

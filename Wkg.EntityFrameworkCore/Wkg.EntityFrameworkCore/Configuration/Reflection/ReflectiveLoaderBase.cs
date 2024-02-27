@@ -28,12 +28,12 @@ public abstract class ReflectiveLoaderBase
     /// Gets all assemblies with an entry point.
     /// </summary>
     /// <returns>The assemblies with an entry point.</returns>
-    protected static IEnumerable<Assembly> GetClientAssemblies() =>
+    protected static IEnumerable<Assembly> AssembliesWithEntryPoint() =>
         AppDomain.CurrentDomain
             // get all assemblies
             .GetAssemblies()
-            // filter out system and microsoft assemblies
-            .Where(asm => asm.FullName is string name && !name.StartsWith(nameof(System)) && !name.StartsWith(nameof(Microsoft)));
+            // only keep assemblies that are not libraries
+            .Where(asm => asm.EntryPoint is not null);
 
     /// <summary>
     /// Loads all procedures that implement the specified reflective interface.
@@ -50,7 +50,7 @@ public abstract class ReflectiveLoaderBase
     protected static void LoadAllProceduresInternal(Type storedProcedureInterface, Type storedProcedure, Type reflectiveInterface, Type modelBuilderExtensionsType, string loadProcedureMethodName, ModelBuilder builder)
     {
         Log.WriteInfo($"Loading all procedures implementing {storedProcedureInterface.Name}.");
-        ReflectiveProcedure[] entities = GetClientAssemblies()
+        ReflectiveProcedure[] entities = AssembliesWithEntryPoint()
             // get all types in these assemblies
             .SelectMany(asm => asm.GetTypes()
                 .Where(type =>
