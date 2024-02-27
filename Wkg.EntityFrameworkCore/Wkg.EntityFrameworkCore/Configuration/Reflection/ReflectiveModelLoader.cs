@@ -22,7 +22,7 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
     /// <param name="discoveryContext">The <see cref="IDiscoveryContext"/> to use for discovery.</param>
     /// <param name="databaseEngineAttributeType">The type of the attribute that marks a model as being for a specific database engine. If <see langword="null"/>, all models will be loaded.</param>
     /// <returns>A dictionary of the used <see cref="EntityTypeBuilder"/> instances keyed by the type of the entity.</returns>
-    public static void LoadAll(ModelBuilder builder, IDiscoveryContext discoveryContext, Type? databaseEngineAttributeType)
+    public static void LoadAll(ModelBuilder builder, IDiscoveryContext discoveryContext, Type? databaseEngineAttributeType, string[]? targetAssemblies)
     {
         if (databaseEngineAttributeType is null)
         {
@@ -42,7 +42,7 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
         }
         Log.WriteInfo($"{nameof(ReflectiveModelLoader)} is initializing.");
 
-        ReflectiveEntity[] entities = AssembliesWithEntryPoint()
+        ReflectiveEntity[] entities = TargetAssembliesOrWithEntryPoint(targetAssemblies)
             // get all types in these assemblies
             .SelectMany(asm => asm.GetExportedTypes()
                 .Where(type =>

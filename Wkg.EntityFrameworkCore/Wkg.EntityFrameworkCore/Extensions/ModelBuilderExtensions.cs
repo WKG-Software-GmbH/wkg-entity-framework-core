@@ -76,7 +76,7 @@ public static class ModelBuilderExtensions
     /// </para>
     /// </remarks>
     public static ModelBuilder LoadReflectiveModels(this ModelBuilder builder, INamingPolicy? namingPolicy = null, IMappingPolicy? mappingPolicy = null) =>
-        LoadReflectiveModelsInternal(builder, namingPolicy, mappingPolicy, null);
+        LoadReflectiveModelsInternal(builder, namingPolicy, mappingPolicy, null, null);
 
     /// <summary>
     /// Loads and configures all models that implement <see cref="IReflectiveModelConfiguration{T}"/> and are annotated with the specified <typeparamref name="TDatabaseEngineModelAttribute"/>.
@@ -94,14 +94,14 @@ public static class ModelBuilderExtensions
     /// </remarks>
     public static ModelBuilder LoadReflectiveModels<TDatabaseEngineModelAttribute>(this ModelBuilder builder, INamingPolicy? namingPolicy = null, IMappingPolicy? mappingPolicy = null)
         where TDatabaseEngineModelAttribute : DatabaseEngineModelAttribute, new() =>
-        LoadReflectiveModelsInternal(builder, namingPolicy, mappingPolicy, typeof(TDatabaseEngineModelAttribute));
+        LoadReflectiveModelsInternal(builder, namingPolicy, mappingPolicy, typeof(TDatabaseEngineModelAttribute), null);
 
-    private static ModelBuilder LoadReflectiveModelsInternal(this ModelBuilder builder, INamingPolicy? namingPolicy, IMappingPolicy? mappingPolicy, Type? dbEngineModelAttributeType)
+    private static ModelBuilder LoadReflectiveModelsInternal(this ModelBuilder builder, INamingPolicy? namingPolicy, IMappingPolicy? mappingPolicy, Type? dbEngineModelAttributeType, string[]? targetAssemblies)
     {
         _ = builder ?? throw new ArgumentNullException(nameof(builder));
         EntityDiscoveryContext discoveryContext = new(namingPolicy, mappingPolicy);
-        ReflectiveModelLoader.LoadAll(builder, discoveryContext, dbEngineModelAttributeType);
-        ReflectiveConnectionLoader.LoadAll(builder, discoveryContext, dbEngineModelAttributeType);
+        ReflectiveModelLoader.LoadAll(builder, discoveryContext, dbEngineModelAttributeType, targetAssemblies);
+        ReflectiveConnectionLoader.LoadAll(builder, discoveryContext, dbEngineModelAttributeType, targetAssemblies);
         discoveryContext.AuditPolicies();
         return builder;
     }

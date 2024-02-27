@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Wkg.Common.Extensions;
 using Wkg.Extensions.Reflection;
 using Wkg.Logging;
 
@@ -28,12 +29,18 @@ public abstract class ReflectiveLoaderBase
     /// Gets all assemblies with an entry point.
     /// </summary>
     /// <returns>The assemblies with an entry point.</returns>
-    protected static IEnumerable<Assembly> AssembliesWithEntryPoint() =>
-        AppDomain.CurrentDomain
-            // get all assemblies
-            .GetAssemblies()
-            // only keep assemblies that are not libraries
-            .Where(asm => asm.EntryPoint is not null);
+    protected static IEnumerable<Assembly> TargetAssembliesOrWithEntryPoint(string[]? targetAssemblies)
+    {
+        Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+        return (targetAssemblies?
+            // if target assemblies are specified, only load models from these assemblies
+            .Select(target => assemblies
+                .SingleOrDefault(asm => asm.FullName?.Equals(asm) is true)
+                    // if the target assembly is not loaded, throw an exception
+                    ?? throw new TypeLoadException($"The target assembly {target} is not loaded.")))
+            // if no target assemblies are specified, load models from assemblies with an entry point (i.e. not libraries)
+            .Coalesce(assemblies.Where(asm => asm.EntryPoint is not null));
+    }
 
     /// <summary>
     /// Loads all procedures that implement the specified reflective interface.
@@ -47,10 +54,10 @@ public abstract class ReflectiveLoaderBase
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="storedProcedureInterface"/>, <paramref name="storedProcedure"/>, <paramref name="reflectiveInterface"/>, <paramref name="modelBuilderExtensionsType"/>, or <paramref name="builder"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentException">Thrown if <paramref name="loadProcedureMethodName"/> is <see langword="null"/> or empty.</exception>
     /// <exception cref="InvalidOperationException">Thrown if the procedure type does not implement the reflective interface or if the procedure type does not inherit from the generic base class.</exception>
-    protected static void LoadAllProceduresInternal(Type storedProcedureInterface, Type storedProcedure, Type reflectiveInterface, Type modelBuilderExtensionsType, string loadProcedureMethodName, ModelBuilder builder)
+    protected static void LoadAllProceduresInternal(Type storedProcedureInterface, Type storedProcedure, Type reflectiveInterface, Type modelBuilderExtensionsType, string loadProcedureMethodName, ModelBuilder builder, string[]? targetAssemblies)
     {
         Log.WriteInfo($"Loading all procedures implementing {storedProcedureInterface.Name}.");
-        ReflectiveProcedure[] entities = AssembliesWithEntryPoint()
+        ReflectiveProcedure[] entities = TargetAssembliesOrWithEntryPoint(targetAssemblies)
             // get all types in these assemblies
             .SelectMany(asm => asm.GetTypes()
                 .Where(type =>
