@@ -96,6 +96,23 @@ public static class ModelBuilderExtensions
         where TDatabaseEngineModelAttribute : DatabaseEngineModelAttribute, new() =>
         LoadReflectiveModelsInternal(builder, namingPolicy, mappingPolicy, typeof(TDatabaseEngineModelAttribute), null);
 
+    /// <summary>
+    /// Loads and configures all models that implement <see cref="IReflectiveModelConfiguration{T}"/>.
+    /// </summary>
+    /// <param name="builder">The model builder.</param>
+    /// <param name="namingPolicy">The <see cref="INamingPolicy"/> to be used to determine what action should be taken when no explicit column name is provided.</param>
+    /// <param name="mappingPolicy">The <see cref="IMappingPolicy"/> to be used to determine what action should be taken when a property is neither ignored nor explicitly mapped, i.e., how to handle convention-based mapping scenarios.</param>
+    /// <param name="targetAssemblies">The assemblies that contain definitions of any configured reflective model.</param>
+    /// <returns>The model builder.</returns>
+    /// <remarks>
+    /// <para>
+    /// This method uses reflection to find all types that implement <see cref="IReflectiveModelConfiguration{T}"/> and then loads and configures them.
+    /// Models implementing <see cref="IReflectiveModelConfiguration{T}"/> should not be loaded explicitly using <see cref="LoadModel{TModel}(ModelBuilder, IDiscoveryContext)"/>.
+    /// </para>
+    /// </remarks>
+    public static ModelBuilder LoadReflectiveModels(this ModelBuilder builder, INamingPolicy? namingPolicy = null, IMappingPolicy? mappingPolicy = null, string[]? targetAssemblies) =>
+        LoadReflectiveModelsInternal(builder, namingPolicy, mappingPolicy, null, targetAssemblies);
+
     private static ModelBuilder LoadReflectiveModelsInternal(this ModelBuilder builder, INamingPolicy? namingPolicy, IMappingPolicy? mappingPolicy, Type? dbEngineModelAttributeType, string[]? targetAssemblies)
     {
         _ = builder ?? throw new ArgumentNullException(nameof(builder));
