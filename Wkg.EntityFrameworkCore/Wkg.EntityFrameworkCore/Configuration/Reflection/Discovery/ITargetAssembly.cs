@@ -10,5 +10,5 @@ public interface ITargetAssembly
     /// <summary>
     /// Returns the assembly containing the entity types to be enumerated.
     /// </summary>
-    internal static abstract Assembly Assembly { get; }
+    static abstract Assembly Assembly { get; }
 }
