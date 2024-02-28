@@ -37,6 +37,11 @@ internal readonly struct IgnoreImplicitMappingPolicy : IMappingPolicy
                         entityType.RemoveForeignKey(fkey);
                     }
                 }
+                if (implicitProperty.IsPrimaryKey())
+                {
+                    Log.WriteWarning($"Property {implicitProperty.Name} is a primary key property and will be removed from the containing primary key.");
+                    entityType.SetPrimaryKey(default(IMutableProperty));
+                }
                 entityType.RemoveProperty(implicitProperty);
                 entityType.AddIgnored(implicitProperty.Name);
             }
