@@ -21,8 +21,9 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
     /// <param name="builder">The <see cref="ModelBuilder"/> to configure.</param>
     /// <param name="discoveryContext">The <see cref="IDiscoveryContext"/> to use for discovery.</param>
     /// <param name="databaseEngineAttributeType">The type of the attribute that marks a model as being for a specific database engine. If <see langword="null"/>, all models will be loaded.</param>
+    /// <param name="targetAssemblies">The assemblies in which the models are defined.</param>
     /// <returns>A dictionary of the used <see cref="EntityTypeBuilder"/> instances keyed by the type of the entity.</returns>
-    public static void LoadAll(ModelBuilder builder, IDiscoveryContext discoveryContext, Type? databaseEngineAttributeType, string[]? targetAssemblies)
+    public static void LoadAll(ModelBuilder builder, IDiscoveryContext discoveryContext, Type? databaseEngineAttributeType, Assembly[]? targetAssemblies)
     {
         if (databaseEngineAttributeType is null)
         {

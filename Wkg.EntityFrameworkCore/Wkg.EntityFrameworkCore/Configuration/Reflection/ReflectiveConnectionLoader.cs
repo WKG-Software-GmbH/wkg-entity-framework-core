@@ -22,7 +22,7 @@ internal class ReflectiveConnectionLoader : ReflectiveLoaderBase
     /// <param name="discoveryContext">The <see cref="IDiscoveryContext"/> that has been used for model discovery.</param>
     /// <param name="databaseEngineAttributeType">The type of the attribute that marks a model connection as being for a specific database engine. If <see langword="null"/>, all models will be loaded.</param>
     /// <param name="targetAssemblies">The assemblies in which the <see cref="IReflectiveModelConnection{TConnection, TLeft, TRight}"/>s are defined.</param>
-    public static void LoadAll(ModelBuilder builder, IDiscoveryContext discoveryContext, Type? databaseEngineAttributeType, string[]? targetAssemblies)
+    public static void LoadAll(ModelBuilder builder, IDiscoveryContext discoveryContext, Type? databaseEngineAttributeType, Assembly[]? targetAssemblies)
     {
         if (databaseEngineAttributeType is null)
         {
@@ -45,7 +45,7 @@ internal class ReflectiveConnectionLoader : ReflectiveLoaderBase
 
         ReflectiveConnection[] connections = TargetAssembliesOrWithEntryPoint(targetAssemblies)
             // get all types in these assemblies
-            .SelectMany(asm => asm.GetTypes()
+            .SelectMany(asm => asm.GetExportedTypes()
                 .Where(type =>
                     // only keep classes
                     type.IsClass
