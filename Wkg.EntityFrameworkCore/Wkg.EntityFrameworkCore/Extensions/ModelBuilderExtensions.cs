@@ -94,7 +94,7 @@ public static class ModelBuilderExtensions
     /// Models implementing <see cref="IReflectiveModelConfiguration{T}"/> should not be loaded explicitly using <see cref="LoadModel{TModel}(ModelBuilder, IDiscoveryContext)"/>.
     /// </para>
     /// </remarks>
-    public static ModelBuilder LoadReflectiveModels(this ModelBuilder builder, INamingPolicy? namingPolicy, IMappingPolicy? mappingPolicy, Action<DiscoveryOptionsBuilder>? configureOptions) =>
+    public static ModelBuilder LoadReflectiveModels(this ModelBuilder builder, INamingPolicy? namingPolicy, IMappingPolicy? mappingPolicy, Action<IDiscoveryOptionsBuilder>? configureOptions) =>
         LoadReflectiveModelsInternal(builder, namingPolicy, mappingPolicy, null, configureOptions);
 
     /// <summary>
@@ -109,7 +109,7 @@ public static class ModelBuilderExtensions
     /// Models implementing <see cref="IReflectiveModelConfiguration{T}"/> should not be loaded explicitly using <see cref="LoadModel{TModel}(ModelBuilder, IDiscoveryContext)"/>.
     /// </para>
     /// </remarks>
-    public static ModelBuilder LoadReflectiveModels(this ModelBuilder builder, Action<DiscoveryOptionsBuilder> configureOptions) =>
+    public static ModelBuilder LoadReflectiveModels(this ModelBuilder builder, Action<IDiscoveryOptionsBuilder> configureOptions) =>
         LoadReflectiveModelsInternal(builder, null, null, null, configureOptions);
 
     /// <summary>
@@ -130,7 +130,7 @@ public static class ModelBuilderExtensions
         where TDatabaseEngineModelAttribute : DatabaseEngineModelAttribute, new() =>
         LoadReflectiveModelsInternal(builder, namingPolicy, mappingPolicy, typeof(TDatabaseEngineModelAttribute), null);
 
-    private static ModelBuilder LoadReflectiveModelsInternal(this ModelBuilder builder, INamingPolicy? namingPolicy, IMappingPolicy? mappingPolicy, Type? dbEngineModelAttributeType, Action<DiscoveryOptionsBuilder>? configureOptions)
+    private static ModelBuilder LoadReflectiveModelsInternal(this ModelBuilder builder, INamingPolicy? namingPolicy, IMappingPolicy? mappingPolicy, Type? dbEngineModelAttributeType, Action<IDiscoveryOptionsBuilder>? configureOptions)
     {
         _ = builder ?? throw new ArgumentNullException(nameof(builder));
         Assembly[]? assemblies = null;

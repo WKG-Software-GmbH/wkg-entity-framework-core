@@ -5,22 +5,24 @@ namespace Wkg.EntityFrameworkCore.Configuration.Reflection.Discovery;
 /// <summary>
 /// Configures global entity discovery options.
 /// </summary>
-public class DiscoveryOptionsBuilder
+public class DiscoveryOptionsBuilder : IDiscoveryOptionsBuilder
 {
     private readonly List<Assembly> _assemblies = [];
 
-    internal DiscoveryOptionsBuilder() => Pass();
-
     /// <summary>
-    /// Specifies an assembly to be included in entity discovery.
+    /// Creates a new instance of <see cref="DiscoveryOptionsBuilder"/>.
     /// </summary>
-    /// <typeparam name="TTargetAssembly">The type implementing <see cref="ITargetAssembly"/> which represents the assembly to be included in entity discovery.</typeparam>
-    /// <returns>This instance for method chaining.</returns>
+    internal protected DiscoveryOptionsBuilder() => Pass();
+
+    /// <inheritdoc />
     public DiscoveryOptionsBuilder AddDiscoveryTarget<TTargetAssembly>() where TTargetAssembly : class, ITargetAssembly
     {
         _assemblies.Add(TTargetAssembly.Assembly);
         return this;
     }
 
-    internal DiscoveryOptions Build() => new([.. _assemblies]);
+    /// <summary>
+    /// Builds the <see cref="DiscoveryOptions"/> instance.
+    /// </summary>
+    public DiscoveryOptions Build() => new([.. _assemblies]);
 }
