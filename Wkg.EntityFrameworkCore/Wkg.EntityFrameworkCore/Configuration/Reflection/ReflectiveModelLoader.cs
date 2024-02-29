@@ -45,7 +45,7 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
 
         ReflectiveEntity[] entities = TargetAssembliesOrWithEntryPoint(targetAssemblies)
             // get all types in these assemblies
-            .SelectMany(asm => asm.GetExportedTypes()
+            .SelectMany(asm => asm.GetTypes()
                 .Where(type =>
                     // only keep classes
                     type.IsClass
