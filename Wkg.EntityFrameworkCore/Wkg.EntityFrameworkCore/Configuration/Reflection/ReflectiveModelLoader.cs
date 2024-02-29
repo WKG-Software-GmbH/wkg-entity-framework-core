@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
-using Wkg.Extensions.Reflection;
 using Wkg.Logging;
 using Wkg.EntityFrameworkCore.Configuration.Policies.Discovery;
+using Wkg.Reflection.Extensions;
 
 namespace Wkg.EntityFrameworkCore.Configuration.Reflection;
 
@@ -21,8 +21,9 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
     /// <param name="builder">The <see cref="ModelBuilder"/> to configure.</param>
     /// <param name="discoveryContext">The <see cref="IDiscoveryContext"/> to use for discovery.</param>
     /// <param name="databaseEngineAttributeType">The type of the attribute that marks a model as being for a specific database engine. If <see langword="null"/>, all models will be loaded.</param>
+    /// <param name="targetAssemblies">The assemblies in which the models are defined.</param>
     /// <returns>A dictionary of the used <see cref="EntityTypeBuilder"/> instances keyed by the type of the entity.</returns>
-    public static void LoadAll(ModelBuilder builder, IDiscoveryContext discoveryContext, Type? databaseEngineAttributeType)
+    public static void LoadAll(ModelBuilder builder, IDiscoveryContext discoveryContext, Type? databaseEngineAttributeType, Assembly[]? targetAssemblies)
     {
         if (databaseEngineAttributeType is null)
         {
@@ -42,7 +43,7 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
         }
         Log.WriteInfo($"{nameof(ReflectiveModelLoader)} is initializing.");
 
-        ReflectiveEntity[] entities = AssembliesWithEntryPoint()
+        ReflectiveEntity[] entities = TargetAssembliesOrWithEntryPoint(targetAssemblies)
             // get all types in these assemblies
             .SelectMany(asm => asm.GetTypes()
                 .Where(type =>
@@ -62,7 +63,7 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
                 (
                     nameof(ModelConfigInfoForReflection_DontChange.Configure),
                     BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly,
-                    new Type[] { typeof(EntityTypeBuilder<>).MakeGenericType(type) })
+                    [typeof(EntityTypeBuilder<>).MakeGenericType(type)])
                 ))
             .Where(entity => entity.Configure is not null)
             .ToArray();
@@ -76,7 +77,7 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
         {
             Log.WriteDiagnostic($"{nameof(ReflectiveModelLoader)} loading: {entity.Type.Name}.");
             // get the generic Entity method
-            MethodInfo? entityTypeBuilderFactory = typeof(ModelBuilder).GetMethod(nameof(ModelBuilder.Entity), 1, Array.Empty<Type>());
+            MethodInfo? entityTypeBuilderFactory = typeof(ModelBuilder).GetMethod(nameof(ModelBuilder.Entity), 1, []);
             // make it generic
             MethodInfo genericEntityTypeBuilderFactory = entityTypeBuilderFactory!.MakeGenericMethod(entity.Type);
             // invoke it to create an EntityTypeBuilder<T> where T matches the entity

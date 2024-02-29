@@ -6,7 +6,7 @@ using Wkg.EntityFrameworkCore.ProcedureMapping.Builder.ThrowHelpers;
 using Wkg.EntityFrameworkCore.ProcedureMapping.Compiler;
 using Wkg.EntityFrameworkCore.ProcedureMapping.Compiler.Output;
 using Wkg.Common.Extensions;
-using Wkg.Extensions.Reflection;
+using Wkg.Reflection.Extensions;
 
 namespace Wkg.EntityFrameworkCore.ProcedureMapping.Builder;
 
