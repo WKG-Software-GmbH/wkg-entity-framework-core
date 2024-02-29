@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Wkg.Common.Extensions;
-using Wkg.Extensions.Reflection;
 using Wkg.Logging;
+using Wkg.Reflection.Extensions;
 
 namespace Wkg.EntityFrameworkCore.Configuration.Reflection;
 

@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
-using Wkg.Extensions.Reflection;
 using Wkg.Logging;
 using Wkg.EntityFrameworkCore.Configuration.Policies.Discovery;
+using Wkg.Reflection.Extensions;
 
 namespace Wkg.EntityFrameworkCore.Configuration.Reflection;
 
