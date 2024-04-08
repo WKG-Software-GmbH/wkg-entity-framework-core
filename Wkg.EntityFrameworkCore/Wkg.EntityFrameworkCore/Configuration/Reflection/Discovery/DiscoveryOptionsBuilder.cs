@@ -6,7 +6,7 @@ namespace Wkg.EntityFrameworkCore.Configuration.Reflection.Discovery;
 /// <summary>
 /// Configures global entity discovery options.
 /// </summary>
-internal class DiscoveryOptionsBuilder : IDiscoveryOptionsBuilder
+public class DiscoveryOptionsBuilder : IDiscoveryOptionsBuilder
 {
     private readonly HashSet<Assembly> _assemblies = [];
     private readonly HashSet<Type> _databaseEngines = [];
@@ -17,7 +17,7 @@ internal class DiscoveryOptionsBuilder : IDiscoveryOptionsBuilder
     internal protected DiscoveryOptionsBuilder() => Pass();
 
     /// <inheritdoc />
-    public IDiscoveryOptionsBuilder AddTargetAssembly<TTargetAssembly>() where TTargetAssembly : class, ITargetAssembly
+    public virtual IDiscoveryOptionsBuilder AddTargetAssembly<TTargetAssembly>() where TTargetAssembly : class, ITargetAssembly
     {
         if (!_assemblies.Add(TTargetAssembly.Assembly))
         {
@@ -26,7 +26,8 @@ internal class DiscoveryOptionsBuilder : IDiscoveryOptionsBuilder
         return this;
     }
 
-    public IDiscoveryOptionsBuilder AddTargetDatabaseEngine<TTargetEngine>() where TTargetEngine : DatabaseEngineModelAttribute, new()
+    /// <inheritdoc />
+    public virtual IDiscoveryOptionsBuilder AddTargetDatabaseEngine<TTargetEngine>() where TTargetEngine : DatabaseEngineModelAttribute, new()
     {
         if (!_databaseEngines.Add(typeof(TTargetEngine)))
         {
