@@ -3,41 +3,22 @@ using Wkg.EntityFrameworkCore.Configuration.Reflection.Discovery;
 
 namespace Wkg.EntityFrameworkCore.Configuration;
 
+/// <summary>
+/// Represents a builder for configuring global model options.
+/// </summary>
 public interface IModelOptionsBuilder
 {
+    /// <summary>
+    /// Configures global entity discovery options.
+    /// </summary>
+    /// <param name="configure">The action to configure the discovery options.</param>
+    /// <returns>The same <see cref="IModelOptionsBuilder"/> instance for method chaining.</returns>
     IModelOptionsBuilder ConfigureDiscovery(Action<IDiscoveryOptionsBuilder> configure);
 
+    /// <summary>
+    /// Configures global entity validation policies.
+    /// </summary>
+    /// <param name="configure">The action to configure the policy options.</param>
+    /// <returns>The same <see cref="IModelOptionsBuilder"/> instance for method chaining.</returns>
     IModelOptionsBuilder ConfigurePolicies(Action<IPolicyOptionBuilder> configure);
-}
-
-internal class ModelOptionsBuilder : IModelOptionsBuilder
-{
-    private bool _discoveryOptionsConfigured;
-    private bool _policyOptionsConfigured;
-
-    public DiscoveryOptionsBuilder DiscoveryOptionsBuilder { get; } = new();
-
-    public IPolicyOptionBuilder PolicyOptionsBuilder { get; } = new PolicyOptionBuilder();
-
-    public IModelOptionsBuilder ConfigureDiscovery(Action<IDiscoveryOptionsBuilder> configure)
-    {
-        if (_discoveryOptionsConfigured)
-        {
-            throw new InvalidOperationException("Discovery options have already been configured.");
-        }
-        configure(DiscoveryOptionsBuilder);
-        _discoveryOptionsConfigured = true;
-        return this;
-    }
-
-    public IModelOptionsBuilder ConfigurePolicies(Action<IPolicyOptionBuilder> configure)
-    {
-        if (_policyOptionsConfigured)
-        {
-            throw new InvalidOperationException("Policy options have already been configured.");
-        }
-        configure(PolicyOptionsBuilder);
-        _policyOptionsConfigured = true;
-        return this;
-    }
 }

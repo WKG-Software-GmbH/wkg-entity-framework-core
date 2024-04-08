@@ -15,5 +15,11 @@ public interface IDiscoveryOptionsBuilder
     /// <returns>This instance for method chaining.</returns>
     IDiscoveryOptionsBuilder AddTargetAssembly<TTargetAssembly>() where TTargetAssembly : class, ITargetAssembly;
 
+    /// <summary>
+    /// Specifies a database engine-specific attribute that should be included in entity discovery. 
+    /// If no database engines are specified, all entities are included in discovery.
+    /// </summary>
+    /// <typeparam name="TTargetEngine">The type of the database engine attribute to be included in entity discovery, which must be a subclass of <see cref="DatabaseEngineModelAttribute"/>.</typeparam>
+    /// <returns>This instance for method chaining.</returns>
     IDiscoveryOptionsBuilder AddTargetDatabaseEngine<TTargetEngine>() where TTargetEngine : DatabaseEngineModelAttribute, new();
 }

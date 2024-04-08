@@ -19,9 +19,20 @@ public readonly struct Uuid : IEqualityOperators<Uuid, Uuid, bool>, IEquatable<U
     [FieldOffset(0)]
     private readonly Guid _value;
 
-    internal Uuid(Guid value) => _value = value;
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Uuid"/> structure from the provided <paramref name="guid"/>.
+    /// </summary>
+    /// <remarks>
+    /// Byte order is preserved when converting between <see cref="Guid"/> and <see cref="Uuid"/>, string representation will differ.
+    /// </remarks>
+    /// <param name="guid">The <see cref="Guid"/> to create the <see cref="Uuid"/> from.</param>
+    public Uuid(Guid guid) => _value = guid;
 
-    internal Uuid(ReadOnlySpan<byte> b)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Uuid"/> structure from the provided bytes.
+    /// </summary>
+    /// <param name="b">The bytes to create the <see cref="Uuid"/> from.</param>
+    public Uuid(ReadOnlySpan<byte> b)
     {
         _value = new Guid(b);
     }

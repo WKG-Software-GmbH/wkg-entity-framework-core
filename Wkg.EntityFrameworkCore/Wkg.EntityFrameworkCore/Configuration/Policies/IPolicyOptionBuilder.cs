@@ -2,8 +2,17 @@
 
 namespace Wkg.EntityFrameworkCore.Configuration.Policies;
 
+/// <summary>
+/// Represents a builder for configuring global entity validation policies.
+/// </summary>
 public interface IPolicyOptionBuilder
 {
+    /// <summary>
+    /// Adds a policy to the configuration.
+    /// </summary>
+    /// <typeparam name="TPolicyBuilder">The type of the policy builder.</typeparam>
+    /// <param name="configurePolicy">The configuration action for the policy.</param>
+    /// <returns>The same <see cref="IPolicyOptionBuilder"/> instance for method chaining.</returns>
     IPolicyOptionBuilder AddPolicy<TPolicyBuilder>(Action<TPolicyBuilder> configurePolicy) where TPolicyBuilder : class, IEntityPolicyBuilder<TPolicyBuilder>;
 
     internal bool Contains<TPolicyBuilder>() where TPolicyBuilder : class, IEntityPolicyBuilder<TPolicyBuilder>;
@@ -51,6 +60,9 @@ internal class PolicyOptionBuilder : IPolicyOptionBuilder
     ];
 }
 
+/// <summary>
+/// Composite pattern for <see cref="PolicyOptionBuilder"/>.
+/// </summary>
 internal interface IEntityPolicyComponent
 {
     List<IEntityPolicy> AddToAggregation(List<IEntityPolicy> aggregation);

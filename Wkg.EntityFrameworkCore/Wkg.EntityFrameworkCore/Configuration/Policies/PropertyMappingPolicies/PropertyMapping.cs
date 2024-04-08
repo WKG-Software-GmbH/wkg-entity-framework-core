@@ -1,10 +1,9 @@
-﻿using Wkg.Common.Extensions;
-using Wkg.EntityFrameworkCore.Configuration.Policies.MappingPolicies.Internals;
+﻿using Wkg.EntityFrameworkCore.Configuration.Policies.MappingPolicies.Internals;
 
 namespace Wkg.EntityFrameworkCore.Configuration.Policies.MappingPolicies;
 
 /// <summary>
-/// Provides a set of default <see cref="IMappingPolicy"/> implementations.
+/// Configures the mapping policy for properties.
 /// </summary>
 public class PropertyMapping : IEntityPolicyBuilder<PropertyMapping>
 {

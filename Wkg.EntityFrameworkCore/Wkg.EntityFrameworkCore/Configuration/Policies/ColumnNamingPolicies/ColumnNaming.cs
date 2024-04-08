@@ -4,7 +4,7 @@ using Wkg.EntityFrameworkCore.Configuration.Policies.ColumnNamingPolicies.Intern
 namespace Wkg.EntityFrameworkCore.Configuration.Policies.ColumnNamingPolicies;
 
 /// <summary>
-/// Provides a set of predefined <see cref="IColumnNamingPolicy"/> implementations.
+/// Configures the naming policy for database columns.
 /// </summary>
 public class ColumnNaming : IEntityPolicyBuilder<ColumnNaming>
 {

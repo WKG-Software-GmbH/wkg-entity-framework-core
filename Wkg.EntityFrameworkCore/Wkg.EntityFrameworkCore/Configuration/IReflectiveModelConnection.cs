@@ -1,12 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Wkg.EntityFrameworkCore.Configuration.Policies.MappingPolicies;
-using Wkg.EntityFrameworkCore.Configuration.Policies.ColumnNamingPolicies;
 using Wkg.EntityFrameworkCore.Extensions;
 
 namespace Wkg.EntityFrameworkCore.Configuration;
 
 /// <summary>
-/// Represents a many to many connection between two entities that will be reflectively configured by the <see cref="ModelBuilderExtensions.LoadReflectiveModels(ModelBuilder, IColumnNamingPolicy, IMappingPolicy)"/> method.
+/// Represents a many to many connection between two entities that are reflectively configured through <see cref="ModelBuilderExtensions.LoadReflectiveModels(ModelBuilder, Action{IModelOptionsBuilder}?)"/>.
 /// </summary>
 /// <typeparam name="TConnection">The type of the implementing connection entity.</typeparam>
 /// <typeparam name="TLeft">The type of the left entity.</typeparam>
@@ -14,6 +12,4 @@ namespace Wkg.EntityFrameworkCore.Configuration;
 public interface IReflectiveModelConnection<TConnection, TLeft, TRight> : IModelConnection<TConnection, TLeft, TRight>
     where TConnection : class, IReflectiveModelConnection<TConnection, TLeft, TRight>
     where TLeft : class, IReflectiveModelConfiguration<TLeft>
-    where TRight : class, IReflectiveModelConfiguration<TRight>
-{
-}
+    where TRight : class, IReflectiveModelConfiguration<TRight>;
