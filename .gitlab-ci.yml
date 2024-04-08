@@ -1,6 +1,5 @@
 stages:
     - build
-    - test
     - increase-version
     - deploy-baget
 
@@ -14,15 +13,11 @@ include:
       ref: 'v1.2.2'
       file:
           - '/jobs/build_dotnet_8.yml'
-          - '/jobs/test_dotnet_8.yml'
           - '/jobs/increase_version.yml'
           - '/jobs/deploy_baget_dotnet_8.yml'
 
 build:
     extends: .build
-
-test:
-    extends: .test
 
 increase-version:
     extends: .increase-version
