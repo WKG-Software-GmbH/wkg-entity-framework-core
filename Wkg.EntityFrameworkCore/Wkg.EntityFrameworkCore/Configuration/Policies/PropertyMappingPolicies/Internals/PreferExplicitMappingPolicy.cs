@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Wkg.Logging;
 
-namespace Wkg.EntityFrameworkCore.Configuration.Policies.MappingPolicies;
+namespace Wkg.EntityFrameworkCore.Configuration.Policies.MappingPolicies.Internals;
 
 internal readonly struct PreferExplicitMappingPolicy : IMappingPolicy
 {

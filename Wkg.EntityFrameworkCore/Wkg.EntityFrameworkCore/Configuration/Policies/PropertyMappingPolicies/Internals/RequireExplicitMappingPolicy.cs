@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Wkg.EntityFrameworkCore.Configuration.Policies.MappingPolicies;
+namespace Wkg.EntityFrameworkCore.Configuration.Policies.MappingPolicies.Internals;
 
 internal readonly struct RequireExplicitMappingPolicy : IMappingPolicy
 {
@@ -16,7 +16,7 @@ internal readonly struct RequireExplicitMappingPolicy : IMappingPolicy
             List<Exception> unmappedPropertyExceptions = [];
             foreach (IMutableProperty implicitProperty in unmappedProperties)
             {
-                unmappedPropertyExceptions.Add(new ArgumentException($"Property '{implicitProperty.Name}' was not explicitly mapped and was not marked as unmapped. **EF Core WILL ATTEMPT TO MAP THIS PROPERTY based on naming convention**! Consider using the [{nameof(NotMappedAttribute)}] or the Ignore() method if you do not want to map this property."));
+                unmappedPropertyExceptions.Add(new PolicyViolationException($"Property '{implicitProperty.Name}' was not explicitly mapped and was not marked as unmapped. **EF Core WILL ATTEMPT TO MAP THIS PROPERTY based on naming convention**! Consider using the [{nameof(NotMappedAttribute)}] or the Ignore() method if you do not want to map this property."));
             }
             throw new AggregateException($"{nameof(RequireExplicitMappingPolicy)}: entity '{entityType.ClrType.Name}' contains implicitly mapped properties.", unmappedPropertyExceptions);
         }

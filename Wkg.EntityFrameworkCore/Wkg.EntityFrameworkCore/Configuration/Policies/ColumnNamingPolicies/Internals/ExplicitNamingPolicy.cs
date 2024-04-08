@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata;
 using Wkg.EntityFrameworkCore.Extensions;
 
-namespace Wkg.EntityFrameworkCore.Configuration.Policies.NamingPolicies;
+namespace Wkg.EntityFrameworkCore.Configuration.Policies.ColumnNamingPolicies.Internals;
 
-internal abstract class ExplicitNamingPolicy : INamingPolicy
+internal abstract class ExplicitNamingPolicy : IColumnNamingPolicy
 {
     protected static bool HasExplicitTableName(IMutableEntityType entityType)
     {

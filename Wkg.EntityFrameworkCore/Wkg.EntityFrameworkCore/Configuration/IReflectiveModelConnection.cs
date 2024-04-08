@@ -1,12 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Wkg.EntityFrameworkCore.Configuration.Policies.MappingPolicies;
-using Wkg.EntityFrameworkCore.Configuration.Policies.NamingPolicies;
+using Wkg.EntityFrameworkCore.Configuration.Policies.ColumnNamingPolicies;
 using Wkg.EntityFrameworkCore.Extensions;
 
 namespace Wkg.EntityFrameworkCore.Configuration;
 
 /// <summary>
-/// Represents a many to many connection between two entities that will be reflectively configured by the <see cref="ModelBuilderExtensions.LoadReflectiveModels(ModelBuilder, INamingPolicy, IMappingPolicy)"/> method.
+/// Represents a many to many connection between two entities that will be reflectively configured by the <see cref="ModelBuilderExtensions.LoadReflectiveModels(ModelBuilder, IColumnNamingPolicy, IMappingPolicy)"/> method.
 /// </summary>
 /// <typeparam name="TConnection">The type of the implementing connection entity.</typeparam>
 /// <typeparam name="TLeft">The type of the left entity.</typeparam>

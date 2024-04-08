@@ -1,4 +1,7 @@
-﻿namespace Wkg.EntityFrameworkCore.Configuration.Reflection.Discovery;
+﻿using Wkg.EntityFrameworkCore.Configuration.Policies;
+using Wkg.EntityFrameworkCore.Configuration.Reflection.Attributes;
+
+namespace Wkg.EntityFrameworkCore.Configuration.Reflection.Discovery;
 
 /// <summary>
 /// Represents a builder for configuring global entity discovery options.
@@ -10,5 +13,7 @@ public interface IDiscoveryOptionsBuilder
     /// </summary>
     /// <typeparam name="TTargetAssembly">The type implementing <see cref="ITargetAssembly"/> which represents the assembly to be included in entity discovery.</typeparam>
     /// <returns>This instance for method chaining.</returns>
-    DiscoveryOptionsBuilder AddDiscoveryTarget<TTargetAssembly>() where TTargetAssembly : class, ITargetAssembly;
+    IDiscoveryOptionsBuilder AddTargetAssembly<TTargetAssembly>() where TTargetAssembly : class, ITargetAssembly;
+
+    IDiscoveryOptionsBuilder AddTargetDatabaseEngine<TTargetEngine>() where TTargetEngine : DatabaseEngineModelAttribute, new();
 }

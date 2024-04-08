@@ -1,12 +1,12 @@
 ﻿using Wkg.EntityFrameworkCore.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Wkg.EntityFrameworkCore.Configuration.Policies.MappingPolicies;
-using Wkg.EntityFrameworkCore.Configuration.Policies.NamingPolicies;
+using Wkg.EntityFrameworkCore.Configuration.Policies.ColumnNamingPolicies;
 
 namespace Wkg.EntityFrameworkCore.Configuration;
 
 /// <summary>
-/// Represents a model configuration that will be reflectively configured by the <see cref="ModelBuilderExtensions.LoadReflectiveModels(ModelBuilder, INamingPolicy, IMappingPolicy)"/> method.
+/// Represents a model configuration that will be reflectively configured by the <see cref="ModelBuilderExtensions.LoadReflectiveModels(ModelBuilder, IColumnNamingPolicy, IMappingPolicy)"/> method.
 /// </summary>
 /// <typeparam name="T">The type of the model.</typeparam>
 /// <remarks>
