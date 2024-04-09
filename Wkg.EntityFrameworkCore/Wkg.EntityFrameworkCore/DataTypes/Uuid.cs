@@ -6,7 +6,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using Wkg.Common.Extensions;
 
-namespace Wkg.EntityFrameworkCore.DataTypes.Uuids;
+namespace Wkg.EntityFrameworkCore.DataTypes;
 
 /// <summary>
 /// Represents a universally unique identifier (UUID) with big-endian byte order.

@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Wkg.EntityFrameworkCore.DataTypes.Uuids;
+namespace Wkg.EntityFrameworkCore.DataTypes;
 
 internal class UuidJsonConverter : JsonConverter<Uuid>
 {
