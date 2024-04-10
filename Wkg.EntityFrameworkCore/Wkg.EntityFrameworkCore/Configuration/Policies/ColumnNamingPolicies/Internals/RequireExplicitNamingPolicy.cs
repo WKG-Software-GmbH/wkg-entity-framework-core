@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace Wkg.EntityFrameworkCore.Configuration.Policies.NamingPolicies;
+namespace Wkg.EntityFrameworkCore.Configuration.Policies.ColumnNamingPolicies.Internals;
 
 internal class RequireExplicitNamingPolicy : ExplicitNamingPolicy
 {
@@ -8,7 +8,7 @@ internal class RequireExplicitNamingPolicy : ExplicitNamingPolicy
     {
         if (!HasExplicitTableName(entityType))
         {
-            throw new ArgumentException($"{nameof(RequireExplicitNamingPolicy)}: entity {entityType.ClrType.Name} was not explicitly mapped to a table or view.");
+            throw new PolicyViolationException($"{nameof(RequireExplicitNamingPolicy)}: entity {entityType.ClrType.Name} was not explicitly mapped to a table or view.");
         }
         IMutableProperty[] implicitProperties = GetImplicitProperties(entityType);
         if (implicitProperties.Length > 0)
@@ -16,7 +16,7 @@ internal class RequireExplicitNamingPolicy : ExplicitNamingPolicy
             List<Exception> invalidPropertyExceptions = [];
             foreach (IMutableProperty implicitProperty in implicitProperties)
             {
-                invalidPropertyExceptions.Add(new ArgumentException($"Property {implicitProperty.Name} has no explicit column name configured. Use HasColumnName() to specify a column name."));
+                invalidPropertyExceptions.Add(new PolicyViolationException($"Property {implicitProperty.Name} has no explicit column name configured. Use HasColumnName() to specify a column name."));
             }
             throw new AggregateException($"{nameof(RequireExplicitNamingPolicy)}: entity {entityType.ClrType.Name} contains implicitly named properties.", invalidPropertyExceptions);
         }

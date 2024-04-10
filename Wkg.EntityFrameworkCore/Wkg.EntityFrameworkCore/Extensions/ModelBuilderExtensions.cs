@@ -1,14 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System.Reflection;
 using Wkg.EntityFrameworkCore.Configuration;
-using Wkg.EntityFrameworkCore.Configuration.Policies;
-using Wkg.EntityFrameworkCore.Configuration.Policies.Discovery;
 using Wkg.EntityFrameworkCore.Configuration.Policies.MappingPolicies;
-using Wkg.EntityFrameworkCore.Configuration.Policies.NamingPolicies;
+using Wkg.EntityFrameworkCore.Configuration.Policies.ColumnNamingPolicies;
 using Wkg.EntityFrameworkCore.Configuration.Reflection;
-using Wkg.EntityFrameworkCore.Configuration.Reflection.Attributes;
 using Wkg.EntityFrameworkCore.Configuration.Reflection.Discovery;
+using Wkg.EntityFrameworkCore.Configuration.Discovery;
+using Wkg.EntityFrameworkCore.Configuration.Policies;
 
 namespace Wkg.EntityFrameworkCore.Extensions;
 
@@ -18,14 +16,13 @@ namespace Wkg.EntityFrameworkCore.Extensions;
 public static class ModelBuilderExtensions
 {
     /// <summary>
-    /// Initializes a new <see cref="IDiscoveryContext"/> using the specified <paramref name="namingPolicy"/> and <paramref name="mappingPolicy"/>.
+    /// Initializes a new <see cref="IDiscoveryContext"/> using the specified <paramref name="policies"/>.
     /// </summary>
     /// <param name="_">The model builder.</param>
-    /// <param name="namingPolicy">The <see cref="INamingPolicy"/> to use. If <see langword="null"/>, <see cref="NamingPolicy.RequireExplicit"/> will be used.</param>
-    /// <param name="mappingPolicy">The <see cref="IMappingPolicy"/> to use. If <see langword="null"/>, <see cref="PropertyMappingPolicy.IgnoreImplicit"/> will be used.</param>
+    /// <param name="policies">The policies to be enforced on the discovered entities.</param>
     /// <returns>The <see cref="IDiscoveryContext"/>.</returns>
-    public static IDiscoveryContext CreateDiscoveryContext(this ModelBuilder _, INamingPolicy? namingPolicy = null, IMappingPolicy? mappingPolicy = null) => 
-        new EntityDiscoveryContext(namingPolicy, mappingPolicy);
+    public static IDiscoveryContext CreateDiscoveryContext(this ModelBuilder _, IEntityPolicy[] policies) => 
+        new EntityDiscoveryContext(policies);
 
     /// <summary>
     /// Loads and configures the specified <typeparamref name="TModel"/>.
@@ -68,24 +65,6 @@ public static class ModelBuilderExtensions
     /// Loads and configures all models that implement <see cref="IReflectiveModelConfiguration{T}"/>.
     /// </summary>
     /// <param name="builder">The model builder.</param>
-    /// <param name="namingPolicy">The <see cref="INamingPolicy"/> to be used to determine what action should be taken when no explicit column name is provided.</param>
-    /// <param name="mappingPolicy">The <see cref="IMappingPolicy"/> to be used to determine what action should be taken when a property is neither ignored nor explicitly mapped, i.e., how to handle convention-based mapping scenarios.</param>
-    /// <returns>The model builder.</returns>
-    /// <remarks>
-    /// <para>
-    /// This method uses reflection to find all types that implement <see cref="IReflectiveModelConfiguration{T}"/> and then loads and configures them.
-    /// Models implementing <see cref="IReflectiveModelConfiguration{T}"/> should not be loaded explicitly using <see cref="LoadModel{TModel}(ModelBuilder, IDiscoveryContext)"/>.
-    /// </para>
-    /// </remarks>
-    public static ModelBuilder LoadReflectiveModels(this ModelBuilder builder, INamingPolicy? namingPolicy = null, IMappingPolicy? mappingPolicy = null) =>
-        LoadReflectiveModelsInternal(builder, namingPolicy, mappingPolicy, null, null);
-
-    /// <summary>
-    /// Loads and configures all models that implement <see cref="IReflectiveModelConfiguration{T}"/>.
-    /// </summary>
-    /// <param name="builder">The model builder.</param>
-    /// <param name="namingPolicy">The <see cref="INamingPolicy"/> to be used to determine what action should be taken when no explicit column name is provided.</param>
-    /// <param name="mappingPolicy">The <see cref="IMappingPolicy"/> to be used to determine what action should be taken when a property is neither ignored nor explicitly mapped, i.e., how to handle convention-based mapping scenarios.</param>
     /// <param name="configureOptions">The options to configure the discovery process.</param>
     /// <returns>The model builder.</returns>
     /// <remarks>
@@ -94,56 +73,29 @@ public static class ModelBuilderExtensions
     /// Models implementing <see cref="IReflectiveModelConfiguration{T}"/> should not be loaded explicitly using <see cref="LoadModel{TModel}(ModelBuilder, IDiscoveryContext)"/>.
     /// </para>
     /// </remarks>
-    public static ModelBuilder LoadReflectiveModels(this ModelBuilder builder, INamingPolicy? namingPolicy, IMappingPolicy? mappingPolicy, Action<IDiscoveryOptionsBuilder>? configureOptions) =>
-        LoadReflectiveModelsInternal(builder, namingPolicy, mappingPolicy, null, configureOptions);
+    public static ModelBuilder LoadReflectiveModels(this ModelBuilder builder, Action<IModelOptionsBuilder>? configureOptions) =>
+        LoadReflectiveModelsInternal(builder, configureOptions);
 
-    /// <summary>
-    /// Loads and configures all models that implement <see cref="IReflectiveModelConfiguration{T}"/>.
-    /// </summary>
-    /// <param name="builder">The model builder.</param>
-    /// <param name="configureOptions">The options to configure the discovery process.</param>
-    /// <returns>The model builder.</returns>
-    /// <remarks>
-    /// <para>
-    /// This method uses reflection to find all types that implement <see cref="IReflectiveModelConfiguration{T}"/> and then loads and configures them.
-    /// Models implementing <see cref="IReflectiveModelConfiguration{T}"/> should not be loaded explicitly using <see cref="LoadModel{TModel}(ModelBuilder, IDiscoveryContext)"/>.
-    /// </para>
-    /// </remarks>
-    public static ModelBuilder LoadReflectiveModels(this ModelBuilder builder, Action<IDiscoveryOptionsBuilder> configureOptions) =>
-        LoadReflectiveModelsInternal(builder, null, null, null, configureOptions);
-
-    /// <summary>
-    /// Loads and configures all models that implement <see cref="IReflectiveModelConfiguration{T}"/> and are annotated with the specified <typeparamref name="TDatabaseEngineModelAttribute"/>.
-    /// </summary>
-    /// <typeparam name="TDatabaseEngineModelAttribute">The type data base engine to load the models for.</typeparam>
-    /// <param name="builder">The model builder.</param>
-    /// <param name="namingPolicy">The <see cref="INamingPolicy"/> to be used to determine what action should be taken when no explicit column name is provided.</param>
-    /// <param name="mappingPolicy">The <see cref="IMappingPolicy"/> to be used to determine what action should be taken when a property is neither ignored nor explicitly mapped, i.e., how to handle convention-based mapping scenarios.</param>
-    /// <returns>The model builder.</returns>
-    /// <remarks>
-    /// <para>
-    /// This method uses reflection to find all types that implement <see cref="IReflectiveModelConfiguration{T}"/> and then loads and configures them.
-    /// Models implementing <see cref="IReflectiveModelConfiguration{T}"/> should not be loaded explicitly using <see cref="LoadModel{TModel}(ModelBuilder, IDiscoveryContext)"/>.
-    /// </para>
-    /// </remarks>
-    public static ModelBuilder LoadReflectiveModels<TDatabaseEngineModelAttribute>(this ModelBuilder builder, INamingPolicy? namingPolicy = null, IMappingPolicy? mappingPolicy = null)
-        where TDatabaseEngineModelAttribute : DatabaseEngineModelAttribute, new() =>
-        LoadReflectiveModelsInternal(builder, namingPolicy, mappingPolicy, typeof(TDatabaseEngineModelAttribute), null);
-
-    private static ModelBuilder LoadReflectiveModelsInternal(this ModelBuilder builder, INamingPolicy? namingPolicy, IMappingPolicy? mappingPolicy, Type? dbEngineModelAttributeType, Action<IDiscoveryOptionsBuilder>? configureOptions)
+    private static ModelBuilder LoadReflectiveModelsInternal(this ModelBuilder builder, Action<IModelOptionsBuilder>? configureOptions)
     {
-        _ = builder ?? throw new ArgumentNullException(nameof(builder));
-        Assembly[]? assemblies = null;
-        if (configureOptions is not null)
-        {
-            DiscoveryOptionsBuilder discoveryOptionsBuilder = new();
-            configureOptions(discoveryOptionsBuilder);
-            assemblies = discoveryOptionsBuilder.Build().TargetAssemblies;
-        }
-        EntityDiscoveryContext discoveryContext = new(namingPolicy, mappingPolicy);
-        ReflectiveModelLoader.LoadAll(builder, discoveryContext, dbEngineModelAttributeType, assemblies);
-        ReflectiveConnectionLoader.LoadAll(builder, discoveryContext, dbEngineModelAttributeType, assemblies);
+        ArgumentNullException.ThrowIfNull(builder, nameof(builder));
+
+        ModelOptionsBuilder modelOptions = new();
+        configureOptions?.Invoke(modelOptions);
+        modelOptions.AddDefaults();
+        IEntityPolicy[] policies = modelOptions.PolicyOptionsBuilder.Build();
+        DiscoveryOptions discoveryOptions = modelOptions.DiscoveryOptionsBuilder.Build();
+
+        EntityDiscoveryContext discoveryContext = new(policies);
+        ReflectiveModelLoader.LoadAll(builder, discoveryContext, discoveryOptions);
+        ReflectiveConnectionLoader.LoadAll(builder, discoveryContext, discoveryOptions);
         discoveryContext.AuditPolicies();
         return builder;
+    }
+
+    private static void AddDefaults(this ModelOptionsBuilder modelOptions)
+    {
+        ColumnNaming.AddDefaults(modelOptions.PolicyOptionsBuilder);
+        PropertyMapping.AddDefaults(modelOptions.PolicyOptionsBuilder);
     }
 }

@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata;
 using Wkg.Logging;
 
-namespace Wkg.EntityFrameworkCore.Configuration.Policies.NamingPolicies;
+namespace Wkg.EntityFrameworkCore.Configuration.Policies.ColumnNamingPolicies.Internals;
 
 internal class PreferExplicitNamingPolicy : ExplicitNamingPolicy
 {

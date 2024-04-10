@@ -2,8 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using Wkg.Logging;
-using Wkg.EntityFrameworkCore.Configuration.Policies.Discovery;
 using Wkg.Reflection.Extensions;
+using Wkg.EntityFrameworkCore.Configuration.Discovery;
+using Wkg.EntityFrameworkCore.Configuration.Reflection.Discovery;
 
 namespace Wkg.EntityFrameworkCore.Configuration.Reflection;
 
@@ -20,24 +21,35 @@ internal class ReflectiveConnectionLoader : ReflectiveLoaderBase
     /// </summary>
     /// <param name="builder">The <see cref="ModelBuilder"/> to configure.</param>
     /// <param name="discoveryContext">The <see cref="IDiscoveryContext"/> that has been used for model discovery.</param>
-    /// <param name="databaseEngineAttributeType">The type of the attribute that marks a model connection as being for a specific database engine. If <see langword="null"/>, all models will be loaded.</param>
-    /// <param name="targetAssemblies">The assemblies in which the <see cref="IReflectiveModelConnection{TConnection, TLeft, TRight}"/>s are defined.</param>
-    public static void LoadAll(ModelBuilder builder, IDiscoveryContext discoveryContext, Type? databaseEngineAttributeType, Assembly[]? targetAssemblies)
+    /// <param name="options">The options to use for discovery.</param>
+    public static void LoadAll(ModelBuilder builder, IDiscoveryContext discoveryContext, DiscoveryOptions options)
     {
-        if (databaseEngineAttributeType is null)
+        Assembly[]? targetAssemblies = null;
+        if (options.TargetAssemblies.Length > 0)
         {
+            targetAssemblies = options.TargetAssemblies;
+        }
+
+        Type[]? dbEngineModelAttributeTypes;
+        if (options.TargetDatabaseEngineAttributes.Length == 0)
+        {
+            dbEngineModelAttributeTypes = null;
             AssertLoadOnce(builder, ref _reflectiveConnectionLoaderSentinel);
         }
         else
         {
+            dbEngineModelAttributeTypes = options.TargetDatabaseEngineAttributes;
             lock(_loadedDatabaseEngines)
             {
-                if (_loadedDatabaseEngines.Contains(databaseEngineAttributeType))
+                if (dbEngineModelAttributeTypes.FirstOrDefault(_loadedDatabaseEngines.Contains) is Type databaseEngineAttributeType)
                 {
                     throw new InvalidOperationException($"The database engine {databaseEngineAttributeType.Name} has already been loaded.");
                 }
-                _loadedDatabaseEngines.Add(databaseEngineAttributeType);
-                Log.WriteInfo($"Loading only model connections with {databaseEngineAttributeType.Name}.");
+                foreach (Type type in dbEngineModelAttributeTypes)
+                {
+                    _loadedDatabaseEngines.Add(type);
+                    Log.WriteInfo($"Added discovery target for model connections decorated with {type.Name}.");
+                }
             }
         }
 
@@ -52,7 +64,7 @@ internal class ReflectiveConnectionLoader : ReflectiveLoaderBase
                     // only keep classes that implement IReflectiveModelConnection<TConnection, TFrom, TTo>
                     && type.ImplementsGenericInterfaceDirectly(typeof(IReflectiveModelConnection<,,>))
                     // only keep classes that have the specified database engine attribute if enabled
-                    && (databaseEngineAttributeType is null || type.GetCustomAttribute(databaseEngineAttributeType) is not null)))
+                    && (dbEngineModelAttributeTypes is null || dbEngineModelAttributeTypes.Any(attribute => type.GetCustomAttribute(attribute) is not null))))
             // just to be sure ...
             .Distinct()
             .Select(type => 
