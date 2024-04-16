@@ -15,6 +15,13 @@ public interface IPolicyOptionBuilder
     /// <returns>The same <see cref="IPolicyOptionBuilder"/> instance for method chaining.</returns>
     IPolicyOptionBuilder AddPolicy<TPolicyBuilder>(Action<TPolicyBuilder> configurePolicy) where TPolicyBuilder : class, IEntityPolicyBuilder<TPolicyBuilder>;
 
+    /// <summary>
+    /// Adds a policy to the configuration.
+    /// </summary>
+    /// <typeparam name="TPolicyBuilder">The type of the policy builder.</typeparam>
+    /// <returns>The same <see cref="IPolicyOptionBuilder"/> instance for method chaining.</returns>
+    IPolicyOptionBuilder AddPolicy<TPolicyBuilder>() where TPolicyBuilder : class, IEntityPolicyBuilder<TPolicyBuilder>;
+
     internal bool Contains<TPolicyBuilder>() where TPolicyBuilder : class, IEntityPolicyBuilder<TPolicyBuilder>;
 
     internal IEntityPolicy[] Build();
@@ -27,10 +34,16 @@ internal class PolicyOptionBuilder : IPolicyOptionBuilder
     /// </summary>
     private readonly Dictionary<Type, IEntityPolicyComponent> _policies = [];
 
-    public IPolicyOptionBuilder AddPolicy<TPolicyBuilder>(Action<TPolicyBuilder> configurePolicy) where TPolicyBuilder : class, IEntityPolicyBuilder<TPolicyBuilder>
+    public IPolicyOptionBuilder AddPolicy<TPolicyBuilder>(Action<TPolicyBuilder> configurePolicy) where TPolicyBuilder : class, IEntityPolicyBuilder<TPolicyBuilder> =>
+        AddPolicyCore(configurePolicy);
+
+    public IPolicyOptionBuilder AddPolicy<TPolicyBuilder>() where TPolicyBuilder : class, IEntityPolicyBuilder<TPolicyBuilder> =>
+        AddPolicyCore<TPolicyBuilder>(null);
+
+    public IPolicyOptionBuilder AddPolicyCore<TPolicyBuilder>(Action<TPolicyBuilder>? configurePolicy) where TPolicyBuilder : class, IEntityPolicyBuilder<TPolicyBuilder>
     {
         TPolicyBuilder builder = TPolicyBuilder.Create();
-        configurePolicy(builder);
+        configurePolicy?.Invoke(builder);
         IEntityPolicy? policy = builder.Build();
         if (policy is null)
         {
