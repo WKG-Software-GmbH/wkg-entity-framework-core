@@ -166,16 +166,14 @@ public abstract class ResultColumnBuilderBase<TResult, TProperty, TResultColumnB
 /// The base class for all non-proxied result column builders.
 /// </summary>
 /// <inheritdoc/>
-public abstract class ResultColumnBuilder<TResult, TProperty, TResultColumnBuilderImpl> : ResultColumnBuilderBase<TResult, TProperty, TResultColumnBuilderImpl>
+/// <remarks>
+/// Creates a new instance of the <see cref="ResultColumnBuilder{TResult, TProperty, TResultColumnBuilderImpl}"/> class.
+/// </remarks>
+/// <inheritdoc/>
+public abstract class ResultColumnBuilder<TResult, TProperty, TResultColumnBuilderImpl>(Expression<Func<TResult, TProperty>> columnSelector, IResultThrowHelper throwHelper) 
+    : ResultColumnBuilderBase<TResult, TProperty, TResultColumnBuilderImpl>(columnSelector, throwHelper)
     where TResultColumnBuilderImpl : ResultColumnBuilder<TResult, TProperty, TResultColumnBuilderImpl>
 {
-    /// <summary>
-    /// Creates a new instance of the <see cref="ResultColumnBuilder{TResult, TProperty, TResultColumnBuilderImpl}"/> class.
-    /// </summary>
-    /// <inheritdoc/>
-    protected ResultColumnBuilder(Expression<Func<TResult, TProperty>> columnSelector, IResultThrowHelper throwHelper) : base(columnSelector, throwHelper)
-    {
-    }
 
     /// <summary>
     /// Configures the conversion to be applied after the column value has been read from the <see cref="DbDataReader"/> but before it is assigned to the property.

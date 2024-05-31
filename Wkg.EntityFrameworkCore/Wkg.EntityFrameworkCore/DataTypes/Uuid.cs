@@ -1,23 +1,21 @@
-using System.Diagnostics;
+using System.Buffers.Binary;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json.Serialization;
-using Wkg.Common.Extensions;
 
 namespace Wkg.EntityFrameworkCore.DataTypes;
 
 /// <summary>
 /// Represents a universally unique identifier (UUID) with big-endian byte order.
 /// </summary>
-[StructLayout(LayoutKind.Explicit, Size = 16)]
-[DebuggerDisplay("{ToString(),nq}")]
 [JsonConverter(typeof(UuidJsonConverter))]
-public readonly struct Uuid : IEqualityOperators<Uuid, Uuid, bool>, IEquatable<Uuid>
+[InlineArray(16)]
+public struct Uuid : IEqualityOperators<Uuid, Uuid, bool>, IEquatable<Uuid>
 {
-    [FieldOffset(0)]
-    private readonly Guid _value;
+    private byte _element0;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Uuid"/> structure from the provided <paramref name="guid"/>.
@@ -26,7 +24,11 @@ public readonly struct Uuid : IEqualityOperators<Uuid, Uuid, bool>, IEquatable<U
     /// Byte order is preserved when converting between <see cref="Guid"/> and <see cref="Uuid"/>, string representation will differ.
     /// </remarks>
     /// <param name="guid">The <see cref="Guid"/> to create the <see cref="Uuid"/> from.</param>
-    public Uuid(Guid guid) => _value = guid;
+    public Uuid(Guid guid)
+    {
+        Span<byte> self = AsSpan();
+        guid.TryWriteBytes(self);
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Uuid"/> structure from the provided bytes.
@@ -34,34 +36,180 @@ public readonly struct Uuid : IEqualityOperators<Uuid, Uuid, bool>, IEquatable<U
     /// <param name="b">The bytes to create the <see cref="Uuid"/> from.</param>
     public Uuid(ReadOnlySpan<byte> b)
     {
-        _value = new Guid(b);
+        if (b.Length != 16)
+        {
+            throw new ArgumentException("Invalid UUID byte length.", nameof(b));
+        }
+        Span<byte> self = AsSpan();
+        b.CopyTo(self);
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Uuid"/> structure
+    /// Initializes a new instance of the <see cref="Uuid"/> structure from an underlying <see cref="Guid"/>.
     /// </summary>
     /// <returns>
     /// A new UUID object.
     /// </returns>
     public static Uuid NewUuid() => new(Guid.NewGuid());
 
+    /// <summary>
+    /// Returns a new instance of the <see cref="Uuid"/> structure with a version 4 UUID.
+    /// </summary>
+    public static Uuid NewUuidV4()
+    {
+        Uuid uuid = default;
+        Span<byte> buffer = uuid.AsSpan();
+        Random.Shared.NextBytes(buffer);
+        NewUuidV4Core(buffer);
+        return uuid;
+    }
+
+    /// <summary>
+    /// Returns a new instance of the <see cref="Uuid"/> structure with a version 4 UUID using a cryptographically secure random number generator.
+    /// </summary>
+    public static Uuid NewUuidV4Secure()
+    {
+        Uuid uuid = default;
+        Span<byte> buffer = uuid.AsSpan();
+        RandomNumberGenerator.Fill(buffer);
+        NewUuidV4Core(buffer);
+        return uuid;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void NewUuidV4Core(Span<byte> buffer)
+    {
+        buffer[6] = (byte)(buffer[6] & 0x0F | 0x40);
+        buffer[8] = (byte)(buffer[8] & 0x3F | 0x80);
+    }
+
+    /// <summary>
+    /// Returns a new instance of the <see cref="Uuid"/> structure with a version 7 UUID.
+    /// </summary>
+    public static Uuid NewUuidV7()
+    {
+        Uuid uuid = default;
+        Span<byte> buffer = uuid.AsSpan();
+        Random.Shared.NextBytes(buffer);
+        NewUuidV7Core(buffer);
+        return uuid;
+    }
+
+    /// <summary>
+    /// Returns a new instance of the <see cref="Uuid"/> structure with a version 7 UUID using a cryptographically secure random number generator.
+    /// </summary>
+    public static Uuid NewUuidV7Secure()
+    {
+        Uuid uuid = default;
+        Span<byte> buffer = uuid.AsSpan();
+        RandomNumberGenerator.Fill(buffer);
+        NewUuidV7Core(buffer);
+        return uuid;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void NewUuidV7Core(Span<byte> buffer)
+    {
+        ulong timestamp = (ulong)DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        ulong timestamp48 = timestamp << 16;
+        uint bytes6To9 = BinaryPrimitives.ReadUInt32LittleEndian(buffer[6..10]);
+        BinaryPrimitives.WriteUInt64BigEndian(buffer, timestamp48);
+        uint bytes6To9Masked = (bytes6To9 & 0x0FFF3FFF) | 0x70008000;
+        BinaryPrimitives.WriteUInt32BigEndian(buffer[6..], bytes6To9Masked);
+    }
+
+    /// <inheritdoc cref="Guid.ToByteArray()" />
+    public readonly byte[] GetBytes() => AsReadOnlySpan().ToArray();
+
+    /// <summary>
+    /// Copies the bytes of this UUID instance to the provided <paramref name="bytes"/>.
+    /// </summary>
+    /// <param name="bytes">The destination span to copy the bytes to.</param>
+    public readonly void GetBytes(Span<byte> bytes) => AsReadOnlySpan().CopyTo(bytes);
+
+    /// <summary>
+    /// Returns this UUID instance as a 16-byte span.
+    /// </summary>
+    public Span<byte> AsSpan() => MemoryMarshal.CreateSpan(ref _element0, 16);
+
+    /// <summary>
+    /// Returns this UUID instance as a 16-byte read-only span.
+    /// </summary>
+    public readonly ReadOnlySpan<byte> AsReadOnlySpan() => MemoryMarshal.CreateReadOnlySpan(in _element0, 16);
+
+    /// <summary>
+    /// Represents an empty UUID.
+    /// </summary>
+    public static Uuid Empty => default;
+
     /// <inheritdoc/>
-    public bool Equals(Uuid other) => this == other;
+    public readonly bool Equals(Uuid other) => this == other;
 
     /// <summary>
     /// Returns a 36-character string that represents the current <see cref="Uuid"/> object.
     /// </summary>
-    public override string ToString() => _value.ToStringBigEndian();
+    public override readonly string ToString()
+    {
+        // allocate enough bytes to store Uuid ASCII string
+        Span<byte> result = stackalloc byte[36];
+
+        // write Uuid to buffer
+        ToStringCore(in this, result);
+
+        // get string from ASCII encoded uuid byte array
+        return Encoding.ASCII.GetString(result);
+    }
+
+    /// <summary>
+    /// Writes this <see cref="Uuid"/> to the specified buffer in its big endian ASCII representation.
+    /// </summary>
+    /// <param name="buffer">The buffer to write the <see cref="Uuid"/> to, must be at least 36 bytes long.</param>
+    public readonly void ToString(Span<byte> buffer) => ToStringCore(in this, buffer);
+
+    private static void ToStringCore(ref readonly Uuid uuid, Span<byte> buffer)
+    {
+        ReadOnlySpan<byte> source = uuid.AsReadOnlySpan();
+        int skip = 0;
+
+        // iterate over uuid bytes
+        for (int i = 0; i < source.Length; i++)
+        {
+            // indices 4, 6, 8 and 10 will contain a '-' delimiter character in the uuid string.
+            // --> leave space for those delimiters
+            // we can check if i is even and i / 2 is >= 2 and <= 5 to determine if we are at one of those indices
+            // 0xF...F if i is odd and 0x0...0 if i is even
+            int isOddMask = -(i & 1);
+
+            // 0xF...F if i / 2 is < 2 and 0x0...0 if i / 2 is >= 2
+            int less2Mask = (i >> 1) - 2 >> 31;
+
+            // 0xF...F if i / 2 is > 5 and 0x0...0 if i / 2 is <= 5
+            int greater5Mask = ~((i >> 1) - 6 >> 31);
+
+            // 0xF...F if i is even and 2 <= i / 2 <= 5 otherwise 0x0...0
+            int skipIndexMask = ~(isOddMask | less2Mask | greater5Mask);
+
+            // skipIndexMask will be 0xFFFFFFFF for indices 4, 6, 8 and 10 and 0x00000000 for all other indices
+            // --> skip those indices
+            skip += 1 & skipIndexMask;
+            buffer[2 * i + skip] = ToHexCharBranchless(source[i] >>> 0x4);
+            buffer[2 * i + skip + 1] = ToHexCharBranchless(source[i] & 0x0F);
+        }
+
+        // add dashes
+        const byte dash = (byte)'-';
+        buffer[8] = buffer[13] = buffer[18] = buffer[23] = dash;
+    }
 
     /// <summary>
     /// Converts the string representation of a UUID to its <see cref="Guid"/> equivalent (byte equivalence, string representation will differ).
     /// </summary>
-    public Guid ToGuid() => _value;
+    public readonly Guid ToGuid() => new(AsReadOnlySpan());
 
     /// <summary>
     /// Indicates whether the current <see cref="Uuid"/> object is empty (all bits are zero).
     /// </summary>
-    public bool IsEmpty => _value == Guid.Empty;
+    public readonly bool IsEmpty => this == Empty;
 
     /// <summary>
     /// Validates and parses the specified 36-character string representation of a UUID into a new <see cref="Uuid"/> object.
@@ -143,6 +291,11 @@ public readonly struct Uuid : IEqualityOperators<Uuid, Uuid, bool>, IEquatable<U
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int UnhexlifyAsciiNibble(int ascii) => (ascii & 0xF) + (ascii >> 6) | ascii >> 3 & 0x8;
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static byte ToHexCharBranchless(int b) =>
+        // b + 0x30 for [0-9] if 0 <= b <= 9 and b + 0x30 + 0x27 for [a-f] if 10 <= b <= 15
+        (byte)(b + 0x30 + (0x27 & ~(b - 0xA >> 31)));
+
     /// <summary>
     /// Validates the specified 36-character string representation of a UUID.
     /// </summary>
@@ -172,14 +325,24 @@ public readonly struct Uuid : IEqualityOperators<Uuid, Uuid, bool>, IEquatable<U
     }
 
     /// <inheritdoc/>
-    public static bool operator ==(Uuid left, Uuid right) => left._value == right._value;
+    public static bool operator ==(Uuid left, Uuid right)
+    {
+        ReadOnlySpan<byte> leftBytes = left.AsReadOnlySpan();
+        ReadOnlySpan<byte> rightBytes = right.AsReadOnlySpan();
+        return leftBytes.SequenceEqual(rightBytes);
+    }
 
     /// <inheritdoc/>
-    public static bool operator !=(Uuid left, Uuid right) => left._value != right._value;
+    public static bool operator !=(Uuid left, Uuid right) => !(left == right);
 
     /// <inheritdoc/>
-    public override bool Equals(object? obj) => obj is Uuid uuid && Equals(uuid);
+    public readonly override bool Equals(object? obj) => obj is Uuid uuid && Equals(uuid);
 
     /// <inheritdoc/>
-    public override int GetHashCode() => _value.GetHashCode();
+    public override int GetHashCode()
+    {
+        ulong hi = Unsafe.As<byte, ulong>(ref this[0]);
+        ulong lo = Unsafe.As<byte, ulong>(ref this[8]);
+        return HashCode.Combine(hi, lo);
+    }
 }
