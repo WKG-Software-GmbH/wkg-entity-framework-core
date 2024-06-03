@@ -45,36 +45,9 @@ public struct Uuid : IEqualityOperators<Uuid, Uuid, bool>, IEquatable<Uuid>
     }
 
     /// <summary>
-    /// Gets the version of the UUID.
+    /// A read-only instance of the <see cref="Uuid"/> structure whose value is all zeros.
     /// </summary>
-    /// <value>
-    /// The version of the UUID. If the version is less than 1 or greater than 8, or if the variant is not RFC 4122, -1 is returned.
-    /// </value>
-    public readonly int Version
-    {
-        get
-        {
-            int version = this[6] >> 4;
-            if (version is < 1 or > 8 || (this[8] & 0b1100_0000) != 0b1000_0000)
-            {
-                return -1;
-            }
-            return version;
-        }
-    }
-
-    /// <summary>
-    /// Tries to get the version of the UUID.
-    /// </summary>
-    /// <param name="version">When this method returns, contains the version of the UUID, if the conversion succeeded, or -1 if the version is not valid in accordance with RFC 4122.</param>
-    /// <returns>
-    /// <see langword="true"/> if the UUID version is valid; otherwise, <see langword="false"/>.
-    /// </returns>
-    public readonly bool TryGetVersion(out int version)
-    {
-        version = Version;
-        return version != -1;
-    }
+    public static Uuid Empty => default;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Uuid"/> structure from an underlying <see cref="Guid"/>.
@@ -150,6 +123,38 @@ public struct Uuid : IEqualityOperators<Uuid, Uuid, bool>, IEquatable<Uuid>
         BinaryPrimitives.WriteUInt32BigEndian(buffer[6..], bytes6To9Masked);
     }
 
+    /// <summary>
+    /// Gets the version of the UUID.
+    /// </summary>
+    /// <value>
+    /// The version of the UUID. If the version is less than 1 or greater than 8, or if the variant is not RFC 4122, -1 is returned.
+    /// </value>
+    public readonly int Version
+    {
+        get
+        {
+            int version = this[6] >> 4;
+            if (version is < 1 or > 8 || (this[8] & 0b1100_0000) != 0b1000_0000)
+            {
+                return -1;
+            }
+            return version;
+        }
+    }
+
+    /// <summary>
+    /// Tries to get the version of the UUID.
+    /// </summary>
+    /// <param name="version">When this method returns, contains the version of the UUID, if the conversion succeeded, or -1 if the version is not valid in accordance with RFC 4122.</param>
+    /// <returns>
+    /// <see langword="true"/> if the UUID version is valid; otherwise, <see langword="false"/>.
+    /// </returns>
+    public readonly bool TryGetVersion(out int version)
+    {
+        version = Version;
+        return version != -1;
+    }
+
     /// <inheritdoc cref="Guid.ToByteArray()" />
     public readonly byte[] GetBytes() => AsReadOnlySpan().ToArray();
 
@@ -168,11 +173,6 @@ public struct Uuid : IEqualityOperators<Uuid, Uuid, bool>, IEquatable<Uuid>
     /// Returns this UUID instance as a 16-byte read-only span.
     /// </summary>
     public readonly ReadOnlySpan<byte> AsReadOnlySpan() => MemoryMarshal.CreateReadOnlySpan(in _element0, 16);
-
-    /// <summary>
-    /// Represents an empty UUID.
-    /// </summary>
-    public static Uuid Empty => default;
 
     /// <inheritdoc/>
     public readonly bool Equals(Uuid other) => this == other;
