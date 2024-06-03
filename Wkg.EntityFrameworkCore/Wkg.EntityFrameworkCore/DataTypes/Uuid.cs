@@ -26,7 +26,7 @@ public struct Uuid : IEqualityOperators<Uuid, Uuid, bool>, IEquatable<Uuid>
     /// <param name="guid">The <see cref="Guid"/> to create the <see cref="Uuid"/> from.</param>
     public Uuid(Guid guid)
     {
-        Span<byte> self = AsSpan();
+        Span<byte> self = UnsafeAsSpan();
         guid.TryWriteBytes(self);
     }
 
@@ -40,7 +40,7 @@ public struct Uuid : IEqualityOperators<Uuid, Uuid, bool>, IEquatable<Uuid>
         {
             throw new ArgumentException("Invalid UUID byte length.", nameof(b));
         }
-        Span<byte> self = AsSpan();
+        Span<byte> self = UnsafeAsSpan();
         b.CopyTo(self);
     }
 
@@ -63,7 +63,7 @@ public struct Uuid : IEqualityOperators<Uuid, Uuid, bool>, IEquatable<Uuid>
     public static Uuid NewUuidV4()
     {
         Uuid uuid = default;
-        Span<byte> buffer = uuid.AsSpan();
+        Span<byte> buffer = uuid.UnsafeAsSpan();
         Random.Shared.NextBytes(buffer);
         NewUuidV4Core(buffer);
         return uuid;
@@ -75,7 +75,7 @@ public struct Uuid : IEqualityOperators<Uuid, Uuid, bool>, IEquatable<Uuid>
     public static Uuid NewUuidV4Secure()
     {
         Uuid uuid = default;
-        Span<byte> buffer = uuid.AsSpan();
+        Span<byte> buffer = uuid.UnsafeAsSpan();
         RandomNumberGenerator.Fill(buffer);
         NewUuidV4Core(buffer);
         return uuid;
@@ -94,7 +94,7 @@ public struct Uuid : IEqualityOperators<Uuid, Uuid, bool>, IEquatable<Uuid>
     public static Uuid NewUuidV7()
     {
         Uuid uuid = default;
-        Span<byte> buffer = uuid.AsSpan();
+        Span<byte> buffer = uuid.UnsafeAsSpan();
         Random.Shared.NextBytes(buffer);
         NewUuidV7Core(buffer);
         return uuid;
@@ -106,7 +106,7 @@ public struct Uuid : IEqualityOperators<Uuid, Uuid, bool>, IEquatable<Uuid>
     public static Uuid NewUuidV7Secure()
     {
         Uuid uuid = default;
-        Span<byte> buffer = uuid.AsSpan();
+        Span<byte> buffer = uuid.UnsafeAsSpan();
         RandomNumberGenerator.Fill(buffer);
         NewUuidV7Core(buffer);
         return uuid;
@@ -156,23 +156,20 @@ public struct Uuid : IEqualityOperators<Uuid, Uuid, bool>, IEquatable<Uuid>
     }
 
     /// <inheritdoc cref="Guid.ToByteArray()" />
-    public readonly byte[] GetBytes() => AsReadOnlySpan().ToArray();
+    public readonly byte[] GetBytes() => UnsafeAsReadOnlySpan().ToArray();
 
     /// <summary>
     /// Copies the bytes of this UUID instance to the provided <paramref name="bytes"/>.
     /// </summary>
     /// <param name="bytes">The destination span to copy the bytes to.</param>
-    public readonly void GetBytes(Span<byte> bytes) => AsReadOnlySpan().CopyTo(bytes);
+    public readonly void GetBytes(Span<byte> bytes) => UnsafeAsReadOnlySpan().CopyTo(bytes);
 
     /// <summary>
-    /// Returns this UUID instance as a 16-byte span.
+    /// Writes the bytes of this UUID instance to the provided <paramref name="destination"/>.
     /// </summary>
-    public Span<byte> AsSpan() => MemoryMarshal.CreateSpan(ref _element0, 16);
-
-    /// <summary>
-    /// Returns this UUID instance as a 16-byte read-only span.
-    /// </summary>
-    public readonly ReadOnlySpan<byte> AsReadOnlySpan() => MemoryMarshal.CreateReadOnlySpan(in _element0, 16);
+    /// <param name="destination"></param>
+    /// <returns></returns>
+    public readonly bool TryWriteBytes(Span<byte> destination) => MemoryMarshal.TryWrite(destination, in this);
 
     /// <inheritdoc/>
     public readonly bool Equals(Uuid other) => this == other;
@@ -200,7 +197,7 @@ public struct Uuid : IEqualityOperators<Uuid, Uuid, bool>, IEquatable<Uuid>
 
     private static void ToStringCore(ref readonly Uuid uuid, Span<byte> buffer)
     {
-        ReadOnlySpan<byte> source = uuid.AsReadOnlySpan();
+        ReadOnlySpan<byte> source = uuid.UnsafeAsReadOnlySpan();
         int skip = 0;
 
         // iterate over uuid bytes
@@ -236,12 +233,22 @@ public struct Uuid : IEqualityOperators<Uuid, Uuid, bool>, IEquatable<Uuid>
     /// <summary>
     /// Converts the string representation of a UUID to its <see cref="Guid"/> equivalent (byte equivalence, string representation will differ).
     /// </summary>
-    public readonly Guid ToGuid() => new(AsReadOnlySpan());
+    public readonly Guid ToGuid() => new(UnsafeAsReadOnlySpan());
 
     /// <summary>
     /// Indicates whether the current <see cref="Uuid"/> object is empty (all bits are zero).
     /// </summary>
     public readonly bool IsEmpty => this == Empty;
+
+    /// <summary>
+    /// Returns this UUID instance as a 16-byte span, may cause use-after-free if not used carefully.
+    /// </summary>
+    private Span<byte> UnsafeAsSpan() => MemoryMarshal.CreateSpan(ref _element0, 16);
+
+    /// <summary>
+    /// Returns this UUID instance as a 16-byte read-only span, may cause use-after-free if not used carefully.
+    /// </summary>
+    private readonly ReadOnlySpan<byte> UnsafeAsReadOnlySpan() => MemoryMarshal.CreateReadOnlySpan(in _element0, 16);
 
     /// <summary>
     /// Validates and parses the specified 36-character string representation of a UUID into a new <see cref="Uuid"/> object.
@@ -359,8 +366,8 @@ public struct Uuid : IEqualityOperators<Uuid, Uuid, bool>, IEquatable<Uuid>
     /// <inheritdoc/>
     public static bool operator ==(Uuid left, Uuid right)
     {
-        ReadOnlySpan<byte> leftBytes = left.AsReadOnlySpan();
-        ReadOnlySpan<byte> rightBytes = right.AsReadOnlySpan();
+        ReadOnlySpan<byte> leftBytes = left.UnsafeAsReadOnlySpan();
+        ReadOnlySpan<byte> rightBytes = right.UnsafeAsReadOnlySpan();
         return leftBytes.SequenceEqual(rightBytes);
     }
 
