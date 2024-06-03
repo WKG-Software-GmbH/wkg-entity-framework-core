@@ -72,8 +72,8 @@ public class UuidTests
         for (int i = 0; i < 1000; i++)
         {
             Uuid result = Uuid.NewUuidV4();
-            Assert.IsTrue(result[6] >> 4 == 4);
-            Assert.IsTrue((result[8] & 0b1100_0000) == 0b1000_0000);
+            Assert.IsTrue(result.Version == 4);
+            Assert.IsTrue(result.TryGetVersion(out int version) && version == 4);
         }
     }
 
@@ -83,8 +83,8 @@ public class UuidTests
         for (int i = 0; i < 1000; i++)
         {
             Uuid result = Uuid.NewUuidV7();
-            Assert.IsTrue(result[6] >> 4 == 7);
-            Assert.IsTrue((result[8] & 0b1100_0000) == 0b1000_0000);
+            Assert.IsTrue(result.Version == 7);
+            Assert.IsTrue(result.TryGetVersion(out int version) && version == 7);
         }
     }
 }
