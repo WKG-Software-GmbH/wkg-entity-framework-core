@@ -21,20 +21,18 @@ public interface IResultColumnCompiler
 /// </summary>
 /// <typeparam name="TBuilder">The type of the result column builder.</typeparam>
 /// <typeparam name="TDbDataReader">The type of the <see cref="DbDataReader"/> to be used.</typeparam>
-public abstract class ResultColumnCompiler<TBuilder, TDbDataReader> 
+/// <remarks>
+/// Creates a new <see cref="ResultColumnCompiler{TBuilder, TDbDataReader}"/> instance.
+/// </remarks>
+/// <param name="builder">The result column builder.</param>
+public abstract class ResultColumnCompiler<TBuilder, TDbDataReader>(TBuilder builder)
     where TBuilder : IResultColumnBuilder
     where TDbDataReader : DbDataReader
 {
     /// <summary>
     /// The result column builder.
     /// </summary>
-    protected TBuilder Builder { get; }
-
-    /// <summary>
-    /// Creates a new <see cref="ResultColumnCompiler{TBuilder, TDbDataReader}"/> instance.
-    /// </summary>
-    /// <param name="builder">The result column builder.</param>
-    protected ResultColumnCompiler(TBuilder builder) => Builder = builder;
+    protected TBuilder Builder { get; } = builder;
 
     /// <inheritdoc cref="IResultColumnCompiler.Compile"/>
     public virtual CompiledResultColumn Compile()

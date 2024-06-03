@@ -1,33 +1,36 @@
 stages:
-    - build
-    - test
-    - increase-version
-    - deploy-baget
+  - build
+  - test
+  - increase-version
+  - deploy-baget
 
 variables:
-    PROJECT_FILE_PATH: "Wkg.EntityFrameworkCore/Wkg.EntityFrameworkCore/Wkg.EntityFrameworkCore.csproj"
-    MAJOR_VERSION: "8"
-    MINOR_VERSION: "1"
+  PROJECT_DIRECTORY: "Wkg.EntityFrameworkCore/Wkg.EntityFrameworkCore"
+  PROJECT_FILE_PATH: "${PROJECT_DIRECTORY}/Wkg.EntityFrameworkCore.csproj"
+  MAJOR_VERSION: "8"
+  MINOR_VERSION: "1"
 
 include:
-    - project: 'wkg/gitlab-templates'
-      ref: 'v1.2.2'
-      file:
-          - '/jobs/build_dotnet_8.yml'
-          - '/jobs/test_dotnet_8.yml'
-          - '/jobs/increase_version.yml'
-          - '/jobs/deploy_baget_dotnet_8.yml'
+  - project: 'wkg/gitlab-templates'
+    ref: 'v1.2.6'
+    file:
+      - '/jobs/build_dotnet_8.yml'
+      - '/jobs/test_dotnet_8.yml'
+      - '/jobs/increase_version.yml'
+      - '/jobs/deploy_baget_dotnet_8.yml'
 
 build:
-    extends: .build
+  extends: .build
 
 test:
-    extends: .test
-    variables:
-        TEST_PROJECT_FILE_PATH: "Wkg.EntityFrameworkCore/Wkg.EntityFrameworkCore.Tests/Wkg.EntityFrameworkCore.Tests.csproj"
+  extends: .test
+  variables:
+    TEST_PROJECT_FILE_PATH: "Wkg.EntityFrameworkCore/Wkg.EntityFrameworkCore.Tests/Wkg.EntityFrameworkCore.Tests.csproj"
 
 increase-version:
-    extends: .increase-version
+  extends: .increase-version
 
 deploy:
-    extends: .deploy-baget        
+  extends: .deploy-baget
+  variables:
+    DOTNET_CI_VERSION_FILE: "${PROJECT_DIRECTORY}/WkgEntityFrameworkCore.cs"

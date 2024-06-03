@@ -16,23 +16,19 @@ namespace Wkg.EntityFrameworkCore.ProcedureMapping.Builder.ResultBinding;
 /// <typeparam name="TColumn">The CLR type of the column being mapped.</typeparam>
 /// <typeparam name="TProxiedBuilder">The type of the proxied builder.</typeparam>
 /// <typeparam name="TProxyImpl">The type of the proxy implementation.</typeparam>
-public abstract class TypedResultColumnBuilderProxy<TResult, TProperty, TColumn, TProxiedBuilder, TProxyImpl> : ResultColumnBuilderBase<TResult, TProperty, TProxyImpl>
+/// <remarks>
+/// Initializes a new instance of the <see cref="TypedResultColumnBuilderProxy{TResult, TProperty, TColumn, TProxiedBuilder, TProxyImpl}"/> class.
+/// </remarks>
+/// <param name="proxiedBuilder">The proxied builder.</param>
+public abstract class TypedResultColumnBuilderProxy<TResult, TProperty, TColumn, TProxiedBuilder, TProxyImpl>(TProxiedBuilder proxiedBuilder) 
+    : ResultColumnBuilderBase<TResult, TProperty, TProxyImpl>(proxiedBuilder.To<IResultColumnBuilder>().Context)
     where TProxiedBuilder : ResultColumnBuilder<TResult, TProperty, TProxiedBuilder>
     where TProxyImpl : TypedResultColumnBuilderProxy<TResult, TProperty, TColumn, TProxiedBuilder, TProxyImpl>
 {
     /// <summary>
     /// The proxied builder.
     /// </summary>
-    protected TProxiedBuilder ProxiedBuilder { get; }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="TypedResultColumnBuilderProxy{TResult, TProperty, TColumn, TProxiedBuilder, TProxyImpl}"/> class.
-    /// </summary>
-    /// <param name="proxiedBuilder">The proxied builder.</param>
-    protected TypedResultColumnBuilderProxy(TProxiedBuilder proxiedBuilder) : base(proxiedBuilder.To<IResultColumnBuilder>().Context)
-    {
-        ProxiedBuilder = proxiedBuilder;
-    }
+    protected TProxiedBuilder ProxiedBuilder { get; } = proxiedBuilder;
 
     /// <inheritdoc/>
     public override TProxyImpl HasName(string name)

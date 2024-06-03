@@ -24,21 +24,16 @@ public interface IResultCompiler<TDataReader>
 /// Represents a compiler capable of transforming all pre-compiled result columns and the result entity configured by the <typeparamref name="TBuilder"/> into executable IL code, allowing a result entity to be constructed from a <see cref="DbDataReader"/> row.
 /// </summary>
 /// <typeparam name="TBuilder">The type of the <see cref="IResultBuilder"/> used to configure the result entity.</typeparam>
-public abstract class ResultCompiler<TBuilder> where TBuilder : IResultBuilder
+/// <remarks>
+/// Creates a new <see cref="ResultCompiler{TBuilder}"/> instance.
+/// </remarks>
+/// <param name="builder">The <see cref="IResultBuilder"/> used to configure the result entity.</param>
+public abstract class ResultCompiler<TBuilder>(TBuilder builder) where TBuilder : IResultBuilder
 {
     /// <summary>
     /// The <see cref="IResultBuilder"/> used to configure the result entity.
     /// </summary>
-    protected TBuilder Builder { get; }
-
-    /// <summary>
-    /// Creates a new <see cref="ResultCompiler{TBuilder}"/> instance.
-    /// </summary>
-    /// <param name="builder">The <see cref="IResultBuilder"/> used to configure the result entity.</param>
-    protected ResultCompiler(TBuilder builder)
-    {
-        Builder = builder;
-    }
+    protected TBuilder Builder { get; } = builder;
 
     /// <summary>
     /// Compiles all result column bindings into executable IL code, and calls the matching constructor of the result entity with the compiled result columns as arguments.
