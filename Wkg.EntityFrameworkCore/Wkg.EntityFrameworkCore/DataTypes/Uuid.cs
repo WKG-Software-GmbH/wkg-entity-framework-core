@@ -221,8 +221,8 @@ public struct Uuid : IEqualityOperators<Uuid, Uuid, bool>, IEquatable<Uuid>
             // skipIndexMask will be 0xFFFFFFFF for indices 4, 6, 8 and 10 and 0x00000000 for all other indices
             // --> skip those indices
             skip += 1 & skipIndexMask;
-            buffer[2 * i + skip] = ToHexCharBranchless(source[i] >>> 0x4);
-            buffer[2 * i + skip + 1] = ToHexCharBranchless(source[i] & 0x0F);
+            buffer[2 * i + skip] = HexlifyAsciiNibble(source[i] >>> 0x4);
+            buffer[2 * i + skip + 1] = HexlifyAsciiNibble(source[i] & 0x0F);
         }
 
         // add dashes
@@ -328,12 +328,13 @@ public struct Uuid : IEqualityOperators<Uuid, Uuid, bool>, IEquatable<Uuid>
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int UnhexlifyAsciiNibble(int ascii) => (ascii & 0xF) + (ascii >> 6) | ascii >> 3 & 0x8;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static byte ToHexCharBranchless(int b) =>
+    private static byte HexlifyAsciiNibble(int b) =>
         // b + 0x30 for [0-9] if 0 <= b <= 9 and b + 0x30 + 0x27 for [a-f] if 10 <= b <= 15
         (byte)(b + 0x30 + (0x27 & ~(b - 0xA >> 31)));
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int UnhexlifyAsciiNibble(int ascii) => 
+        (ascii & 0xF) + (ascii >> 6) | ascii >> 3 & 0x8;
 
     /// <summary>
     /// Validates the specified 36-character string representation of a UUID.
