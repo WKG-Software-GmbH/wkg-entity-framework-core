@@ -67,8 +67,6 @@ public abstract class ResultColumnBuilderBase<TResult, TProperty, TResultColumnB
         }
     }
 
-    IResultColumnCompilerHint? IResultColumnBuilder.CompilerHint { get; }
-
     /// <inheritdoc cref="IResultColumnBuilder.ColumnName"/>
     protected internal virtual string? ColumnName { get; set; }
 
