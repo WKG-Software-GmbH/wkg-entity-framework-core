@@ -37,9 +37,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Wkg" Version="8.1.15929" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.6" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.6" />
+        <PackageReference Include="Wkg" Version="[8.2.16652-rc,8.3)" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.7" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.7" />
     </ItemGroup>
 
     <ItemGroup>
