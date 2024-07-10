@@ -2,6 +2,7 @@
 using Wkg.Common.Extensions;
 using Wkg.Logging;
 using Wkg.EntityFrameworkCore.Configuration.Policies;
+using System.Runtime.ExceptionServices;
 
 namespace Wkg.EntityFrameworkCore.Configuration.Discovery;
 
@@ -23,12 +24,34 @@ internal class EntityDiscoveryContext(IEntityPolicy[] policies) : IDiscoveryCont
 
         // audit for compliance with the specified policies
         Log.WriteInfo($"Auditing {self.EntityBuilderCache.Count} entities for compliance with the specified policies.");
+        List<Exception>? exceptions = null;
         foreach (EntityTypeBuilder entityType in self.EntityBuilderCache.Values)
         {
             foreach (IEntityPolicy policy in policies)
             {
-                policy.Audit(entityType.Metadata);
+                try
+                {
+                    policy.Audit(entityType.Metadata);
+                }
+                catch (PolicyViolationException e)
+                {
+                    Log.WriteException(e, "Policy validation failed.");
+                    exceptions ??= [];
+                    exceptions.Add(e);
+                }
+                catch (Exception e)
+                {
+                    Log.WriteException(e, LogLevel.Fatal);
+                    throw;
+                }
             }
+        }
+        if (exceptions is not null)
+        {
+            AggregateException aggregate = new("One or more policies could not be enforced.", exceptions);
+            ExceptionDispatchInfo.SetCurrentStackTrace(aggregate);
+            Log.WriteException(aggregate, LogLevel.Fatal);
+            throw aggregate;
         }
         Log.WriteInfo($"Audit completed. {self.EntityBuilderCache.Count} entities loaded and configured.");
     }
