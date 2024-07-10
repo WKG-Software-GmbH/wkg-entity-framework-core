@@ -8,11 +8,11 @@ variables:
   PROJECT_DIRECTORY: "Wkg.EntityFrameworkCore/Wkg.EntityFrameworkCore"
   PROJECT_FILE_PATH: "${PROJECT_DIRECTORY}/Wkg.EntityFrameworkCore.csproj"
   MAJOR_VERSION: "8"
-  MINOR_VERSION: "1"
+  MINOR_VERSION: "2"
 
 include:
   - project: 'wkg/gitlab-templates'
-    ref: 'v1.2.6'
+    ref: 'v1.2.10'
     file:
       - '/jobs/build_dotnet_8.yml'
       - '/jobs/test_dotnet_8.yml'
@@ -29,6 +29,12 @@ test:
 
 increase-version:
   extends: .increase-version
+  only:
+    - main
+    - master
+    - /^rc-.*$/
+    - /^dev-.*$/ 
+    - /^diag-.*$/ 
 
 deploy:
   extends: .deploy-baget
