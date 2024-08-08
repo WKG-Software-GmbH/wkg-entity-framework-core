@@ -57,7 +57,7 @@ public abstract class ResultColumnBuilderBase<TResult, TProperty, TResultColumnB
     public virtual IResultColumnCompilerHint? CompilerHint
     {
         get => _compilerHint;
-        protected internal set
+        internal protected set
         {
             if (CompilerHint is not null)
             {
@@ -68,12 +68,12 @@ public abstract class ResultColumnBuilderBase<TResult, TProperty, TResultColumnB
     }
 
     /// <inheritdoc cref="IResultColumnBuilder.ColumnName"/>
-    protected internal virtual string? ColumnName { get; set; }
+    internal protected virtual string? ColumnName { get; set; }
 
     string? IResultColumnBuilder.ColumnName => ColumnName;
 
     /// <inheritdoc cref="IResultColumnBuilder.Conversion"/>
-    protected internal virtual LambdaExpression? Conversion { get; set; }
+    internal protected virtual LambdaExpression? Conversion { get; set; }
 
     LambdaExpression? IResultColumnBuilder.Conversion => Conversion;
 
@@ -83,7 +83,7 @@ public abstract class ResultColumnBuilderBase<TResult, TProperty, TResultColumnB
     ResultColumnBuilderContext IResultColumnBuilder.Context => Context;
 
     /// <inheritdoc cref="IResultColumnBuilder.IsNullable"/>
-    protected internal virtual bool IsNullable { get; set; }
+    internal protected virtual bool IsNullable { get; set; }
 
     bool IResultColumnBuilder.IsNullable => IsNullable;
 

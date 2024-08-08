@@ -56,14 +56,14 @@ public abstract class TypedResultColumnBuilderProxy<TResult, TProperty, TColumn,
     }
 
     /// <inheritdoc/>
-    protected internal override string? ColumnName
+    internal protected override string? ColumnName
     {
         get => ProxiedBuilder.ColumnName;
         set => ProxiedBuilder.ColumnName = value;
     }
 
     /// <inheritdoc/>
-    protected internal override LambdaExpression? Conversion
+    internal protected override LambdaExpression? Conversion
     {
         get => ProxiedBuilder.Conversion;
         set => ProxiedBuilder.Conversion = value;
@@ -73,7 +73,7 @@ public abstract class TypedResultColumnBuilderProxy<TResult, TProperty, TColumn,
     public override IResultColumnCompilerHint? CompilerHint
     {
         get => ProxiedBuilder.CompilerHint;
-        protected internal set => ProxiedBuilder.CompilerHint = value;
+        internal protected set => ProxiedBuilder.CompilerHint = value;
     }
 
     /// <inheritdoc/>
