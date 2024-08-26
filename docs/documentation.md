@@ -809,23 +809,23 @@ class MyDbContext
     {
         modelBuilder.LoadReflectiveModels(options => options
             .ConfigurePolicies(policies => policies
-                .AddPolicy<ColumnNaming>(naming => naming.RequireExplicit())
+                .AddPolicy<EntityNaming>(naming => naming.RequireExplicit())
                 .AddPolicy<PropertyMapping>(properties => properties.IgnoreImplicit())));
     }
 }
 ```
 
-RECAP allows you to use predefined or custom mapping and naming policies to enforce different policies for your Entity Framework mappings. Following the principles of *"explicit is better than implicit"*, you can, for example, prohibit EF Core from applying convention-based mappings if no explicit column name has been specified. This way, you can ensure that all mappings are explicitly defined and that renaming a property or class will not break your application.
+RECAP allows you to use predefined or custom mapping and naming policies to enforce different policies for your Entity Framework mappings. Following the principles of *"explicit is better than implicit"*, you can, for example, prohibit EF Core from applying convention-based mappings if no explicit name has been specified for an entity or property. This way, you can ensure that all mappings are explicitly defined and that renaming a property or class will not break your application.
 
 ##### Naming Policies
 
-Naming policies determine what action RECAP should take when no explicit column name is provided for an entity or property. They can be configured by adding the `ColumnNaming` to the policy option builder. The following predefined naming policies are available:
+Naming policies determine what action RECAP should take when no explicit name is provided for an entity or property. They can be configured by adding the `EntityNaming` policy to the policy option builder. The following predefined naming policies are available:
 
 | Policy | Description |
 | --- | --- |
 | `AllowImplicit` | Allows implicit naming of database column, tables, or views determined automatically from the corresponding CLR name via EF Core conventions. |
-| `PreferExplicit` | Allows implicit naming of database columns determined automatically from the corresponding property name via EF Core conventions but generates warnings and advises against implicit naming in an apttempt to pressure you into writing clean code. *This is the default naming policy used by RECAP.* |
-| `RequireExplicit` | Requires explicit naming of database columns and enforces this policy by throwing an exception if implicit naming is attempted. |
+| `PreferExplicit` | Allows implicit naming of database components, determined automatically from the corresponding property or CLR type name via EF Core conventions but generates warnings and advises against implicit naming in an attempt to pressure you into writing clean code. *This is the default naming policy used by RECAP.* |
+| `RequireExplicit` | Requires explicit naming of all database components and enforces this policy by throwing an exception if implicit naming attempts are detected. |
 
 ##### Mapping Policies
 
