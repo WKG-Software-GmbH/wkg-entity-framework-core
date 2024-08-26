@@ -8,7 +8,7 @@ internal class InheritanceValidationPolicy(InheritanceValidationOptions options)
     {
         if (!entityType.ClrType.IsAssignableTo(options.RequiredBaseType)
             && !options.ExceptedTypes.Contains(entityType.ClrType)
-            && !options.ExceptedBaseTypes.Any(exception => entityType.ClrType.IsAssignableTo(exception)))
+            && !options.ExceptedBaseTypes.Any(entityType.ClrType.IsAssignableTo))
         {
             options.OnValidationFailure(entityType.ClrType);
         }

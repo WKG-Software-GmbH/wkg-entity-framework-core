@@ -14,12 +14,12 @@ internal readonly struct ILAccessorBuilder : IAccessorBuilder, IAccessorBuilderF
     /// <summary>
     /// the argument types for the parameter setter delegate (<see cref="PropertySetter"/>), cached for performance (read-only, so thread safe)
     /// </summary>
-    private static readonly Type[] _parameterSetterArgumentTypes = TypeArray.Of<object, object>();
+    private static readonly Type[] s_parameterSetterArgumentTypes = TypeArray.Of<object, object>();
 
     /// <summary>
     /// argument types for the parameter getter delegate (<see cref="PropertyGetter"/>), again cached for performance (again, read-only)
     /// </summary>
-    private static readonly Type[] _parameterGetterArgumentTypes = TypeArray.Of<object>();
+    private static readonly Type[] s_parameterGetterArgumentTypes = TypeArray.Of<object>();
 
     /// <summary>
     /// the property info of the property this accessor builder is for
@@ -65,7 +65,7 @@ internal readonly struct ILAccessorBuilder : IAccessorBuilder, IAccessorBuilderF
         DynamicMethod dynamicMethod = new(
             $"Getter_{Guid.NewGuid:N}",
             typeof(object),
-            _parameterGetterArgumentTypes,
+            s_parameterGetterArgumentTypes,
             _ownerType,
             true);
 
@@ -113,7 +113,7 @@ internal readonly struct ILAccessorBuilder : IAccessorBuilder, IAccessorBuilderF
         DynamicMethod dynamicMethod = new(
             $"Setter_{Guid.NewGuid:N}",
             typeof(void),
-            _parameterSetterArgumentTypes,
+            s_parameterSetterArgumentTypes,
             _ownerType,
             true);
 

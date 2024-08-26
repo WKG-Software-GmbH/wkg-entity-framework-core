@@ -10,7 +10,7 @@ namespace Wkg.EntityFrameworkCore.ProcedureMapping.Compiler.ResultConverters;
 /// </summary>
 public static class JsonResultConverter
 {
-    private static readonly MethodInfo Deserialize = typeof(JsonSerializer)
+    private static readonly MethodInfo s_deserialize = typeof(JsonSerializer)
         .GetMethod(nameof(JsonSerializer.Deserialize), TypeArray.Of<string, Type, JsonSerializerOptions>())!;
 
     /// <summary>
@@ -22,7 +22,7 @@ public static class JsonResultConverter
         ParameterExpression jsonExpression = Expression.Parameter(typeof(string), "json");
         ConstantExpression typeExpression = Expression.Constant(targetType, typeof(Type));
         ConstantExpression optionsExpression = Expression.Constant(null, typeof(JsonSerializerOptions));
-        MethodCallExpression deserializeInvocation = Expression.Call(Deserialize, jsonExpression, typeExpression, optionsExpression);
+        MethodCallExpression deserializeInvocation = Expression.Call(s_deserialize, jsonExpression, typeExpression, optionsExpression);
         Expression result;
         if (targetType.IsValueType)
         {

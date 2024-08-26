@@ -24,10 +24,14 @@
         - [Connection Entity Discovery](#connection-entity-discovery)
           - [Reflective Connection Discovery](#reflective-connection-discovery)
           - [Manual Connection Registration](#manual-connection-registration)
-      - [Defining Mapping and Naming Policies](#defining-mapping-and-naming-policies)
+      - [Enforcing Policies](#enforcing-policies)
         - [Naming Policies](#naming-policies)
         - [Mapping Policies](#mapping-policies)
-        - [Applying Policies](#applying-policies)
+        - [Inheritance Policies](#inheritance-policies)
+        - [Custom Policies](#custom-policies)
+          - [Example: Code-First Naming with Snake Case](#example-code-first-naming-with-snake-case)
+          - [Example: Ensure All UUID Properties are Database-Generated](#example-ensure-all-uuid-properties-are-database-generated)
+          - [Example: Automatically Ignoring Navigation Properties during JSON Serialization](#example-automatically-ignoring-navigation-properties-during-json-serialization)
     - [Stored Procedure Mapping](#stored-procedure-mapping)
       - [Getting Started with PCO Mapping](#getting-started-with-pco-mapping)
         - [Mapping a Database Function](#mapping-a-database-function)
@@ -792,63 +796,36 @@ class MyDbContext : DbContext
 > :warning: **Warning**
 > If you are using manual connection registration, be sure to register the connection entities after the entities they connect have been registered.
 
-#### Defining Mapping and Naming Policies
+#### Enforcing Policies
 
-RECAP allows you to use predefined or custom mapping and naming policies to enforce different policies for your Entity Framework mappings. Following the principles of *"explicit is better than implicit"*, you can, for example, prohibit EF Core from applying convention-based mappings if no explicit column or table name has been specified. This way, you can ensure that all mappings are explicitly defined and that renaming a property or class will not break your application.
+RECAP allows you to enforce different policies for your Entity Framework mappings. Policies can be applied to all entities loaded via Reflective Entity Discovery, allowing you to enforce code quality standards, validate mappings to discover potential issues, or execute custom initialization logic for all discovered entities.
+
+Policies are configured by calling the `ConfigurePolicies()` method on the `IModelOptionsBuilder` instance in the `LoadReflectiveModels` method. The following example shows how to apply built-in naming and mapping policies to all entities loaded via Reflective Entity Discovery:
+
+```csharp
+class MyDbContext
+{
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.LoadReflectiveModels(options => options
+            .ConfigurePolicies(policies => policies
+                .AddPolicy<ColumnNaming>(naming => naming.RequireExplicit())
+                .AddPolicy<PropertyMapping>(properties => properties.IgnoreImplicit())));
+    }
+}
+```
+
+RECAP allows you to use predefined or custom mapping and naming policies to enforce different policies for your Entity Framework mappings. Following the principles of *"explicit is better than implicit"*, you can, for example, prohibit EF Core from applying convention-based mappings if no explicit column name has been specified. This way, you can ensure that all mappings are explicitly defined and that renaming a property or class will not break your application.
 
 ##### Naming Policies
 
-Naming policies determine what action RECAP should take when no explicit column or table name is provided for an entity or property. The following predefined naming policies are available:
+Naming policies determine what action RECAP should take when no explicit column name is provided for an entity or property. They can be configured by adding the `ColumnNaming` to the policy option builder. The following predefined naming policies are available:
 
 | Policy | Description |
 | --- | --- |
 | `AllowImplicit` | Allows implicit naming of database column, tables, or views determined automatically from the corresponding CLR name via EF Core conventions. |
 | `PreferExplicit` | Allows implicit naming of database columns determined automatically from the corresponding property name via EF Core conventions but generates warnings and advises against implicit naming in an apttempt to pressure you into writing clean code. *This is the default naming policy used by RECAP.* |
 | `RequireExplicit` | Requires explicit naming of database columns and enforces this policy by throwing an exception if implicit naming is attempted. |
-
-Predifined naming policies are provided as static properties of the `NamingPolicy` class.
-
-You can also create your own custom naming policies by implementing the `INamingPolicy` interface. The following example shows how to create a naming policy that allows convention-based naming of database columns and tables but ensures that the names are in snake case:
-
-```csharp
-readonly struct UseSnakeCaseByConvention : INamingPolicy
-{
-    public void Audit(IMutableEntityType entityType)
-    {
-        if (!entityType.HasAnnotation(annotation => annotation 
-            is RelationalAnnotationNames.TableName 
-            or RelationalAnnotationNames.ViewName))
-        {
-            entityType.SetTableName(ToSnakeCase(entityType.Name));
-        }
-        foreach (var property in entityType.GetProperties())
-        {
-            if (!property.HasAnnotation(annotation => annotation is RelationalAnnotationNames.ColumnName))
-            {
-                property.SetColumnName(ToSnakeCase(property.Name));
-            }
-        }
-    }
-
-    private static string ToSnakeCase(string name)
-    {
-        StringBuilder bobTheBuilder = new();
-        for (int i = 0; i < name.Length; i++)
-        {
-            char c = name[i];
-            if (i > 0 && char.IsUpper(c))
-            {
-                builder.Append('_');
-            }
-            builder.Append(char.ToLowerInvariant(c));
-        }
-        return builder.ToString();
-    }
-}
-```
-
-> :x: **Caution**
-> Policies are designed to be stateless and immutable. If you absolutely need to store state, beware that policy objects are treated as singletons by RECAP, so the same instance will be used for all mappings.
 
 ##### Mapping Policies
 
@@ -861,51 +838,312 @@ Mapping policies determine what action RECAP should take when a property is neit
 | `RequireExplicit` | Requires explicit mapping of properties and enforces this policy by throwing an exception if implicit mapping is attempted. |
 | `IgnoreImplicit` | Automatically ignores properties that are not explicitly mapped. This has the same effect as calling the `Ignore()` method on the `PropertyBuilder` instance. *This is the default mapping policy used by RECAP.* |
 
-Predifined mapping policies are provided as static properties of the `PropertyMappingPolicy` class.
+##### Inheritance Policies
 
-Similar to naming policies, you can also create your own custom mapping policies by implementing the `IMappingPolicy` interface.
-
-##### Applying Policies
-
-You can apply naming and mapping policies by passing corresponding policy objects to the `LoadReflectiveModels()` method. The following example shows how to apply the `AllowImplicit` naming policy and the `IgnoreImplicit` mapping policy:
+If you are using soft delete or change tracking techniques that require all entities to inherit from a common base class, you can enforce such inheritance requirements using the predefined `EntityInheritanceValidation` policy, which automatically enforces the configured inheritance requirements on all entities loaded via Reflective Entity Discovery.
 
 ```csharp
-class MyDbContext : DbContext
+class MyDbContext
 {
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        _ = modelBuilder.LoadReflectiveModels
-        (
-            NamingPolicy.AllowImplicit, 
-            PropertyMappingPolicy.IgnoreImplicit
-        );
+        modelBuilder.LoadReflectiveModels(options => options
+            .ConfigurePolicies(policies => policies
+                .AddPolicy<EntityInheritanceValidation>(entity => entity
+                    .MustExtend<ISoftDeletable>()
+                    .UnlessExtends<IDatabaseView>()
+                    .Unless<TransientFoo>())
+                .AddPolicy<EntityInheritanceValidation>(entity => entity
+                    .ShouldExtend<IChangeTrackable>()
+                    .UnlessExtends<IDatabaseView>()
+                    .Unless<TransientFoo>())
+                    .Unless<TransientBar>()));
     }
 }
 ```
 
-If you are using manual entity registration, you can use an `IDiscoveryContext` instance to apply policies to all loaded entities. The following example shows how to apply the `PreferExplicit` naming policy and the `IgnoreImplicit` mapping policy manually:
+In the example above, the `EntityInheritanceValidation` policy enforces that all entities loaded via Reflective Entity Discovery must inherit from the `ISoftDeletable` interface, unless they inherit from the `IDatabaseView` interface or are of the `TransientFoo` type, which are exempt from the inheritance requirement. If an entity violates the inheritance requirements, an appropriate action is taken, such as throwing an exception or generating a warning. The severity of the action depends on whether the requirement is mandatory (`MustExtend`) or optional (`ShouldExtend`). Multiple independent inheritance requirements can be enforced by adding multiple `EntityInheritanceValidation` policies.
+
+##### Custom Policies
+
+RECAP's policy system is designed to be extensible, allowing you to create custom policies that apply to your specific needs and requirements. Custom policies are implemented by specifying a builder class that implements `IEntityPolicyBuilder<TSelf>` and a policy class that implements `IEntityPolicy`. The following examples aim to demonstrate the versatility of custom policies and may be used as a starting point for creating your own custom policies today.
+
+> :x: **Caution**
+> Policies are designed to be stateless and immutable. If you absolutely need to store state, beware that policy objects are treated as singletons by RECAP, so the same instance will be used for all mappings.
+
+###### Example: Code-First Naming with Snake Case
+
+Assume you are using a code-first approach to define your entities and properties, and want EF Core to automatically generate database tables and columns with snake case names, but you don't want to use data annotations or fluent API to specify every table and column name explicitly. You can create a custom naming policy that converts the default PascalCase names to snake_case names by convention.
+
+<details>
+<summary>
+
+*Show/hide code-snippet*
+
+</summary>
 
 ```csharp
-class MyDbContext : DbContext
+// a minimalistic policy builder class with no additional configuration options
+public class UseSnakeCaseByConvention : IEntityPolicyBuilder<UseSnakeCaseByConvention>
+{
+    // the factory method to create the policy builder
+    static UseSnakeCaseByConvention IEntityPolicyBuilder<UseSnakeCaseByConvention>.Create() => new();
+
+    // only one instance of the policy is needed
+    static bool IEntityPolicyBuilder.AllowMultiple => false;
+
+    // build the policy
+    IEntityPolicy IEntityPolicyBuilder.Build() => new Policy();
+
+    // the internal policy class that actually enforces the naming convention
+    private class Policy : IEntityPolicy
+    {
+        public void Audit(IMutableEntityType entityType)
+        {
+            // unless explicitly specified, convert the entity name to snake_case
+            if (!entityType.HasAnnotation(annotation => annotation 
+                is RelationalAnnotationNames.TableName 
+                or RelationalAnnotationNames.ViewName))
+            {
+                entityType.SetTableName(ToSnakeCase(entityType.Name));
+            }
+            foreach (var property in entityType.GetProperties())
+            {
+                // same for properties
+                if (!property.HasAnnotation(annotation => annotation is RelationalAnnotationNames.ColumnName))
+                {
+                    property.SetColumnName(ToSnakeCase(property.Name));
+                }
+            }
+        }
+
+        private static string ToSnakeCase(string name)
+        {
+            StringBuilder bobTheBuilder = new();
+            for (int i = 0; i < name.Length; i++)
+            {
+                char c = name[i];
+                if (i > 0 && char.IsUpper(c))
+                {
+                    builder.Append('_');
+                }
+                builder.Append(char.ToLowerInvariant(c));
+            }
+            return builder.ToString();
+        }
+    }
+}
+
+// usage in the DbContext
+class MyDbContext
 {
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // create a discovery context with the desired policies
-        IDiscoveryContext discoveryContext = modelBuilder.CreateDiscoveryContext
-        (
-            NamingPolicy.PreferExplicit, 
-            PropertyMappingPolicy.IgnoreImplicit
-        );
-        // load entities and connections using the discovery context
-        _ = modelBuilder
-            .LoadModel<Person>(discoveryContext)
-            .LoadModel<Group>(discoveryContext)
-            .LoadConnection<PersonToGroup, Person, Group>(discoveryContext);
-        // enforce policies on all loaded entities
-        discoveryContext.AuditPolicies();
+        modelBuilder.LoadReflectiveModels(options => options
+            .ConfigurePolicies(policies => policies
+                .AddPolicy<UseSnakeCaseByConvention>()));
     }
 }
 ```
+
+</details>
+
+###### Example: Ensure All UUID Properties are Database-Generated
+
+Assume you are using UUIDs as substitute primary keys for your entities and want to ensure that all UUID properties are automatically generated by the database (rather being provided by the client). Perhaps you are using an `IGeneratedUuidOwner` interface to mark entities that own a UUID property that should be automatically generated. This interface may then be used in the `DbContext` to ignore changes to the UUID properties when saving changes to the database.
+
+You can create a custom policy that enforces that all UUID properties are automatically generated by the database. The following example demonstrates how to create such a policy:
+
+<details>
+<summary>
+
+*Show/hide code-snippet*
+
+</summary>
+
+```csharp
+// a policy builder class with configuration options
+internal class AssertUuidsAreDatabaseGenerated : IEntityPolicyBuilder<AssertUuidsAreDatabaseGenerated>
+{
+    private AssertionAction _action = AssertionAction.Warn;
+    private Func<IMutableProperty, bool>? _propertyFilter;
+
+    // having multiple instances of the policy is nonsensical and not allowed
+    static bool IEntityPolicyBuilder.AllowMultiple => false;
+
+    static AssertUuidsAreDatabaseGenerated IEntityPolicyBuilder<AssertUuidsAreDatabaseGenerated>.Create() => new();
+
+    IEntityPolicy? IEntityPolicyBuilder.Build() => new Policy(_action, _propertyFilter ?? (prop => true));
+
+    // configuration methods
+    // determines the action to take when a violation is detected
+    public AssertUuidsAreDatabaseGenerated OnViolation(AssertionAction action)
+    {
+        _action = action;
+        return this;
+    }
+
+    // filters the properties to which the policy should be applied
+    public AssertUuidsAreDatabaseGenerated ForProperties(Func<IMutableProperty, bool> propertyFilter)
+    {
+        if (_propertyFilter is null)
+        {
+            _propertyFilter = propertyFilter;
+        }
+        else
+        {
+            Func<IMutableProperty, bool> oldFilter = _propertyFilter;
+            _propertyFilter = prop => oldFilter.Invoke(prop) && propertyFilter.Invoke(prop);
+        }
+        return this;
+    }
+
+    private class Policy(AssertionAction action, Func<IMutableProperty, bool> propertyFilter) : IEntityPolicy
+    {
+        public void Audit(IMutableEntityType entityType)
+        {
+            if (!entityType.ClrType.ImplementsInterface<IGeneratedUuidOwner>() 
+                && entityType.GetProperties().Any(prop => prop.ClrType == typeof(Uuid) 
+                && propertyFilter.Invoke(prop)))
+            {
+                string message = $"Entity type {entityType.ClrType.Name} has a UUID property but does not implement {nameof(IGeneratedUuidOwner)}. This may cause issues with UUID generation.";
+                Log.WriteWarning(message, LogWriter.Blocking);
+                if (action == AssertionAction.Throw)
+                {
+                    throw new PolicyViolationException(message);
+                }
+            }
+        }
+    }
+}
+
+// for configuration
+public enum AssertionAction
+{
+    Warn,
+    Throw,
+}
+
+// the interface to mark entities that own a UUID property
+public interface IGeneratedUuidOwner
+{
+    Uuid Uuid { get; }
+}
+
+// usage in the DbContext
+class MyDbContext
+{
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        // Prevent setting Uuid manually (database will generate it)
+        foreach (EntityEntry<IGeneratedUuidOwner> entry in ChangeTracker.Entries<IGeneratedUuidOwner>())
+        {
+            // automatically rollback changes to database-generated UUIDs
+            PropertyEntry<IGeneratedUuidOwner, Uuid> uuid;
+            if (entry.State is EntityState.Added or EntityState.Modified 
+                && (uuid = entry.Property(e => e.Uuid)).IsModified)
+            {
+                uuid.IsModified = false;
+#if DEBUG
+                if (uuid.CurrentValue != default && uuid.CurrentValue != uuid.OriginalValue)
+                {
+                    throw new InvalidOperationException($"Uuid must not be set manually. Uuid values of owner {nameof(IGeneratedUuidOwner)} entities are generated automatically.");
+                }
+#endif
+            }
+        }
+        return base.SaveChanges(acceptAllChangesOnSuccess);
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.LoadReflectiveModels(options => options
+            .ConfigurePolicies(policies => policies
+                .AddPolicy<AssertUuidsAreDatabaseGenerated>(assertUuid => assertUuid
+                    // there may be some UUID properties that have legitimate reasons to be set manually
+                    // e.g., Camunda UUID references. These should be excluded from the policy.
+                    // usually, these properties should be named more expressively than just "Uuid",
+                    // so we can use a simple name filter to exclude them
+                    .ForProperties(prop => prop.Name == nameof(IGeneratedUuidOwner.Uuid))
+                    .OnViolation(AssertionAction.Throw))));
+    }
+}
+```
+
+</details>
+
+###### Example: Automatically Ignoring Navigation Properties during JSON Serialization
+
+Assume you are using JSON serialization to serialize your entities into API responses, and you want to automatically ignore navigation properties to prevent circular references and reduce the size of the JSON response. You can create a custom policy in conjunction with the a custom JSON converter to automatically ignore navigation properties during JSON serialization.
+
+<details>
+<summary>
+
+*Show/hide code-snippet*
+
+</summary>
+
+```csharp
+// The JSON converter that automatically ignores navigation properties
+internal class IgnoreComplexPropertiesJsonConverter<T>(ImmutableArray<PropertyInfo> allowedProperties) : JsonConverter<T> where T : class
+{
+    public override T? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) => 
+        JsonSerializer.Deserialize<T>(ref reader, options);
+
+    public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
+    {
+        writer.WriteStartObject();
+        for (int i = 0; i < allowedProperties.Length; i++)
+        {
+            PropertyInfo property = allowedProperties[i];
+            object? propValue = property.GetValue(value);
+            writer.WritePropertyName(property.Name);
+            JsonSerializer.Serialize(writer, propValue, options);
+        }
+        writer.WriteEndObject();
+    }
+}
+
+// The policy that automatically applies the JSON converter to all entities
+public class JsonIgnoreComplexProperties : IEntityPolicyBuilder<JsonIgnoreComplexProperties>
+{
+    static bool IEntityPolicyBuilder.AllowMultiple => false;
+
+    static JsonIgnoreComplexProperties IEntityPolicyBuilder<JsonIgnoreComplexProperties>.Create() => new();
+
+    IEntityPolicy? IEntityPolicyBuilder.Build() => new Policy();
+
+    private class Policy : IEntityPolicy
+    {
+        public void Audit(IMutableEntityType entityType)
+        {
+            ImmutableArray<PropertyInfo> allowedProperties = entityType.GetProperties()
+                .Where(prop => !prop.IsShadowProperty())
+                .Select(prop => prop.PropertyInfo)
+                .Where(prop => prop is not null)
+                .ToImmutableArray()!;
+            Type converterType = typeof(IgnoreComplexPropertiesJsonConverter<>).MakeGenericType(entityType.ClrType);
+            JsonConverter converter = (JsonConverter)(Activator.CreateInstance(converterType, allowedProperties)
+                ?? throw new InvalidOperationException($"Failed to create an instance of {converterType}."));
+            Log.WriteDiagnostic($"Added {nameof(IgnoreComplexPropertiesJsonConverter<object>)} to {entityType.ClrType.Name}. Included properties: {string.Join(", ", allowedProperties.Select(prop => prop.Name))}");
+            SerializationStore.SerializerOptions.Converters.Add(converter);
+        }
+    }
+}
+
+// Usage in the DbContext
+class MyDbContext
+{
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.LoadReflectiveModels(options => options
+            .ConfigurePolicies(policies => policies
+                .AddPolicy<JsonIgnoreComplexProperties>()));
+    }
+}
+```
+
+</details>
 
 ### Stored Procedure Mapping
 

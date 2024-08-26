@@ -71,9 +71,9 @@ public readonly struct ResultElement<TResult>(TResult? result) : IResultContaine
     {
         if (_result is not null)
         {
-            return new[] { _result };
+            return [_result];
         }
-        return Array.Empty<TResult>();
+        return [];
     }
 
     /// <inheritdoc/>

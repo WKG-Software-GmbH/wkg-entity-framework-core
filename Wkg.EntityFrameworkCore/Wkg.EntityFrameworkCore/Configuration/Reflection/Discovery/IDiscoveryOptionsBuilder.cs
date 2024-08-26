@@ -1,5 +1,4 @@
-﻿using Wkg.EntityFrameworkCore.Configuration.Policies;
-using Wkg.EntityFrameworkCore.Configuration.Reflection.Attributes;
+﻿using Wkg.EntityFrameworkCore.Configuration.Reflection.Attributes;
 
 namespace Wkg.EntityFrameworkCore.Configuration.Reflection.Discovery;
 

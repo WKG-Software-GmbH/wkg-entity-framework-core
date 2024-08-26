@@ -1,8 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Wkg.Common.Extensions;
 using Wkg.Logging;
 using Wkg.Reflection.Extensions;
 

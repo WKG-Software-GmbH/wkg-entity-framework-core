@@ -1,5 +1,4 @@
-﻿using Wkg.Common.Extensions;
-using Wkg.EntityFrameworkCore.Configuration.Policies.ColumnNamingPolicies.Internals;
+﻿using Wkg.EntityFrameworkCore.Configuration.Policies.ColumnNamingPolicies.Internals;
 
 namespace Wkg.EntityFrameworkCore.Configuration.Policies.ColumnNamingPolicies;
 

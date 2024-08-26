@@ -13,8 +13,8 @@ namespace Wkg.EntityFrameworkCore.Configuration.Reflection;
 /// </summary>
 internal class ReflectiveConnectionLoader : ReflectiveLoaderBase
 {
-    private static object? _reflectiveConnectionLoaderSentinel = new();
-    private static readonly HashSet<Type> _loadedDatabaseEngines = [];
+    private static object? s_reflectiveConnectionLoaderSentinel = new();
+    private static readonly HashSet<Type> s_loadedDatabaseEngines = [];
 
     /// <summary>
     /// Loads and configures all <see cref="IReflectiveModelConnection{TConnection, TSource, TTarget}"/> implementations.
@@ -34,20 +34,20 @@ internal class ReflectiveConnectionLoader : ReflectiveLoaderBase
         if (options.TargetDatabaseEngineAttributes.Length == 0)
         {
             dbEngineModelAttributeTypes = null;
-            AssertLoadOnce(builder, ref _reflectiveConnectionLoaderSentinel);
+            AssertLoadOnce(builder, ref s_reflectiveConnectionLoaderSentinel);
         }
         else
         {
             dbEngineModelAttributeTypes = options.TargetDatabaseEngineAttributes;
-            lock(_loadedDatabaseEngines)
+            lock(s_loadedDatabaseEngines)
             {
-                if (dbEngineModelAttributeTypes.FirstOrDefault(_loadedDatabaseEngines.Contains) is Type databaseEngineAttributeType)
+                if (dbEngineModelAttributeTypes.FirstOrDefault(s_loadedDatabaseEngines.Contains) is Type databaseEngineAttributeType)
                 {
                     throw new InvalidOperationException($"The database engine {databaseEngineAttributeType.Name} has already been loaded.");
                 }
                 foreach (Type type in dbEngineModelAttributeTypes)
                 {
-                    _loadedDatabaseEngines.Add(type);
+                    s_loadedDatabaseEngines.Add(type);
                     Log.WriteInfo($"Added discovery target for model connections decorated with {type.Name}.");
                 }
             }
