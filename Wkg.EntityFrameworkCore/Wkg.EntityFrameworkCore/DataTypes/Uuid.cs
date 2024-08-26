@@ -84,8 +84,8 @@ public struct Uuid : IEqualityOperators<Uuid, Uuid, bool>, IEquatable<Uuid>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void NewUuidV4Core(Span<byte> buffer)
     {
-        buffer[6] = (byte)(buffer[6] & 0x0F | 0x40);
-        buffer[8] = (byte)(buffer[8] & 0x3F | 0x80);
+        buffer[6] = (byte)((buffer[6] & 0x0F) | 0x40);
+        buffer[8] = (byte)((buffer[8] & 0x3F) | 0x80);
     }
 
     /// <summary>
@@ -177,7 +177,7 @@ public struct Uuid : IEqualityOperators<Uuid, Uuid, bool>, IEquatable<Uuid>
     /// <summary>
     /// Returns a 36-character string that represents the current <see cref="Uuid"/> object.
     /// </summary>
-    public override readonly string ToString()
+    public readonly override string ToString()
     {
         // allocate enough bytes to store Uuid ASCII string
         Span<byte> result = stackalloc byte[36];
@@ -210,10 +210,10 @@ public struct Uuid : IEqualityOperators<Uuid, Uuid, bool>, IEquatable<Uuid>
             int isOddMask = -(i & 1);
 
             // 0xF...F if i / 2 is < 2 and 0x0...0 if i / 2 is >= 2
-            int less2Mask = (i >> 1) - 2 >> 31;
+            int less2Mask = ((i >> 1) - 2) >> 31;
 
             // 0xF...F if i / 2 is > 5 and 0x0...0 if i / 2 is <= 5
-            int greater5Mask = ~((i >> 1) - 6 >> 31);
+            int greater5Mask = ~(((i >> 1) - 6) >> 31);
 
             // 0xF...F if i is even and 2 <= i / 2 <= 5 otherwise 0x0...0
             int skipIndexMask = ~(isOddMask | less2Mask | greater5Mask);
@@ -221,13 +221,13 @@ public struct Uuid : IEqualityOperators<Uuid, Uuid, bool>, IEquatable<Uuid>
             // skipIndexMask will be 0xFFFFFFFF for indices 4, 6, 8 and 10 and 0x00000000 for all other indices
             // --> skip those indices
             skip += 1 & skipIndexMask;
-            buffer[2 * i + skip] = HexlifyAsciiNibble(source[i] >>> 0x4);
-            buffer[2 * i + skip + 1] = HexlifyAsciiNibble(source[i] & 0x0F);
+            buffer[(2 * i) + skip] = HexlifyAsciiNibble(source[i] >>> 0x4);
+            buffer[(2 * i) + skip + 1] = HexlifyAsciiNibble(source[i] & 0x0F);
         }
 
         // add dashes
-        const byte dash = (byte)'-';
-        buffer[8] = buffer[13] = buffer[18] = buffer[23] = dash;
+        const byte DASH = (byte)'-';
+        buffer[8] = buffer[13] = buffer[18] = buffer[23] = DASH;
     }
 
     /// <summary>
@@ -303,7 +303,7 @@ public struct Uuid : IEqualityOperators<Uuid, Uuid, bool>, IEquatable<Uuid>
     /// <returns><see langword="true"/> if the string was successfully parsed; otherwise, <see langword="false"/>.</returns>
     public static bool TryParseUnsafe(ReadOnlySpan<char> s, out Uuid uuid)
     {
-        const int SKIP_MAP = 1 << 8 | 1 << 13 | 1 << 18 | 1 << 23;
+        const int SKIP_MAP = (1 << 8) | (1 << 13) | (1 << 18) | (1 << 23);
 
         if (Encoding.ASCII.GetByteCount(s) != 36)
         {
@@ -316,12 +316,12 @@ public struct Uuid : IEqualityOperators<Uuid, Uuid, bool>, IEquatable<Uuid>
         int skip = 0;
         for (int i = 0; i < result.Length; i++)
         {
-            int skipMask = -(1 << 2 * i + skip & SKIP_MAP) >> 31;
+            int skipMask = -((1 << ((2 * i) + skip)) & SKIP_MAP) >> 31;
             skip += 1 & skipMask;
-            int idx = 2 * i + skip;
+            int idx = (2 * i) + skip;
             int hi = UnhexlifyAsciiNibble(bytes[idx]);
             int lo = UnhexlifyAsciiNibble(bytes[idx + 1]);
-            result[i] = (byte)(hi << 4 | lo);
+            result[i] = (byte)((hi << 4) | lo);
         }
         uuid = new Uuid(result);
         return true;
@@ -330,11 +330,11 @@ public struct Uuid : IEqualityOperators<Uuid, Uuid, bool>, IEquatable<Uuid>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static byte HexlifyAsciiNibble(int b) =>
         // b + 0x30 for [0-9] if 0 <= b <= 9 and b + 0x30 + 0x27 for [a-f] if 10 <= b <= 15
-        (byte)(b + 0x30 + (0x27 & ~(b - 0xA >> 31)));
+        (byte)(b + 0x30 + (0x27 & ~((b - 0xA) >> 31)));
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int UnhexlifyAsciiNibble(int ascii) => 
-        (ascii & 0xF) + (ascii >> 6) | ascii >> 3 & 0x8;
+        ((ascii & 0xF) + (ascii >> 6)) | ((ascii >> 3) & 0x8);
 
     /// <summary>
     /// Validates the specified 36-character string representation of a UUID.

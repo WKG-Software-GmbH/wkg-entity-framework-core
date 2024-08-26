@@ -20,5 +20,5 @@ public interface IModelOptionsBuilder
     /// </summary>
     /// <param name="configure">The action to configure the policy options.</param>
     /// <returns>The same <see cref="IModelOptionsBuilder"/> instance for method chaining.</returns>
-    IModelOptionsBuilder ConfigurePolicies(Action<IPolicyOptionBuilder> configure);
+    IModelOptionsBuilder ConfigurePolicies(Action<IPolicyOptionsBuilder> configure);
 }

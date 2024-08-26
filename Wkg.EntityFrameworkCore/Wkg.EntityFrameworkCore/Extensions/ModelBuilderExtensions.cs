@@ -1,12 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Wkg.EntityFrameworkCore.Configuration;
-using Wkg.EntityFrameworkCore.Configuration.Policies.MappingPolicies;
-using Wkg.EntityFrameworkCore.Configuration.Policies.ColumnNamingPolicies;
 using Wkg.EntityFrameworkCore.Configuration.Reflection;
 using Wkg.EntityFrameworkCore.Configuration.Reflection.Discovery;
 using Wkg.EntityFrameworkCore.Configuration.Discovery;
 using Wkg.EntityFrameworkCore.Configuration.Policies;
+using Wkg.EntityFrameworkCore.Configuration.Policies.Defaults.PropertyMappingPolicies;
+using Wkg.EntityFrameworkCore.Configuration.Policies.Defaults.EntityNamingPolicies;
 
 namespace Wkg.EntityFrameworkCore.Extensions;
 
@@ -95,7 +95,7 @@ public static class ModelBuilderExtensions
 
     private static void AddDefaults(this ModelOptionsBuilder modelOptions)
     {
-        ColumnNaming.AddDefaults(modelOptions.PolicyOptionsBuilder);
+        EntityNaming.AddDefaults(modelOptions.PolicyOptionsBuilder);
         PropertyMapping.AddDefaults(modelOptions.PolicyOptionsBuilder);
     }
 }
