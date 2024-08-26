@@ -1,4 +1,4 @@
-﻿using Wkg.EntityFrameworkCore.Configuration.Policies.MappingPolicies;
+﻿using Wkg.EntityFrameworkCore.Configuration.Policies.PropertyMappingPolicies;
 
 namespace Wkg.EntityFrameworkCore.Configuration.Policies.PropertyMappingPolicies;
 

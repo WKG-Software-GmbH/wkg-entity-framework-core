@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Wkg.EntityFrameworkCore.Configuration;
-using Wkg.EntityFrameworkCore.Configuration.Policies.MappingPolicies;
+using Wkg.EntityFrameworkCore.Configuration.Policies.PropertyMappingPolicies;
 using Wkg.EntityFrameworkCore.Configuration.Policies.ColumnNamingPolicies;
 using Wkg.EntityFrameworkCore.Configuration.Reflection;
 using Wkg.EntityFrameworkCore.Configuration.Reflection.Discovery;

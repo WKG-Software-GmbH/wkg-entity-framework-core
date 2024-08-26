@@ -1,6 +1,6 @@
-﻿using Wkg.EntityFrameworkCore.Configuration.Policies.MappingPolicies.Internals;
+﻿using Wkg.EntityFrameworkCore.Configuration.Policies.PropertyMappingPolicies.Internals;
 
-namespace Wkg.EntityFrameworkCore.Configuration.Policies.MappingPolicies;
+namespace Wkg.EntityFrameworkCore.Configuration.Policies.PropertyMappingPolicies;
 
 /// <summary>
 /// Configures the mapping policy for properties.
