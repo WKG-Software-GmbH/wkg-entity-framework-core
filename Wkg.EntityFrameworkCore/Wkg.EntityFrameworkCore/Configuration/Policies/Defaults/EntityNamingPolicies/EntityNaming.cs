@@ -59,11 +59,5 @@ public class EntityNaming : IEntityPolicyBuilder<EntityNaming>
 
     IEntityPolicy IEntityPolicyBuilder.Build() => _policy;
 
-    internal static void AddDefaults(IPolicyOptionsBuilder builder)
-    {
-        if (!builder.Contains<EntityNaming>())
-        {
-            builder.AddPolicy<EntityNaming>(Pass);
-        }
-    }
+    internal static void AddDefaults(IPolicyOptionsBuilder builder) => builder.TryAddPolicy<EntityNaming>();
 }

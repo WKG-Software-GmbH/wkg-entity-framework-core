@@ -6,23 +6,31 @@
         <LangVersion>latest</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+		<!-- CI injected versioning -->
+		<VersionPrefix>0.0.0</VersionPrefix>
+		<VersionSuffix>CI-INJECTED</VersionSuffix>
     </PropertyGroup>
 
     <!--Nuget packaging-->
     <PropertyGroup>
+		<PackageId>Wkg.EntityFrameworkCore</PackageId>
+        <Title>WKG Entity Framework Core</Title>
         <IsPackable>true</IsPackable>
-        <RepositoryUrl>https://git.wkg.lan/WKG/components/wkg-entity-framework-core</RepositoryUrl>
-        <PackageProjectUrl>https://git.wkg.lan/WKG/components/wkg-entity-framework-core</PackageProjectUrl>
-        <Title>WKG Library RECAP Core</Title>
-        <Description>Internal WKG library containing the EntityFrameworkCore Reflective Entity Configuration And Procedure mapping extension (RECAP).</Description>
+		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+        <RepositoryUrl>https://github.com/WKG-Software-GmbH/wkg-entity-framework-core</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/WKG-Software-GmbH/wkg-entity-framework-core</PackageProjectUrl>
+        <Description>
+			Wkg.EntityFrameworkCore provides the Reflective Entity Configuration And Procedure mapping extension (RECAP) to simplify the configuration of Entity Framework Core models, introduce ORM-compatible stored procedure and function mapping, add support for UUID data types, policy validation for discovered entities, and more.
+		</Description>
         <Company>WKG Software GmbH</Company>
         <Authors>WKG Software GmbH</Authors>
         <Copyright>Copyright (c) WKG Software GmbH 2024</Copyright>
         <PackageIcon>logo.png</PackageIcon>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageType>Dependency</PackageType>
         <PackageTags>
-            EntityFrameworkCore;ORM
-        </PackageTags>
+			entity-framework-core;efcore;orm;stored-procedure-mapping;orm-policy-validation;validation;db-data-types;orm-configuration;efcore-extension
+		</PackageTags>
     </PropertyGroup>
 
     <!--Nuget symbols and debugging-->
@@ -34,13 +42,14 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Wkg" Version="[8.2.16943,8.3)" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.8" />
+		<PackageReference Include="Wkg" Version="[8.2.17533,8.3)" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="[8.0.8,8.1.0)" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="[8.0.8,8.1.0)" />
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="Assets\logo.png" Pack="true" PackagePath="\" />
+        <None Include="_Assets\logo.png" Pack="true" PackagePath="\" />
+        <None Include="..\..\README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 
 </Project>

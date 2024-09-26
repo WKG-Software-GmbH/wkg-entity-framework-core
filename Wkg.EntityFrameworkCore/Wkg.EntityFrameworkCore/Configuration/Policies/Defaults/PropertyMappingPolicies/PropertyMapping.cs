@@ -70,11 +70,5 @@ public class PropertyMapping : IEntityPolicyBuilder<PropertyMapping>
         }
     }
 
-    internal static void AddDefaults(IPolicyOptionsBuilder builder)
-    {
-        if (!builder.Contains<PropertyMapping>())
-        {
-            builder.AddPolicy<PropertyMapping>(Pass);
-        }
-    }
+    internal static void AddDefaults(IPolicyOptionsBuilder builder) => builder.TryAddPolicy<PropertyMapping>();
 }
