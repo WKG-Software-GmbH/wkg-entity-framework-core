@@ -1,8 +1,12 @@
 # WKG Entity Framework Core
 
-![](https://git.wkg.lan/WKG/components/wkg-entity-framework-core/badges/main/pipeline.svg)
+[![NuGet version (Wkg.EntityFrameworkCore)](https://img.shields.io/nuget/v/Wkg.EntityFrameworkCore.svg?style=flat-square)](https://www.nuget.org/packages/Wkg.EntityFrameworkCore/)
 
 ---
+
+Wkg.EntityFrameworkCore is a company-internal library providing the Reflective Entity Configuration And Procedure mapping extension (RECAP) to simplify the configuration of Entity Framework Core models, introduce ORM-compatible stored procedure and function mapping, add support for UUID data types, policy validation for discovered entities, and more. The library helps to reduce the amount of boilerplate code required to configure Entity Framework Core models and stored procedures, bringing standardization, validation, and easier maintenance to our projects at WKG Software GmbH.
+
+As part of our commitment to open-source software, we are making this library [available to the public](https://github.com/WKG-Software-GmbH/wkg-entity-framework-core) under the GNU General Public License v3.0. We hope that it will be useful to other developers and that the community will contribute to its further development.
 
 ## Abstract
 
@@ -11,24 +15,14 @@
 
 ---
 
-This repository contains the database-independant core components of the RECAP framework as well as other re-usable components not directly related to RECAP. For platform-specific implementations of RECAP, see the following repositories:
+This repository contains the database-independant core components of the RECAP framework as well as other re-usable components not directly related to RECAP. For database-specific implementations of RECAP, required for stored procedure mapping, see the following repositories:
 
-- [WKG Entity Framework Core Oracle](https://git.wkg.lan/WKG/components/wkg-entity-framework-core-oracle)
-- [WKG Entity Framework Core MySQL](https://git.wkg.lan/WKG/components/wkg-entity-framework-core-mysql)
+- [WKG Entity Framework Core Oracle](https://github.com/WKG-Software-GmbH//wkg-entity-framework-core-oracle)
+- [WKG Entity Framework Core MySQL](https://github.com/WKG-Software-GmbH//wkg-entity-framework-core-mysql)
 
 ## Installation
 
-The *WKG Entity Framework Core* library is available as a NuGet package from our internal nuget feed. To install it, add the following package source to your NuGet configuration:
-
-```xml
-<PropertyGroup>
-    <RestoreAdditionalProjectSources>
-        https://baget.wkg.lan/v3/index.json
-    </RestoreAdditionalProjectSources>
-</PropertyGroup>
-```
-
-Then, install the package by adding the following package reference to your project file:
+Install the `Wkg.EntityFrameworkCore` package by adding the following package reference to your project file:
 
 ```xml
 <ItemGroup>
@@ -37,10 +31,10 @@ Then, install the package by adding the following package reference to your proj
 ```
 
 > :warning: **Warning**
-> Replace `X.X.X` with the latest stable version available on the [nuget feed](https://baget.wkg.lan/packages/wkg.entityframeworkcore/latest), where **the major version must match the major version of your targeted .NET runtime**.
+> Replace `X.X.X` with the latest stable version available on the [nuget feed](https://www.nuget.org/packages/Wkg.EntityFrameworkCore), where **the major version must match the major version of your targeted .NET runtime**.
 
 ## Conceptual Design and Usage
 
-For the full theoretical background and design principles of RECAP, please refer to the [RECAP paper](/docs/RECAP-concept.pdf).
+For the full theoretical background and design principles of RECAP, please refer to the [RECAP paper](https://github.com/WKG-Software-GmbH/wkg-entity-framework-core/tree/main/docs/RECAP-concept.pdf).
 
-For technical documentation and usage examples, please refer to the [documentation](/docs/documentation.md).
+For technical documentation and usage examples, please refer to the [documentation](https://github.com/WKG-Software-GmbH/wkg-entity-framework-core/tree/main/docs/documentation.md).
