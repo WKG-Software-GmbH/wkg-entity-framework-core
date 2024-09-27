@@ -35,6 +35,6 @@ Install the `Wkg.EntityFrameworkCore` package by adding the following package re
 
 ## Conceptual Design and Usage
 
-For the full theoretical background and design principles of RECAP, please refer to the [RECAP paper](https://github.com/WKG-Software-GmbH/wkg-entity-framework-core/tree/main/docs/RECAP-concept.pdf).
+For the full theoretical background and design principles of RECAP, please refer to the [RECAP paper](https://github.com/WKG-Software-GmbH/wkg-entity-framework-core/blob/main/docs/RECAP-concept.pdf).
 
-For technical documentation and usage examples, please refer to the [documentation](https://github.com/WKG-Software-GmbH/wkg-entity-framework-core/tree/main/docs/documentation.md).
+For technical documentation and usage examples, please refer to the [documentation](https://github.com/WKG-Software-GmbH/wkg-entity-framework-core/blob/main/docs/documentation.md).
