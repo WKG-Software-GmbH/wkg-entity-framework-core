@@ -42,7 +42,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-		<PackageReference Include="Wkg" Version="[8.2.17533,8.3)" />
+		<PackageReference Include="Wkg" Version="[8.2.17542,8.3)" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="[8.0.8,8.1.0)" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="[8.0.8,8.1.0)" />
     </ItemGroup>
