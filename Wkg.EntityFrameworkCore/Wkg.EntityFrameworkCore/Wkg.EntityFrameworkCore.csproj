@@ -6,31 +6,31 @@
         <LangVersion>latest</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-		<!-- CI injected versioning -->
-		<VersionPrefix>0.0.0</VersionPrefix>
-		<VersionSuffix>CI-INJECTED</VersionSuffix>
+        <!-- CI injected versioning -->
+        <VersionPrefix>0.0.0</VersionPrefix>
+        <VersionSuffix>CI-INJECTED</VersionSuffix>
     </PropertyGroup>
 
     <!--Nuget packaging-->
     <PropertyGroup>
-		<PackageId>Wkg.EntityFrameworkCore</PackageId>
+        <PackageId>Wkg.EntityFrameworkCore</PackageId>
         <Title>WKG Entity Framework Core</Title>
         <IsPackable>true</IsPackable>
-		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+        <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
         <RepositoryUrl>https://github.com/WKG-Software-GmbH/wkg-entity-framework-core</RepositoryUrl>
         <PackageProjectUrl>https://github.com/WKG-Software-GmbH/wkg-entity-framework-core</PackageProjectUrl>
         <Description>
-			Wkg.EntityFrameworkCore provides the Reflective Entity Configuration And Procedure mapping extension (RECAP) to simplify the configuration of Entity Framework Core models, introduce ORM-compatible stored procedure and function mapping, add support for UUID data types, policy validation for discovered entities, and more.
-		</Description>
+            Wkg.EntityFrameworkCore provides the Reflective Entity Configuration And Procedure mapping extension (RECAP) to simplify the configuration of Entity Framework Core models, introduce ORM-compatible stored procedure and function mapping, add support for UUID data types, policy validation for discovered entities, and more.
+        </Description>
         <Company>WKG Software GmbH</Company>
         <Authors>WKG Software GmbH</Authors>
         <Copyright>Copyright (c) WKG Software GmbH 2024</Copyright>
         <PackageIcon>logo.png</PackageIcon>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageType>Dependency</PackageType>
         <PackageTags>
-			entity-framework-core;efcore;orm;stored-procedure-mapping;orm-policy-validation;validation;db-data-types;orm-configuration;efcore-extension
-		</PackageTags>
+            entity-framework-core;efcore;orm;stored-procedure-mapping;orm-policy-validation;validation;db-data-types;orm-configuration;efcore-extension
+        </PackageTags>
     </PropertyGroup>
 
     <!--Nuget symbols and debugging-->
@@ -42,9 +42,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-		<PackageReference Include="Wkg" Version="[8.2.17542,8.3)" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="[8.0.8,8.1.0)" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="[8.0.8,8.1.0)" />
+        <PackageReference Include="Wkg" Version="[8.2.17550,8.3)" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="[8.0.8,8.1.0)" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="[8.0.8,8.1.0)" />
     </ItemGroup>
 
     <ItemGroup>
