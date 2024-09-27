@@ -1,6 +1,6 @@
 # WKG Entity Framework Core
 
-[![NuGet version (Wkg.EntityFrameworkCore)](https://img.shields.io/nuget/v/Wkg.EntityFrameworkCore.svg?style=flat-square)](https://www.nuget.org/packages/Wkg.EntityFrameworkCore/)
+[![NuGet](https://img.shields.io/badge/NuGet-555555?style=for-the-badge&logo=nuget)![NuGet version (Wkg.EntityFrameworkCore)](https://img.shields.io/nuget/v/Wkg.EntityFrameworkCore.svg?style=for-the-badge&label=Wkg.EntityFrameworkCore)![NuGet downloads (Wkg.EntityFrameworkCore)](https://img.shields.io/nuget/dt/Wkg.EntityFrameworkCore?style=for-the-badge)](https://www.nuget.org/packages/Wkg.EntityFrameworkCore/)
 
 ---
 
@@ -17,8 +17,8 @@ As part of our commitment to open-source software, we are making this library [a
 
 This repository contains the database-independant core components of the RECAP framework as well as other re-usable components not directly related to RECAP. For database-specific implementations of RECAP, required for stored procedure mapping, see the following repositories:
 
-- [WKG Entity Framework Core Oracle](https://github.com/WKG-Software-GmbH//wkg-entity-framework-core-oracle)
-- [WKG Entity Framework Core MySQL](https://github.com/WKG-Software-GmbH//wkg-entity-framework-core-mysql)
+[![GitHub (Wkg.EntityFrameworkCore.Oracle)](https://img.shields.io/badge/GitHub-WKG_Entity_Framework_Core_--_Oracle-blue?style=flat-square&logo=github)](https://github.com/WKG-Software-GmbH/wkg-entity-framework-core-oracle)[![NuGet version (Wkg.EntityFrameworkCore.Oracle)](https://img.shields.io/nuget/v/Wkg.EntityFrameworkCore.Oracle.svg?style=flat-square&logo=nuget&label=&color=555555)](https://www.nuget.org/packages/Wkg.EntityFrameworkCore.Oracle/)  
+[![GitHub (Wkg.EntityFrameworkCore.MySql)](https://img.shields.io/badge/GitHub-WKG_Entity_Framework_Core_--_MySQL-blue?style=flat-square&logo=github)](https://github.com/WKG-Software-GmbH/wkg-entity-framework-core-mysql)[![NuGet version (Wkg.EntityFrameworkCore.MySql)](https://img.shields.io/nuget/v/Wkg.EntityFrameworkCore.MySql.svg?style=flat-square&logo=nuget&label=&color=555555)](https://www.nuget.org/packages/Wkg.EntityFrameworkCore.MySql/)
 
 ## Installation
 
