@@ -1,6 +1,6 @@
 # `Wkg.EntityFrameworkCore` Documentation
 
-`Wkg.EntityFrameworkCore` is a library that provides reflective entity configuration and procedure mapping for Entity Framework Core, as well as other re-usable components not directly related to [RECAP](#).
+`Wkg.EntityFrameworkCore` is a library that provides reflective entity configuration and procedure mapping for Entity Framework Core, as well as other re-usable components not directly related to [RECAP](./RECAP-paper.pdf).
 
 - [`Wkg.EntityFrameworkCore` Documentation](#wkgentityframeworkcore-documentation)
   - [Getting Started](#getting-started)
