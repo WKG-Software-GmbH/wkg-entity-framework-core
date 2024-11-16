@@ -90,7 +90,7 @@ public abstract class ResultCompiler<TBuilder>(TBuilder builder) where TBuilder 
         NewExpression ctorInvocation = Expression.New(constructor, argumentExpressions);
 
         // we only allow reference types as result types, so we can safely cast the result to object without checks
-        MethodInfo unsafeAs = UnsafeReflection.As(typeof(object));
+        MethodInfo unsafeAs = UnsafeReflection.As<object>();
         MethodCallExpression result = Expression.Call(unsafeAs, ctorInvocation);
 
         // compile the lambda expression to a delegate

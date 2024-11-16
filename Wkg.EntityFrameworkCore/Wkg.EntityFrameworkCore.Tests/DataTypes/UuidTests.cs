@@ -83,8 +83,27 @@ public class UuidTests
         for (int i = 0; i < 1000; i++)
         {
             Uuid result = Uuid.NewUuidV7();
-            Assert.IsTrue(result.Version == 7);
+            Assert.AreEqual(7, result.Version);
             Assert.IsTrue(result.TryGetVersion(out int version) && version == 7);
         }
+    }
+
+    [TestMethod]
+    public void GuidEqualityTest1()
+    {
+        Guid guid = Guid.NewGuid();
+        Uuid uuid = new(guid);
+        Assert.AreEqual(guid, uuid.ToGuid());
+        Assert.AreEqual(uuid, new Uuid(guid));
+    }
+
+    [TestMethod]
+    public void GuidEqualityTest2()
+    {
+        Uuid uuid = Uuid.NewUuidV7();
+        Guid guid = uuid.ToGuid();
+        Assert.AreEqual(uuid.ToString(), guid.ToString());
+        Assert.AreEqual(7, uuid.Version);
+        Assert.AreEqual(7, guid.Version);
     }
 }

@@ -2,8 +2,8 @@
 
     <!--.NET build settings-->
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-        <LangVersion>latest</LangVersion>
+        <TargetFramework>net9.0</TargetFramework>
+        <LangVersion>13</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <!-- CI injected versioning -->
@@ -23,7 +23,7 @@
             Wkg.EntityFrameworkCore provides the Reflective Entity Configuration And Procedure mapping extension (RECAP) to simplify the configuration of Entity Framework Core models, introduce ORM-compatible stored procedure and function mapping, add support for UUID data types, policy validation for discovered entities, and more.
         </Description>
         <Company>WKG Software GmbH</Company>
-        <Authors>WKG Software GmbH</Authors>
+        <Authors>WKG Software GmbH,Frederik Höft</Authors>
         <Copyright>Copyright (c) WKG Software GmbH 2024</Copyright>
         <PackageIcon>logo.png</PackageIcon>
         <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -42,9 +42,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Wkg" Version="[8.2.17550,8.3)" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="[8.0.8,8.1.0)" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="[8.0.8,8.1.0)" />
+        <PackageReference Include="Wkg" Version="[9.0.17748,9.1)" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="[9.0.0,9.1)" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="[9.0.0,9.1)" />
     </ItemGroup>
 
     <ItemGroup>
