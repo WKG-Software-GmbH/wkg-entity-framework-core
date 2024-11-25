@@ -20,7 +20,7 @@ public abstract class DbTypeMap<TDbType> where TDbType : Enum
     /// <returns>The database type or <see langword="null"/> if no known mapping exists.</returns>
     public TDbType? GetDbTypeOrDefault(Type type)
     {
-        if (System.Nullable.GetUnderlyingType(type) is Type underlyingType)
+        if (Nullable.GetUnderlyingType(type) is Type underlyingType)
         {
             return GetDbTypeOrDefault(underlyingType);
         }

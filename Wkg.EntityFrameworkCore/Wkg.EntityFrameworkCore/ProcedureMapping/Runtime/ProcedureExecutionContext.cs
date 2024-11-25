@@ -149,7 +149,7 @@ internal sealed class ProcedureExecutionContext<TCompiledParameter> : IProcedure
     /// <typeparam name="TResult">The type of the entity to be returned.</typeparam>
     /// <param name="databaseFacade">The <see cref="DatabaseFacade"/> to be used for the ADO.NET call.</param>
     /// <returns>The first row returned by this procedure, stored in a <typeparamref name="TResult"/> entity.</returns>
-    private IResultContainer<TResult> ExecuteProcedureReaderSingle<TResult>(DatabaseFacade databaseFacade)
+    private ResultElement<TResult> ExecuteProcedureReaderSingle<TResult>(DatabaseFacade databaseFacade)
         where TResult : class
     {
         DbConnection connection = databaseFacade.GetDbConnection();
@@ -181,7 +181,7 @@ internal sealed class ProcedureExecutionContext<TCompiledParameter> : IProcedure
     /// <typeparam name="TResult">The type of the result returned by the stored procedure.</typeparam>
     /// <param name="databaseFacade">The <see cref="DatabaseFacade"/> to be used for the ADO.NET call.</param>
     /// <returns>A collection of <typeparamref name="TResult"/> entities representing all rows returned by this procedure.</returns>
-    private IResultContainer<TResult> ExecuteProcedureReader<TResult>(DatabaseFacade databaseFacade)
+    private ResultCollection<TResult> ExecuteProcedureReader<TResult>(DatabaseFacade databaseFacade)
         where TResult : class
     {
         DbConnection connection = databaseFacade.GetDbConnection();
