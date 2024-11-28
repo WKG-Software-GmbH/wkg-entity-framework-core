@@ -1,4 +1,5 @@
-﻿using Wkg.EntityFrameworkCore.ProcedureMapping.Runtime;
+﻿using System.Collections.Immutable;
+using Wkg.EntityFrameworkCore.ProcedureMapping.Runtime;
 
 namespace Wkg.EntityFrameworkCore.ProcedureMapping.Compiler.Output;
 
@@ -33,8 +34,6 @@ public interface ICompiledProcedure
 public sealed class CompiledProcedure<TCompiledParameter>(string procedureName, bool isFunction, TCompiledParameter[] parameters, Type procedureType, CompiledResult? compiledResult) 
     : ICompiledProcedure where TCompiledParameter : struct, ICompiledParameter
 {
-    private readonly TCompiledParameter[] _compiledParameters = parameters;
-
     /// <summary>
     /// The name of the stored procedure.
     /// </summary>
@@ -48,12 +47,12 @@ public sealed class CompiledProcedure<TCompiledParameter>(string procedureName, 
     /// <summary>
     /// The compiled parameters of this stored procedure.
     /// </summary>
-    internal ReadOnlySpan<TCompiledParameter> CompiledParameters => new(_compiledParameters);
+    internal ImmutableArray<TCompiledParameter> CompiledParameters { get; } = [.. parameters];
 
     /// <summary>
     /// The number of parameters of this stored procedure.
     /// </summary>
-    internal int ParameterCount => _compiledParameters.Length;
+    internal int ParameterCount => CompiledParameters.Length;
 
     /// <summary>
     /// The compiled result returned by this stored procedure.

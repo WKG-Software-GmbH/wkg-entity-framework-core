@@ -1,37 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using System.Data.Common;
+using Microsoft.EntityFrameworkCore.Storage;
+using System.Collections.Immutable;
 using System.Data;
+using System.Data.Common;
+using System.Runtime.CompilerServices;
 using Wkg.EntityFrameworkCore.ProcedureMapping.Compiler.Output;
 using Wkg.EntityFrameworkCore.ProcedureMapping.ResultCollections;
-using System.Runtime.CompilerServices;
-using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Wkg.EntityFrameworkCore.ProcedureMapping.Runtime;
-
-/// <summary>
-/// Represents the stateful runtime execution context of a stored procedure. 
-/// </summary>
-/// <remarks>
-/// This class is responsible for handling, populating, and caching the ADO.NET <see cref="DbParameter"/>s, creating and executing the ADO.NET <see cref="DbCommand"/> and storing potential results into a <see cref="IResultContainer{TResult}"/> object.
-/// </remarks>
-public interface IProcedureExecutionContext
-{
-    /// <summary>
-    /// Executes the stored procedure against the provided <see cref="DatabaseFacade"/> using the provided I/O <paramref name="container"/> object to load input parameters and store output parameters.
-    /// </summary>
-    /// <param name="dbContext">The <see cref="DatabaseFacade"/> to be used for the ADO.NET call.</param>
-    /// <param name="container">The I/O container object.</param>
-    void Execute(DatabaseFacade dbContext, object container);
-
-    /// <summary>
-    /// Executes the stored procedure against the provided <see cref="DatabaseFacade"/> using the provided I/O <paramref name="container"/> object to load input parameters and store output parameters. Results are returned in a <see cref="IResultContainer{TResult}"/> object.
-    /// </summary>
-    /// <typeparam name="TResult">The type of the result entities constructed from the result rows.</typeparam>
-    /// <param name="dbContext">The <see cref="DatabaseFacade"/> to be used for the ADO.NET call.</param>
-    /// <param name="container">The I/O container object.</param>
-    IResultContainer<TResult> Execute<TResult>(DatabaseFacade dbContext, object container) where TResult : class;
-}
 
 internal sealed class ProcedureExecutionContext<TCompiledParameter> : IProcedureExecutionContext where TCompiledParameter : struct, ICompiledParameter
 {
@@ -53,7 +30,7 @@ internal sealed class ProcedureExecutionContext<TCompiledParameter> : IProcedure
     /// </summary>
     /// <param name="context">The I/O container object.</param>
     /// <param name="compiledParameters">The compiled parameters.</param>
-    private void BeforeExecution(object context, ref ReadOnlySpan<TCompiledParameter> compiledParameters)
+    private void BeforeExecution(object context, ImmutableArray<TCompiledParameter> compiledParameters)
     {
         for (int i = 0; i < compiledParameters.Length; i++)
         {
@@ -67,7 +44,7 @@ internal sealed class ProcedureExecutionContext<TCompiledParameter> : IProcedure
     /// </summary>
     /// <param name="context">The I/O container object.</param>
     /// <param name="compiledParameters">The compiled parameters.</param>
-    private void AfterExecution(object context, ref ReadOnlySpan<TCompiledParameter> compiledParameters)
+    private void AfterExecution(object context, ImmutableArray<TCompiledParameter> compiledParameters)
     {
         for (int i = 0; i < compiledParameters.Length; i++)
         {
@@ -91,7 +68,7 @@ internal sealed class ProcedureExecutionContext<TCompiledParameter> : IProcedure
     /// <param name="context">The I/O container object.</param>
     /// <param name="returnValue">The return value of the procedure or function.</param>
     /// <param name="compiledParameters">The compiled parameters.</param>
-    private void AfterExecution(object context, object? returnValue, ref ReadOnlySpan<TCompiledParameter> compiledParameters)
+    private void AfterExecution(object context, object? returnValue, ImmutableArray<TCompiledParameter> compiledParameters)
     {
         for (int i = 0; i < compiledParameters.Length; i++)
         {
@@ -144,6 +121,33 @@ internal sealed class ProcedureExecutionContext<TCompiledParameter> : IProcedure
     }
 
     /// <summary>
+    /// Asynchronously executes the stored procedure against the provided <see cref="DatabaseFacade"/> using the pre-populated ADO.NET <see cref="DbParameter"/> array.
+    /// </summary>
+    /// <param name="databaseFacade">The <see cref="DatabaseFacade"/> to be used for the ADO.NET call.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the single value returned by this procedure or function.</returns>
+    private async Task<object?> ExecuteProcedureScalarAsync(DatabaseFacade databaseFacade, CancellationToken cancellationToken = default)
+    {
+        DbConnection connection = databaseFacade.GetDbConnection();
+        if (connection.State is ConnectionState.Closed)
+        {
+            await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
+        }
+        await using DbCommand cmd = connection.CreateCommand();
+        cmd.Transaction = databaseFacade.CurrentTransaction?.GetDbTransaction();
+        cmd.CommandText = CompiledProcedure.ProcedureName;
+        cmd.CommandType = CommandType.StoredProcedure;
+        foreach (DbParameter? parameter in DbParameters)
+        {
+            if (CompiledProcedure.IsFunction || parameter!.Direction is not ParameterDirection.ReturnValue)
+            {
+                cmd.Parameters.Add(parameter!);
+            }
+        }
+        return await cmd.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
     /// Executes the stored procedure against the provided <see cref="DatabaseFacade"/> using the pre-populated ADO.NET <see cref="DbParameter"/> array.
     /// </summary>
     /// <typeparam name="TResult">The type of the entity to be returned.</typeparam>
@@ -168,6 +172,39 @@ internal sealed class ProcedureExecutionContext<TCompiledParameter> : IProcedure
         using DbDataReader reader = cmd.ExecuteReader();
         TResult? result = null;
         if (reader.Read())
+        {
+            object rawResult = CompiledProcedure.CompiledResult!.ReadFrom(reader);
+            result = Unsafe.As<TResult>(rawResult);
+        }
+        return new ResultElement<TResult>(result);
+    }
+
+    /// <summary>
+    /// Asynchronously executes the stored procedure against the provided <see cref="DatabaseFacade"/> using the pre-populated ADO.NET <see cref="DbParameter"/> array.
+    /// </summary>
+    /// <typeparam name="TResult">The type of the entity to be returned.</typeparam>
+    /// <param name="databaseFacade">The <see cref="DatabaseFacade"/> to be used for the ADO.NET call.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the first row returned by this procedure, stored in a <typeparamref name="TResult"/> entity.</returns>
+    private async Task<ResultElement<TResult>> ExecuteProcedureReaderSingleAsync<TResult>(DatabaseFacade databaseFacade, CancellationToken cancellationToken = default)
+        where TResult : class
+    {
+        DbConnection connection = databaseFacade.GetDbConnection();
+        if (connection.State is ConnectionState.Closed)
+        {
+            await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
+        }
+        await using DbCommand cmd = connection.CreateCommand();
+        cmd.Transaction = databaseFacade.CurrentTransaction?.GetDbTransaction();
+        cmd.CommandText = CompiledProcedure.ProcedureName;
+        cmd.CommandType = CommandType.StoredProcedure;
+        foreach (DbParameter? parameter in DbParameters)
+        {
+            cmd.Parameters.Add(parameter!);
+        }
+        await using DbDataReader reader = await cmd.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+        TResult? result = null;
+        if (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
         {
             object rawResult = CompiledProcedure.CompiledResult!.ReadFrom(reader);
             result = Unsafe.As<TResult>(rawResult);
@@ -203,7 +240,41 @@ internal sealed class ProcedureExecutionContext<TCompiledParameter> : IProcedure
         {
             object rawResult = CompiledProcedure.CompiledResult!.ReadFrom(reader);
             TResult result = Unsafe.As<TResult>(rawResult);
-            results.Add(result!);
+            results.Add(result);
+        }
+        return new ResultCollection<TResult>(results);
+    }
+
+    /// <summary>
+    /// Asynchronously executes the stored procedure against the provided <see cref="DatabaseFacade"/> using the pre-populated ADO.NET <see cref="DbParameter"/> array.
+    /// </summary>
+    /// <typeparam name="TResult">The type of the result returned by the stored procedure.</typeparam>
+    /// <param name="databaseFacade">The <see cref="DatabaseFacade"/> to be used for the ADO.NET call.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a collection of <typeparamref name="TResult"/> entities representing all rows returned by this procedure.</returns>
+    private async Task<ResultCollection<TResult>> ExecuteProcedureReaderAsync<TResult>(DatabaseFacade databaseFacade, CancellationToken cancellationToken = default)
+        where TResult : class
+    {
+        DbConnection connection = databaseFacade.GetDbConnection();
+        if (connection.State is ConnectionState.Closed)
+        {
+            await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
+        }
+        await using DbCommand cmd = connection.CreateCommand();
+        cmd.Transaction = databaseFacade.CurrentTransaction?.GetDbTransaction();
+        cmd.CommandText = CompiledProcedure.ProcedureName;
+        cmd.CommandType = CommandType.StoredProcedure;
+        foreach (DbParameter? parameter in DbParameters)
+        {
+            cmd.Parameters.Add(parameter!);
+        }
+        await using DbDataReader reader = await cmd.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+        List<TResult> results = [];
+        while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
+        {
+            object rawResult = CompiledProcedure.CompiledResult!.ReadFrom(reader);
+            TResult result = Unsafe.As<TResult>(rawResult);
+            results.Add(result);
         }
         return new ResultCollection<TResult>(results);
     }
@@ -211,21 +282,41 @@ internal sealed class ProcedureExecutionContext<TCompiledParameter> : IProcedure
     /// <inheritdoc/>
     public void Execute(DatabaseFacade dbContext, object context)
     {
-        ReadOnlySpan<TCompiledParameter> parameters = CompiledProcedure.CompiledParameters;
-        BeforeExecution(context, ref parameters);
+        ImmutableArray<TCompiledParameter> parameters = CompiledProcedure.CompiledParameters;
+        BeforeExecution(context, parameters);
         object? returnValue = ExecuteProcedureScalar(dbContext);
-        AfterExecution(context, returnValue, ref parameters);
+        AfterExecution(context, returnValue, parameters);
+    }
+
+    public async Task ExecuteAsync(DatabaseFacade dbContext, object context, CancellationToken cancellationToken = default)
+    {
+        ImmutableArray<TCompiledParameter> parameters = CompiledProcedure.CompiledParameters;
+        BeforeExecution(context, parameters);
+        object? returnValue = await ExecuteProcedureScalarAsync(dbContext, cancellationToken).ConfigureAwait(false);
+        AfterExecution(context, returnValue, parameters);
     }
 
     /// <inheritdoc/>
     public IResultContainer<TResult> Execute<TResult>(DatabaseFacade dbContext, object context) where TResult : class
     {
-        ReadOnlySpan<TCompiledParameter> parameters = CompiledProcedure.CompiledParameters;
-        BeforeExecution(context, ref parameters);
+        ImmutableArray<TCompiledParameter> parameters = CompiledProcedure.CompiledParameters;
+        BeforeExecution(context, parameters);
         IResultContainer<TResult> result = CompiledProcedure.CompiledResult!.IsCollection
             ? ExecuteProcedureReader<TResult>(dbContext)
             : ExecuteProcedureReaderSingle<TResult>(dbContext);
-        AfterExecution(context, ref parameters);
+        AfterExecution(context, parameters);
+        return result;
+    }
+
+    /// <inheritdoc/>
+    public async Task<IResultContainer<TResult>> ExecuteAsync<TResult>(DatabaseFacade dbContext, object context, CancellationToken cancellationToken = default) where TResult : class
+    {
+        ImmutableArray<TCompiledParameter> parameters = CompiledProcedure.CompiledParameters;
+        BeforeExecution(context, parameters);
+        IResultContainer<TResult> result = CompiledProcedure.CompiledResult!.IsCollection
+            ? await ExecuteProcedureReaderAsync<TResult>(dbContext, cancellationToken).ConfigureAwait(false)
+            : await ExecuteProcedureReaderSingleAsync<TResult>(dbContext, cancellationToken).ConfigureAwait(false);
+        AfterExecution(context, parameters);
         return result;
     }
 }
