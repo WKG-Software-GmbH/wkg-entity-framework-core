@@ -5,12 +5,12 @@ namespace Wkg.EntityFrameworkCore.ProcedureMapping.Builder.ThrowHelpers.Internal
 internal static class ExceptionHelper
 {
     [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_message")]
-    private static extern ref string GetSetExceptionMessage(Exception exception);
+    private static extern ref string GetExceptionMessageByRef(Exception exception);
 
     [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_paramName")]
-    private static extern ref string? GetSetArgumentName(ArgumentException exception);
+    private static extern ref string? GetArgumentNameByRef(ArgumentException exception);
 
-    public static void SetExceptionMessage(Exception target, string message) => GetSetExceptionMessage(target) = message;
+    public static void SetExceptionMessage(Exception target, string message) => GetExceptionMessageByRef(target) = message;
 
-    public static void SetArgumentName(ArgumentException target, string? parameterName) => GetSetArgumentName(target) = parameterName;
+    public static void SetArgumentName(ArgumentException target, string? parameterName) => GetArgumentNameByRef(target) = parameterName;
 }
