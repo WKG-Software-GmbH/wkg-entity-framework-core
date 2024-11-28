@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics;
 using Wkg.Logging;
-using System.Runtime.CompilerServices;
 
 namespace Wkg.EntityFrameworkCore;
 
