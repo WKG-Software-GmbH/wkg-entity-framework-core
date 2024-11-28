@@ -210,11 +210,7 @@ Table Per Hierarchy (TPH) is the default inheritance strategy used by EF Core. I
 In RECAP, TPH inheritance is achieved by configuring the discriminator column in the base entity mapping, and by mapping any additional properties in the derived entity mappings. The following example shows how to configure TPH inheritance for the `Person`, `Child`, and `Adult` entities:
 
 <details>
-<summary>
-
-*Show/hide <code>Person</code> TPH configuration*
-
-</summary>
+<summary><i>Show/hide <code>Person</code> TPH configuration</i></summary>
 
 `Person.cs` file:
 
@@ -260,13 +256,9 @@ public abstract partial class Person : IReflectiveModelConfiguration<Person>
 }
 ```
 
-</details>
+</details><br>
 <details>
-<summary>
-
-*Show/hide <code>Adult</code> TPH configuration*
-
-</summary>
+<summary><i>Show/hide <code>Adult</code> TPH configuration</i></summary>
 
 `Adult.cs` file:
 
@@ -304,13 +296,9 @@ public partial class Adult : Person, IReflectiveModelConfiguration<Adult>
 }
 ```
 
-</details>
+</details><br>
 <details>
-<summary>
-
-*Show/hide <code>Child</code> TPH configuration*
-
-</summary>
+<summary><i>Show/hide <code>Child</code> TPH configuration</i></summary>
 
 `Child.cs` file:
 
@@ -322,7 +310,7 @@ public class Child : Person
 
 In this example, the `Child` entity does not have any additional properties, so no additional mapping is required.
 
-</details>
+</details><br>
 
 > :information_source: **Note**
 > In TPH inheritance, the child entities automatically inherits the mapping of the base entity, so only the additional properties need to be mapped in the child entity configuration. This includes the table name, meaning that all entities in the inheritance hierarchy are mapped to the same table.
@@ -336,11 +324,7 @@ For easy linking, the primary key of the child entity is also the foreign key to
 The following example shows how to configure TPT inheritance for the `Person`, `Child`, and `Adult` entities:
 
 <details>
-<summary>
-
-*Show/hide <code>Person</code> TPT configuration*
-
-</summary>
+<summary><i>Show/hide <code>Person</code> TPT configuration</i></summary>
 
 `Person.cs` file:
 
@@ -376,13 +360,9 @@ public abstract partial class Person : IReflectiveModelConfiguration<Person>
 }
 ```
 
-</details>
+</details><br>
 <details>
-<summary>
-
-*Show/hide <code>Adult</code> TPT configuration*
-
-</summary>
+<summary><i>Show/hide <code>Adult</code> TPT configuration</i></summary>
 
 `Adult.cs` file:
 
@@ -422,13 +402,9 @@ public partial class Adult : Person, IReflectiveModelConfiguration<Adult>
 }
 ```
 
-</details>
+</details><br>
 <details>
-<summary>
-
-*Show/hide <code>Child</code> TPT configuration*
-
-</summary>
+<summary><i>Show/hide <code>Child</code> TPT configuration</i></summary>
 
 `Child.cs` file:
 
@@ -450,7 +426,7 @@ public partial class Child : Person, IReflectiveModelConfiguration<Child>
 }
 ```
 
-</details>
+</details><br>
 
 > :information_source: **Note**
 > In TPT inheritance, the child entities automatically inherits the property mapptings of the base entity, so only the additional properties need to be mapped in the child entity configuration. However, in order to map the child entity to its own table, the child entity configuration must override the table name mapping of the base entity.
@@ -473,11 +449,7 @@ The following example shows how to configure TPC inheritance for the `Person`, `
 entities:
 
 <details>
-<summary>
-
-*Show/hide <code>Person</code> TPC configuration*
-
-</summary>
+<summary><i>Show/hide <code>Person</code> TPC configuration</i></summary>
 
 `Person.cs` file:
 
@@ -515,13 +487,9 @@ public abstract partial class Person : IReflectiveBaseModelConfiguration<Person>
 > :information_source: **Note**
 > Notice that the `Person` entity configuration implements `IReflectiveBaseModelConfiguration<Person>` instead of `IReflectiveModelConfiguration<Person>`, and that no table mapping is done in the `Person` entity configuration.
 
-</details>
+</details><br>
 <details>
-<summary>
-
-*Show/hide <code>Adult</code> TPC configuration*
-
-</summary>
+<summary><i>Show/hide <code>Adult</code> TPC configuration</i></summary>
 
 `Adult.cs` file:
 
@@ -561,13 +529,9 @@ public partial class Adult : Person, IReflectiveModelConfiguration<Adult>
 }
 ```
 
-</details>
+</details><br>
 <details>
-<summary>
-
-*Show/hide <code>Child</code> TPC configuration*
-
-</summary>
+<summary><i>Show/hide <code>Child</code> TPC configuration</i></summary>
 
 `Child.cs` file:
 
@@ -589,7 +553,7 @@ public partial class Child : Person, IReflectiveModelConfiguration<Child>
 }
 ```
 
-</details>
+</details><br>
 
 > :warning: **Warning**
 > Be sure to not implement the "normal" model configuration interface (`IModelConfiguration<TEntity>` or `IReflectiveModelConfiguration<TEntity>`) in the abstract entity configuration instead of the **base** model configuration interface (`IBaseModelConfiguration<TParentClass>` or `IReflectiveBaseModelConfiguration<TParentClass>`), as the base entity itself must not be configured as a model in TPC inheritance.
@@ -603,11 +567,7 @@ RECAP allows you to easily configure connection entities for many-to-many relati
 First, configure the `Person` and `Group` entities as usual:
 
 <details>
-<summary>
-
-*Show/hide <code>Person</code> entity configuration*
-
-</summary>
+<summary><i>Show/hide <code>Person</code> entity configuration</i></summary>
 
 `Person.cs` file:
 
@@ -648,13 +608,9 @@ public partial class Person : IReflectiveModelConfiguration<Person>
 > :information_source: **Note**
 > Notice that the `Person` entity does not configure the `Groups` navigation property. This is because the navigation property will be configured by the connection entity.
 
-</details>
+</details><br>
 <details>
-<summary>
-
-*Show/hide <code>Group</code> entity configuration*
-
-</summary>
+<summary><i>Show/hide <code>Group</code> entity configuration</i></summary>
 
 `Group.cs` file:
 
@@ -695,18 +651,14 @@ public partial class Group : IReflectiveModelConfiguration<Group>
 > :information_source: **Note**
 > Notice that the `Group` entity does not configure the `Members` navigation property. This is because the navigation property will be configured by the connection entity.
 
-</details>
+</details><br>
 
 ##### Connection Entity Definition
 
 Next, create the connection entity by implementing either `IModelConnection<TConnection, TLeft, TRight>` or `IReflectiveModelConnection<TConnection, TLeft, TRight>`. The following example shows how to create a connection entity named `PersonToGroup`:
 
 <details>
-<summary>
-
-*Show/hide <code>PersonToGroup</code> connection entity configuration*
-
-</summary>
+<summary><i>Show/hide <code>PersonToGroup</code> connection entity configuration</i></summary>
 
 `PersonToGroup.cs` file:
 
@@ -769,7 +721,7 @@ As you can see in the example above, the connection entity implements the `IRefl
 > :information_source: **Note**
 > Notice that the `PersonToGroup` connection entity configures the navigation properties of the `Person` and `Group` entities. This is because the connection entity is the only entity that knows the specifics of the many-to-many relationship between the `Person` and `Group` entities.
 
-</details>
+</details><br>
 
 ##### Connection Entity Discovery
 
@@ -879,11 +831,7 @@ RECAP's policy system is designed to be extensible, allowing you to create custo
 Assume you are using a code-first approach to define your entities and properties, and want EF Core to automatically generate database tables and columns with snake case names, but you don't want to use data annotations or fluent API to specify every table and column name explicitly. You can create a custom naming policy that converts the default PascalCase names to snake_case names by convention.
 
 <details>
-<summary>
-
-*Show/hide code-snippet*
-
-</summary>
+<summary><i>Show/hide code-snippet</i></summary>
 
 ```csharp
 // a minimalistic policy builder class with no additional configuration options
@@ -949,7 +897,7 @@ class MyDbContext
 }
 ```
 
-</details>
+</details><br>
 
 ###### Example: Ensure All UUID Properties are Database-Generated
 
@@ -958,11 +906,7 @@ Assume you are using UUIDs as substitute primary keys for your entities and want
 You can create a custom policy that enforces that all UUID properties are automatically generated by the database. The following example demonstrates how to create such a policy:
 
 <details>
-<summary>
-
-*Show/hide code-snippet*
-
-</summary>
+<summary><i>Show/hide code-snippet</i></summary>
 
 ```csharp
 // a policy builder class with configuration options
@@ -1073,18 +1017,14 @@ class MyDbContext
 }
 ```
 
-</details>
+</details><br>
 
 ###### Example: Automatically Ignoring Navigation Properties during JSON Serialization
 
 Assume you are using JSON serialization to serialize your entities into API responses, and you want to automatically ignore navigation properties to prevent circular references and reduce the size of the JSON response. You can create a custom policy in conjunction with the a custom JSON converter to automatically ignore navigation properties during JSON serialization.
 
 <details>
-<summary>
-
-*Show/hide code-snippet*
-
-</summary>
+<summary><i>Show/hide code-snippet</i></summary>
 
 ```csharp
 // The JSON converter that automatically ignores navigation properties
@@ -1146,7 +1086,7 @@ class MyDbContext
 }
 ```
 
-</details>
+</details><br>
 
 ### Stored Procedure Mapping
 
@@ -1175,11 +1115,7 @@ The following example shows how to map a database function that takes two intege
 Assuming the following database function is defined in the database:
 
 <details>
-<summary>
-
-*Show/hide <code>perform_addition</code> database function definition*
-
-</summary>
+<summary><i>Show/hide <code>perform_addition</code> database function definition</i></summary>
 
 ```sql
 CREATE FUNCTION perform_addition (IN a INT, IN b INT) RETURNS INT
@@ -1188,18 +1124,14 @@ BEGIN
 END
 ```
 
-</details>
+</details><br>
 
 The first step is to define a PCO class that represents the function. The PCO class must inherit from the provider-specific `StoredProcedure<TContainer>` implementation, where `TContainer` is the type of the I/O Container class that represents the input and output parameters of the function. In this example we are using MySQL, so we inherit from the `MySqlStoredProcedure<TContainer>` class. 
 
 Depending on whether you use Reflective or Manual Procedure Discovery, the PCO class must additionally implement either `IProcedureConfiguration<TProcedure, TContainer>` or `IReflectiveProcedureConfiguration<TProcedure, TContainer>`, where `TProcedure` is the type of the PCO class itself and `TContainer` is the type of the I/O Container class. In this example we are using Reflective Procedure Discovery, so we implement `IReflectiveProcedureConfiguration<TProcedure, TContainer>`. Either way, a `Configure()` method must be implemented to configure the PCO class. The following example shows how to configure the PCO class for the `perform_addition` function:
 
 <details>
-<summary>
-
-*Show/hide <code>Addition</code> PCO class definition*
-
-</summary>
+<summary><i>Show/hide <code>Addition</code> PCO class definition</i></summary>
 
 ```csharp
 // define a PCO class that represents the function
@@ -1208,15 +1140,17 @@ public class Addition : MySqlStoredProcedure<AdditionContainer>,
 {
     // depending on your use case, you can define any number of Invoke() methods
     // with different signatures or method names. the method name does not matter.
-    public int Invoke(int a, int b)
+    public async Task<int> InvokeAsync(int a, int b, CancellationToken cancellationToken = default)
     {
         // create an I/O Container instance
         AdditionContainer io = new(a, b, default);
         // invoke the function by calling the base class implementation
-        Execute(io);
+        // you can also use the synchronous Execute() method, depending on your use case
+        await ExecuteAsync(io).ConfigureAwait(false);
         // retrieve the result from the I/O Container and return it
         return io.Result;
     }
+
     // map parameters and return values of the function to properties of the I/O Container
     public static void Configure(MySqlProcedureBuilder<Addition, AdditionContainer> self)
     {
@@ -1239,7 +1173,7 @@ public class Addition : MySqlStoredProcedure<AdditionContainer>,
 public record AdditionContainer(int A, int B, int Result);
 ```
 
-</details>
+</details><br>
 
 As shown in the example above, the `Configure()` method is used to map the function to the PCO class. The `ToDatabaseFunction()` method is used to map the function name. The `ReturnsScalar()` method is used to map the scalar return value of the function. The `Parameter()` method is used to map the input parameters of the function, where `HasName()` is used to map the parameter name, and `HasDbType()` specifies the database type of the parameter.
 
@@ -1251,7 +1185,7 @@ The example above uses a record type for the I/O Container class to take advanta
 > :bulb: **Tip**
 > Even output properties of the I/O Container class don't have to be writable. RECAP uses dynamic IL emission to access I/O Container properties, so records with init-only properties are fully supported.
 
-RECAP does not require any specific signatures for invoking the PCO class. You can freely define any number of instance methods with different signatures or names to invoke the function. By convention, the name *"Invoke"* should be used for the method that is used by client code to invoke the function (duh). However, this is not a requirement.
+RECAP does not require any specific signatures for invoking the PCO class. You can freely define any number of instance methods with different signatures or names to invoke the function. By convention, the name *"Invoke"* should be used for the method that is used by client code to invoke the function, however this is not a requirement.
 
 ##### Mapping a Stored Procedure
 
@@ -1260,11 +1194,7 @@ The following example shows how to map a stored procedure with input and output 
 Assuming the following stored procedure is defined in the database:
 
 <details>
-<summary>
-
-*Show/hide <code>get_persons_by_name</code> stored procedure definition*
-
-</summary>
+<summary><i>Show/hide <code>get_persons_by_name</code> stored procedure definition</i></summary>
 
 ```sql
 CREATE PROCEDURE get_persons_by_name (IN name_in VARCHAR(255), OUT invalid_count INT)
@@ -1274,30 +1204,40 @@ BEGIN
 END
 ```
 
-</details>
+</details><br>
 
 The procedure takes a single input parameter `name_in` and an output parameter `invalid_count`, which is used to return the number of rows in the `person` table where the `name` column is `NULL`. The procedure returns a result set with three columns: `id`, `name`, and `uuid`.
 
 Mapping a stored procedure in RECAP is very similar to mapping a function. The only differences are that the `ToDatabaseFunction()` method is replaced with the `ToDatabaseProcedure()` method, and that parameter and result set mappings are a bit more complex. The following example shows how the `get_persons_by_name` procedure can be mapped:
 
 <details>
-<summary>
-
-*Show/hide <code>GetPersonsByName</code> PCO class definition*
-
-</summary>
+<summary><i>Show/hide <code>GetPersonsByName</code> PCO class definition</i></summary>
 
 ```csharp
 // define a PCO class that represents the procedure
 public class GetPersonsByName : MySqlStoredProcedure<GetPersonsByNameContainer, GetPersonsByNameResult>,
     IReflectiveProcedureConfiguration<GetPersonsByName, GetPersonsByNameContainer>
 {
+    // depending on your use case, you can define any number of Invoke() methods, for example synchronous ones ...
     public IReadOnlyList<GetPersonsByNameResult> Invoke(string name, out int invalidCount)
     {
         // create an I/O Container instance
         GetPersonsByNameContainer io = new(name, default);
         // invoke the procedure by calling the base class implementation
         IResultContainer<GetPersonsByNameResult> result = Execute(io);
+        // set the output parameter
+        invalidCount = io.InvalidCount;
+        // retrieve the result as a collection and return it
+        return result.AsCollection();
+    }
+
+    // ... or asynchronous ones
+    public async Task<IReadOnlyList<GetPersonsByNameResult>> InvokeAsync(string name, out int invalidCount, CancellationToken cancellationToken = default)
+    {
+        // create an I/O Container instance
+        GetPersonsByNameContainer io = new(name, default);
+        // invoke the procedure by calling the base class implementation
+        IResultContainer<GetPersonsByNameResult> result = await ExecuteAsync(io, cancellationToken).ConfigureAwait(false);
         // set the output parameter
         invalidCount = io.InvalidCount;
         // retrieve the result as a collection and return it
@@ -1345,7 +1285,7 @@ public record GetPersonsByNameContainer(string Name, int InvalidCount);
 public record GetPersonsByNameResult(int Id, string Name, Guid Uuid);
 ```
 
-</details>
+</details><br>
 
 As shown above, PCOs expecting a result set must inherit from the `StoredProcedure<TContainer, TResult>` base class, where `TContainer` is the I/O Container class, and `TResult` is the result class. 
 
@@ -1368,12 +1308,13 @@ class MyDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-
-        builder
-            // load entities as usual
-            .LoadReflectiveModels(EntityNamingPolicy.RequireExplicit, PropertyMappingPolicy.IgnoreImplicit)
-            // discover and load PCO definitions
-            .LoadReflectiveProcedures();
+        // load entities as usual
+        modelBuilder.LoadReflectiveModels(options => options
+            .ConfigurePolicies(policies => policies
+                .AddPolicy<EntityNaming>(naming => naming.RequireExplicit())
+                .AddPolicy<PropertyMapping>(properties => properties.IgnoreImplicit())));
+        // discover and load PCO definitions
+        modelBuilder.LoadReflectiveProcedures();
     }
 }
 ```
@@ -1386,8 +1327,7 @@ class MyDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-
-        builder
+        modelBuilder
             // load entities as usual
             .LoadModel<Person>()
             .LoadModel<Child>()
@@ -1405,36 +1345,34 @@ Once a PCO class has been defined and mapped, it can be used in a similar way as
 The following example shows how to invoke the `Addition` PCO:
 
 ```csharp
-using (MyDbContext dbContext = new())
-{
-    int result = dbContext.Procedure<Addition>().Invoke(1, 2);
-    Console.WriteLine(result); // prints 3
-}
+await using MyDbContext dbContext = new();
+int result = await dbContext.Procedure<Addition>().InvokeAsync(1, 2);
+Console.WriteLine(result); // prints 3
 ```
 
 PCOs are transaction-aware, which means that they will automatically enlist in the current transaction if one exists. If no transaction exists, RECAP will not create a new transaction. This means that PCOs can be used in the same way as entities, and you can perform database operations using EF Core and PCOs in the same transaction:
 
 ```csharp
-using MyDbContext dbContext = new();
-using IDbContextTransaction transaction = dbContext.Database.BeginTransaction();
+await using MyDbContext dbContext = new();
+await using IDbContextTransaction transaction = dbContext.Database.BeginTransaction();
 
 dbContext.Add(new Person { Name = "John" });
-dbContext.SaveChanges();
+await dbContext.SaveChangesAsync();
 
-IReadOnlyList<GetPersonsByNameResult> results = dbContext.Procedure<GetPersonsByName>()
-    .Invoke("John", out int _);
+IReadOnlyList<GetPersonsByNameResult> results = await dbContext.Procedure<GetPersonsByName>()
+    .InvokeAsync("John", out int _);
 Console.WriteLine(results.Count > 0); // prints True
 
-transaction.Commit(); // or transaction.Rollback();
+await transaction.CommitAsync(); // or transaction.RollbackAsync();
 ```
 
 You can also re-use the same PCO instance to invoke the procedure multiple times:
 
 ```csharp
-using MyDbContext dbContext = new();
+await using MyDbContext dbContext = new();
 IResultContainer<int> addition = dbContext.Procedure<Addition>();
-int result1 = addition.Invoke(1, 2);
-int result2 = addition.Invoke(3, 4);
+int result1 = await addition.InvokeAsync(1, 2);
+int result2 = await addition.InvokeAsync(3, 4);
 Console.WriteLine(result1); // prints 3
 Console.WriteLine(result2); // prints 7
 ```
