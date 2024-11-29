@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics;
+using Wkg.Logging;
 
 namespace Wkg.EntityFrameworkCore;
 
@@ -49,4 +50,17 @@ public interface IThrowHelper
     [DoesNotReturn]
     [StackTraceHidden]
     public T Throw<TArgumentException, T>(string message, string paramName) where TArgumentException : ArgumentException, new();
+
+    /// <summary>
+    /// Logs a warning <paramref name="message"/> in the current context to the configured <see cref="Log.CurrentLogger"/>.
+    /// </summary>
+    /// <param name="message">The message to be logged.</param>
+    public void Warn(string message);
+
+    /// <summary>
+    /// Logs a warning <paramref name="message"/> in the current context to the configured <see cref="Log.CurrentLogger"/> with the specified <paramref name="paramName"/>.
+    /// </summary>
+    /// <param name="message">The message to be logged.</param>
+    /// <param name="paramName">The name of the parameter that caused the warning.</param>
+    public void Warn(string message, string paramName);
 }
