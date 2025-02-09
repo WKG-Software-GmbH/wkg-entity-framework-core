@@ -20,7 +20,15 @@ public interface IPolicyOptionsBuilder
     /// <returns>The same <see cref="IPolicyOptionsBuilder"/> instance for method chaining.</returns>
     IPolicyOptionsBuilder AddPolicy<TPolicyBuilder>() where TPolicyBuilder : class, IEntityPolicyBuilder<TPolicyBuilder>;
 
-    internal bool Contains<TPolicyBuilder>() where TPolicyBuilder : class, IEntityPolicyBuilder<TPolicyBuilder>;
+    /// <summary>
+    /// Determines whether the configuration contains a policy of the specified type.
+    /// </summary>
+    /// <typeparam name="TPolicyBuilder">The type of the policy builder.</typeparam>
+    /// <returns><see langword="true"/> if the configuration contains a policy of the specified type; otherwise, <see langword="false"/>.</returns>
+    bool Contains<TPolicyBuilder>() where TPolicyBuilder : class, IEntityPolicyBuilder<TPolicyBuilder>;
 
-    internal IEntityPolicy[] Build();
+    /// <summary>
+    /// Builds the entity policies.
+    /// </summary>
+    IEntityPolicy[] Build();
 }

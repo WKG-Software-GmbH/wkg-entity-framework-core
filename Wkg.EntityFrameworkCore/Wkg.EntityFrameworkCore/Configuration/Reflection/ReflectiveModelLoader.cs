@@ -11,48 +11,22 @@ namespace Wkg.EntityFrameworkCore.Configuration.Reflection;
 /// <summary>
 /// Loads and configures all <see cref="IReflectiveModelConfiguration{T}"/> implementations.
 /// </summary>
-internal class ReflectiveModelLoader : ReflectiveLoaderBase
+internal class ReflectiveModelLoader : ReflectiveLoaderBase, IReflectiveEntityLoader
 {
-    private static object? s_reflectiveModelLoaderSentinel = new();
-    private static readonly HashSet<Type> s_loadedDatabaseEngines = [];
-
     /// <summary>
     /// Loads and configures all <see cref="IReflectiveModelConfiguration{T}"/> implementations.
     /// </summary>
     /// <param name="builder">The <see cref="ModelBuilder"/> to configure.</param>
-    /// <param name="discoveryContext">The <see cref="IDiscoveryContext"/> to use for discovery.</param>
+    /// <param name="discoveryContext">The <see cref="IEntityDiscoveryContext"/> to use for discovery.</param>
     /// <param name="options">The options to use for discovery.</param>
-    /// <returns>A dictionary of the used <see cref="EntityTypeBuilder"/> instances keyed by the type of the entity.</returns>
-    public static void LoadAll(ModelBuilder builder, IDiscoveryContext discoveryContext, DiscoveryOptions options)
+    public void LoadEntities(ModelBuilder builder, IEntityDiscoveryContext discoveryContext, DiscoveryOptions options)
     {
         Assembly[]? targetAssemblies = null;
         if (options.TargetAssemblies.Length > 0)
         {
             targetAssemblies = options.TargetAssemblies;
         }
-
-        Type[]? dbEngineModelAttributeTypes;
-        if (options.TargetDatabaseEngineAttributes.Length == 0)
-        {
-            dbEngineModelAttributeTypes = null;
-            AssertLoadOnce(builder, ref s_reflectiveModelLoaderSentinel);
-        }
-        else
-        {
-            dbEngineModelAttributeTypes = options.TargetDatabaseEngineAttributes;
-            lock (s_loadedDatabaseEngines)
-            {
-                if (dbEngineModelAttributeTypes.FirstOrDefault(s_loadedDatabaseEngines.Contains) is Type dbEngineModelAttributeType)
-                {
-                    throw new InvalidOperationException($"The database engine {dbEngineModelAttributeType.Name} has already been loaded.");
-                }
-                foreach (Type databaseEngineAttributeType in dbEngineModelAttributeTypes)
-                {
-                    s_loadedDatabaseEngines.Add(databaseEngineAttributeType);
-                    Log.WriteInfo($"Added discovery target for models decorated with {databaseEngineAttributeType.Name}.");
-                }
-            }
-        }
+        Type[] dbEngineModelAttributeTypes = options.TargetDatabaseEngineAttributes;
         Log.WriteInfo($"{nameof(ReflectiveModelLoader)} is initializing.");
 
         ReflectiveEntity[] entities = TargetAssembliesOrWithEntryPoint(targetAssemblies)
@@ -64,7 +38,7 @@ internal class ReflectiveModelLoader : ReflectiveLoaderBase
                     // only keep classes that implement IReflectiveModelConfiguration<T> where T is that exact class
                     && type.ImplementsDirectGenericInterfaceWithTypeParameter(typeof(IReflectiveModelConfiguration<>), type)
                     // only keep classes that have the specified database engine attribute if enabled
-                    && (dbEngineModelAttributeTypes is null || dbEngineModelAttributeTypes.Any(databaseEngineAttributeType => type.GetCustomAttribute(databaseEngineAttributeType) is not null))))
+                    && (dbEngineModelAttributeTypes.Length == 0 || dbEngineModelAttributeTypes.Any(databaseEngineAttributeType => type.GetCustomAttribute(databaseEngineAttributeType) is not null))))
             // just to be sure...
             .Distinct()
             .Select(type => new ReflectiveEntity

@@ -1,8 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Wkg.Logging;
-using Wkg.Reflection.Extensions;
+using Wkg.EntityFrameworkCore.Configuration.Discovery;
+using Wkg.EntityFrameworkCore.Configuration.Reflection.Compat;
+using Wkg.EntityFrameworkCore.Configuration.Reflection.Discovery;
 
 namespace Wkg.EntityFrameworkCore.Configuration.Reflection;
 
@@ -17,9 +18,10 @@ public abstract class ReflectiveLoaderBase
     /// <param name="builder">The model builder.</param>
     /// <param name="sentinel">The sentinel object.</param>
     [MethodImpl(MethodImplOptions.Synchronized)]
+    [Obsolete($"This method is obsolete and will be removed in a future version. Use an appropriate implementation of {nameof(IReflectiveDiscoveryContext)} instead.")]
     protected static void AssertLoadOnce(ModelBuilder? builder, ref object? sentinel)
     {
-        _ = builder ?? throw new ArgumentNullException(nameof(builder));
+        ArgumentNullException.ThrowIfNull(builder, nameof(builder));
         _ = sentinel ?? throw new InvalidOperationException("ORM model has already been loaded.");
         sentinel = null;
     }
@@ -45,62 +47,12 @@ public abstract class ReflectiveLoaderBase
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="storedProcedureInterface"/>, <paramref name="storedProcedure"/>, <paramref name="reflectiveInterface"/>, <paramref name="modelBuilderExtensionsType"/>, or <paramref name="builder"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentException">Thrown if <paramref name="loadProcedureMethodName"/> is <see langword="null"/> or empty.</exception>
     /// <exception cref="InvalidOperationException">Thrown if the procedure type does not implement the reflective interface or if the procedure type does not inherit from the generic base class.</exception>
+    [Obsolete($"This method is obsolete and will be removed in a future version. Use an appropriate implementation of {nameof(IReflectiveProcedureDiscoveryContext)} instead.")]
     protected static void LoadAllProceduresInternal(Type storedProcedureInterface, Type storedProcedure, Type reflectiveInterface, Type modelBuilderExtensionsType, string loadProcedureMethodName, ModelBuilder builder, Assembly[]? targetAssemblies)
     {
-        Log.WriteInfo($"Loading all procedures implementing {storedProcedureInterface.Name}.");
-        ReflectiveProcedure[] entities = TargetAssembliesOrWithEntryPoint(targetAssemblies)
-            // get all types in these assemblies
-            .SelectMany(asm => asm.GetTypes()
-                .Where(type =>
-                    // only keep classes
-                    type.IsClass
-                    // first quick filter by interface
-                    && type.ImplementsInterface(storedProcedureInterface)))
-            // just to be sure ...
-            .Distinct()
-            .Select(type => new ReflectiveProcedure
-            (
-                ProcedureType: type,
-                // get the I/O Container type argument of StoredProcedure<TIOContainer> if the type is derived from StoredProcedure<TIOContainer>, otherwise get null
-                ContextType: type.GetGenericBaseClassTypeArgument(storedProcedure)
-            ))
-            .Where(procedure =>
-                // procedure must not be abstract
-                !procedure.ProcedureType.IsAbstract
-                // verify that the context type is a non-null reference type
-                && (procedure.ContextType?.IsClass ?? false)
-                // check if the type implements IReflectiveProcedureConfiguration<TProcedure, TIOContainer> where TProcedure is StoredProcedure<T>
-                // and TIOContainer is T.
-                // We need to check this because the type may be derived from StoredProcedure<T> but it might not
-                // implement the reflective interface.
-                && procedure.ProcedureType.ImplementsDirectGenericInterfaceWithTypeParameters(reflectiveInterface, procedure.ProcedureType, procedure.ContextType))
-            .ToArray();
-
-        Log.WriteInfo($"Discovered {entities.Length} stored procedures.");
-
-        // re-use parameter array for all procedures
-        object?[] parameters = new object[1];
-        foreach (ReflectiveProcedure entity in entities)
-        {
-            Log.WriteDiagnostic($"Loading: {entity.ProcedureType.Name}.");
-            // use the load procedure extension method to configure and compile the procedure
-            MethodInfo? loadProcedure = modelBuilderExtensionsType.GetMethod
-            (
-                loadProcedureMethodName,                                                // method name
-                2,                                                                      // number of generic type arguments
-                BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly,  // binding flags
-                null,                                                                   // binder (null = default)
-                [typeof(ModelBuilder)],                                                 // parameter types
-                null                                                                    // modifiers (null = default)
-            );
-            // make the method generic
-            MethodInfo genericLoadProcedure = loadProcedure!
-                .MakeGenericMethod(entity.ProcedureType, entity.ContextType!);
-            parameters[0] = builder;
-            // invoke the method
-            genericLoadProcedure.Invoke(null, parameters);
-            Log.WriteDiagnostic($"Loaded: {entity.ProcedureType.Name}.");
-        }
-        Log.WriteInfo($"Loaded {entities.Length} stored procedures.");
+        IReflectiveProcedureDiscoveryContext discoveryContext = new LegacyProcedureDiscoveryContext();
+        IReflectiveProcedureLoader legacyLoader = new LegacyProcedureLoader(storedProcedureInterface, storedProcedure, reflectiveInterface, modelBuilderExtensionsType, loadProcedureMethodName);
+        discoveryContext.AddLoader(legacyLoader);
+        discoveryContext.Discover(builder, new DiscoveryOptions(targetAssemblies ?? [], []));
     }
 }

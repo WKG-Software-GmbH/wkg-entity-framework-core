@@ -16,12 +16,12 @@ namespace Wkg.EntityFrameworkCore.Extensions;
 public static class ModelBuilderExtensions
 {
     /// <summary>
-    /// Initializes a new <see cref="IDiscoveryContext"/> using the specified <paramref name="policies"/>.
+    /// Initializes a new <see cref="IEntityDiscoveryContext"/> using the specified <paramref name="policies"/>.
     /// </summary>
     /// <param name="_">The model builder.</param>
     /// <param name="policies">The policies to be enforced on the discovered entities.</param>
-    /// <returns>The <see cref="IDiscoveryContext"/>.</returns>
-    public static IDiscoveryContext CreateDiscoveryContext(this ModelBuilder _, IEntityPolicy[] policies) => 
+    /// <returns>The <see cref="IEntityDiscoveryContext"/>.</returns>
+    public static IEntityDiscoveryContext CreateDiscoveryContext(this ModelBuilder _, IEntityPolicy[] policies) => 
         new EntityDiscoveryContext(policies);
 
     /// <summary>
@@ -29,10 +29,10 @@ public static class ModelBuilderExtensions
     /// </summary>
     /// <typeparam name="TModel">The type of the model.</typeparam>
     /// <param name="builder">The model builder.</param>
-    /// <param name="discoveryContext">The <see cref="IDiscoveryContext"/> to be used for discovery. 
+    /// <param name="discoveryContext">The <see cref="IEntityDiscoveryContext"/> to be used for discovery. 
     /// The discovery context can later be used to enforce policies on the discovered entities.</param>
     /// <returns>The model builder.</returns>
-    public static ModelBuilder LoadModel<TModel>(this ModelBuilder builder, IDiscoveryContext? discoveryContext = null)
+    public static ModelBuilder LoadModel<TModel>(this ModelBuilder builder, IEntityDiscoveryContext? discoveryContext = null)
         where TModel : class, IModelConfiguration<TModel>
     {
         EntityTypeBuilder<TModel> entityBuilder = builder.Entity<TModel>();
@@ -48,10 +48,10 @@ public static class ModelBuilderExtensions
     /// <typeparam name="TLeft">The type of the left entity.</typeparam>
     /// <typeparam name="TRight">The type of the right entity.</typeparam>
     /// <param name="builder">The model builder.</param>
-    /// <param name="discoveryContext">The <see cref="IDiscoveryContext"/> to be used for discovery. 
+    /// <param name="discoveryContext">The <see cref="IEntityDiscoveryContext"/> to be used for discovery. 
     /// The discovery context can later be used to enforce policies on the discovered entities.</param>
     /// <returns>The model builder.</returns>
-    public static ModelBuilder LoadConnection<TConnection, TLeft, TRight>(this ModelBuilder builder, IDiscoveryContext? discoveryContext = null)
+    public static ModelBuilder LoadConnection<TConnection, TLeft, TRight>(this ModelBuilder builder, IEntityDiscoveryContext? discoveryContext = null)
         where TConnection : class, IModelConnection<TConnection, TLeft, TRight>
         where TLeft : class, IModelConfiguration<TLeft>
         where TRight : class, IModelConfiguration<TRight>
@@ -70,7 +70,7 @@ public static class ModelBuilderExtensions
     /// <remarks>
     /// <para>
     /// This method uses reflection to find all types that implement <see cref="IReflectiveModelConfiguration{T}"/> and then loads and configures them.
-    /// Models implementing <see cref="IReflectiveModelConfiguration{T}"/> should not be loaded explicitly using <see cref="LoadModel{TModel}(ModelBuilder, IDiscoveryContext)"/>.
+    /// Models implementing <see cref="IReflectiveModelConfiguration{T}"/> should not be loaded explicitly using <see cref="LoadModel{TModel}(ModelBuilder, IEntityDiscoveryContext)"/>.
     /// </para>
     /// </remarks>
     public static ModelBuilder LoadReflectiveModels(this ModelBuilder builder, Action<IModelOptionsBuilder>? configureOptions) =>
@@ -86,9 +86,10 @@ public static class ModelBuilderExtensions
         IEntityPolicy[] policies = modelOptions.PolicyOptionsBuilder.Build();
         DiscoveryOptions discoveryOptions = modelOptions.DiscoveryOptionsBuilder.Build();
 
-        EntityDiscoveryContext discoveryContext = new(policies);
-        ReflectiveModelLoader.LoadAll(builder, discoveryContext, discoveryOptions);
-        ReflectiveConnectionLoader.LoadAll(builder, discoveryContext, discoveryOptions);
+        IReflectiveEntityDiscoveryContext discoveryContext = new EntityDiscoveryContext(policies);
+        discoveryContext.AddLoader(new ReflectiveModelLoader());
+        discoveryContext.AddLoader(new ReflectiveConnectionLoader());
+        discoveryContext.Discover(builder, discoveryOptions);
         discoveryContext.AuditPolicies();
         return builder;
     }

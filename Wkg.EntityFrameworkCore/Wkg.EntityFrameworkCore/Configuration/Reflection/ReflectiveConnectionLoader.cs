@@ -11,47 +11,22 @@ namespace Wkg.EntityFrameworkCore.Configuration.Reflection;
 /// <summary>
 /// Loads and configures all <see cref="IReflectiveModelConnection{TConnection, TSource, TTarget}"/> implementations.
 /// </summary>
-internal class ReflectiveConnectionLoader : ReflectiveLoaderBase
+internal class ReflectiveConnectionLoader : ReflectiveLoaderBase, IReflectiveEntityLoader
 {
-    private static object? s_reflectiveConnectionLoaderSentinel = new();
-    private static readonly HashSet<Type> s_loadedDatabaseEngines = [];
-
     /// <summary>
     /// Loads and configures all <see cref="IReflectiveModelConnection{TConnection, TSource, TTarget}"/> implementations.
     /// </summary>
     /// <param name="builder">The <see cref="ModelBuilder"/> to configure.</param>
-    /// <param name="discoveryContext">The <see cref="IDiscoveryContext"/> that has been used for model discovery.</param>
+    /// <param name="discoveryContext">The <see cref="IEntityDiscoveryContext"/> that has been used for model discovery.</param>
     /// <param name="options">The options to use for discovery.</param>
-    public static void LoadAll(ModelBuilder builder, IDiscoveryContext discoveryContext, DiscoveryOptions options)
+    public void LoadEntities(ModelBuilder builder, IEntityDiscoveryContext discoveryContext, DiscoveryOptions options)
     {
         Assembly[]? targetAssemblies = null;
         if (options.TargetAssemblies.Length > 0)
         {
             targetAssemblies = options.TargetAssemblies;
         }
-
-        Type[]? dbEngineModelAttributeTypes;
-        if (options.TargetDatabaseEngineAttributes.Length == 0)
-        {
-            dbEngineModelAttributeTypes = null;
-            AssertLoadOnce(builder, ref s_reflectiveConnectionLoaderSentinel);
-        }
-        else
-        {
-            dbEngineModelAttributeTypes = options.TargetDatabaseEngineAttributes;
-            lock(s_loadedDatabaseEngines)
-            {
-                if (dbEngineModelAttributeTypes.FirstOrDefault(s_loadedDatabaseEngines.Contains) is Type databaseEngineAttributeType)
-                {
-                    throw new InvalidOperationException($"The database engine {databaseEngineAttributeType.Name} has already been loaded.");
-                }
-                foreach (Type type in dbEngineModelAttributeTypes)
-                {
-                    s_loadedDatabaseEngines.Add(type);
-                    Log.WriteInfo($"Added discovery target for model connections decorated with {type.Name}.");
-                }
-            }
-        }
+        Type[] dbEngineModelAttributeTypes = options.TargetDatabaseEngineAttributes;
 
         Log.WriteInfo($"{nameof(ReflectiveConnectionLoader)} is initializing.");
 
@@ -64,15 +39,15 @@ internal class ReflectiveConnectionLoader : ReflectiveLoaderBase
                     // only keep classes that implement IReflectiveModelConnection<TConnection, TFrom, TTo>
                     && type.ImplementsGenericInterfaceDirectly(typeof(IReflectiveModelConnection<,,>))
                     // only keep classes that have the specified database engine attribute if enabled
-                    && (dbEngineModelAttributeTypes is null || dbEngineModelAttributeTypes.Any(attribute => type.GetCustomAttribute(attribute) is not null))))
+                    && (dbEngineModelAttributeTypes.Length == 0 || dbEngineModelAttributeTypes.Any(attribute => type.GetCustomAttribute(attribute) is not null))))
             // just to be sure ...
             .Distinct()
-            .Select(type => 
+            .Select(type =>
             (
-                Type: type, 
+                Type: type,
                 TypeArgs: type.GetGenericTypeArgumentsOfSingleDirectInterface(typeof(IReflectiveModelConnection<,,>))
             ))
-            .Where(t => t.TypeArgs is { Length: 3 } 
+            .Where(t => t.TypeArgs is { Length: 3 }
                 // TConnection must match the implementing type
                 && t.TypeArgs[0] == t.Type
                 // TFrom and TTo must implement IReflectiveModelConfiguration<T> (be reflectively loaded)
@@ -87,9 +62,9 @@ internal class ReflectiveConnectionLoader : ReflectiveLoaderBase
                 (
                     nameof(ModelConnectionInfoForReflection_DontChange.Connect),
                     BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly,
-                    [ 
-                        typeof(EntityTypeBuilder<>).MakeGenericType(type.TypeArgs[1]), 
-                        typeof(EntityTypeBuilder<>).MakeGenericType(type.TypeArgs[2]) 
+                    [
+                        typeof(EntityTypeBuilder<>).MakeGenericType(type.TypeArgs[1]),
+                        typeof(EntityTypeBuilder<>).MakeGenericType(type.TypeArgs[2])
                     ])
                 ))
             .Where(connection => connection.Connect is not null)
@@ -132,6 +107,7 @@ internal class ReflectiveConnectionLoader : ReflectiveLoaderBase
     }
 }
 
+// internal dummy class as a target for nameof
 file class ModelConnectionInfoForReflection_DontChange
     : IReflectiveModelConfiguration<ModelConnectionInfoForReflection_DontChange>,
     IReflectiveModelConnection<ModelConnectionInfoForReflection_DontChange, ModelConnectionInfoForReflection_DontChange, ModelConnectionInfoForReflection_DontChange>
