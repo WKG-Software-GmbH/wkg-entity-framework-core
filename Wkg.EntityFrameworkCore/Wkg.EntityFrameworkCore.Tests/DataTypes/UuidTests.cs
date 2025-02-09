@@ -72,7 +72,7 @@ public class UuidTests
         for (int i = 0; i < 1000; i++)
         {
             Uuid result = Uuid.NewUuidV4();
-            Assert.IsTrue(result.Version == 4);
+            Assert.AreEqual(4, result.Version);
             Assert.IsTrue(result.TryGetVersion(out int version) && version == 4);
         }
     }
