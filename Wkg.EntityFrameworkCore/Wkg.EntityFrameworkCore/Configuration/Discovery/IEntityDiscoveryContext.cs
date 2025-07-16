@@ -6,7 +6,7 @@ namespace Wkg.EntityFrameworkCore.Configuration.Discovery;
 /// <summary>
 /// A context for entity discovery that can be used to enforce naming and mapping policies on discovered entities.
 /// </summary>
-public interface IDiscoveryContext
+public interface IEntityDiscoveryContext
 {
     internal IDictionary<Type, EntityTypeBuilder> EntityBuilderCache { get; }
 
